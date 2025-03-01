@@ -57,7 +57,8 @@ if __name__ == '__main__':
 		  CyberiadaML.smiNodeDiffFlagEdges,
 		  CyberiadaML.smiEdgeDiffFlagID,
 		  CyberiadaML.smiEdgeDiffFlagAction)
-    isom_stats = data.check_isomorphic_programs(units[unit_type], program, True)
+    words = {}
+    isom_stats = data.check_isomorphic_programs(units[unit_type], program, words, True)
     nodes_to_print = []
     for key,value in isom_stats.items():
         if key == 'res':
@@ -102,6 +103,10 @@ if __name__ == '__main__':
                 nodes_to_print += value
             print("{:20}: {}".format(key, value))
 
+    print()
+    print('Popular state names:')
+    for k, v in sorted(words.items(), key=lambda x: x[1], reverse=True):
+        print(k, v)
     print()
     for n in nodes_to_print:
         node = program.find_element_by_id(n)

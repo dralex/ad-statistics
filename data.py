@@ -33,10 +33,40 @@ PROGRAMS_DIR = 'programs'
 LAST_WAVE_METRICS = 'last_wave'
 LEVEL_START = 'Start'
 LEVEL_INFINITY = 'Infinity'
-LEVELS = [LEVEL_START, '1', '2', '3', LEVEL_INFINITY]
+LEVEL_POLYGON = 'Polygon'
+LEVELS = [LEVEL_START, '1', '2', '3', LEVEL_INFINITY, LEVEL_POLYGON]
 UNITS = ['Autoborder', 'Stapler', 'Smoker', 'Generator']
 TRADITIONS = ['Constructor', 'Beekeeper', 'Programmer']
 DEFAULT_STATE_NAME = 'Состояние'
+
+# CSV file format:
+# id,created_at,player,app_version,context,metrics_id,metrics_key,metrics_value,artefact,checksum
+
+_CONTEXT_LEVEL = 'Level'
+_CONTEXT_RESULTS = 'Итоги волны'
+_CONTEXT_RESULTS_POLYGON = 'Polygon_wave_results'
+_CONTEXT_START_PL = 'Start_placement'
+_CONTEXT_FINISH_PL = 'Finish_placement'
+_CONTEXT_START_GAME = 'Launch_game'
+_CONTEXT_CLOSE_GAME = 'Closing_game'
+_CONTEXT_OPEN_EDITOR = 'Оpening_editor'
+_CONTEXT_CLOSE_EDITOR = 'Closing_editor'
+_CONTEXT_SAVE_PROGRAM = 'Save_program'
+_CONTEXT_POLYGON = 'Polygon_Start'
+
+_CSV_ID = 0
+_CSV_DATETIME = 1
+_CSV_PLAYER = 2
+_CSV_APP_VERSION = 3
+_CSV_CONTEXT = 4
+_CSV_METRICS_ID = 5
+_CSV_METRICS_KEY = 6
+_CSV_METRICS_VALUE = 7
+_CSV_ARTEFACT = 8
+_CSV_CHECKSUM = 9
+_CSV_SIZE = 10
+
+_MAX_SESSION_LENGTH = 6 * 3600.0
 
 def get_artefact_file(player_id, artefact_id):
     return os.path.join(PROGRAMS_DIR, player_id, artefact_id) + ".graphml"
@@ -48,25 +78,27 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
     i = 0
     for row in reader:
         i += 1
-        if len(row) != 20:
+        if len(row) != _CSV_SIZE:
             print("Cannot read players' database from CSV: bad row {}".format(i))
             exit(1)
-        if row[0] == 'id':
+        if row[_CSV_ID] == 'id':
+            # skip header
             continue
-        if len(row[11]) == 0:
+        if len(row[_CSV_METRICS_ID]) == 0:
+            # skip empty metrics
             continue
         
         try:
-            if row[1].find('.'):
-                d = datetime.datetime.strptime(row[1], '%Y-%m-%dT%H:%M:%S.%f+03:00').timestamp()
+            if row[_CSV_DATETIME].find('.'):
+                d = datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S.%f+03').timestamp()
             else:
-                d = datetime.datetime.strptime(row[1], '%Y-%m-%dT%H:%M:%S+03:00').timestamp()
+                d = datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S+03').timestamp()
         except ValueError:
-            print("Cannot read players' database from CSV: bad data {} at row {}".format(row[1], i))
+            print("Cannot read players' database from CSV: bad data {} at row {}".format(row[_CSV_DATETIME], i))
             continue
 
-        activity_id = row[0]
-        player_id = row[3]
+        activity_id = row[_CSV_ID]
+        player_id = row[_CSV_PLAYER]
         if player_filter and player_id not in player_filter:
             continue
         if player_id not in players:
@@ -77,26 +109,31 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
 
         a = players[player_id][0][activity_id]
 
-        metrics_id = int(row[11])
+        app_version = row[_CSV_APP_VERSION]
+        a['v'] = app_version
+        
+        metrics_id = int(row[_CSV_METRICS_ID])
         a['i'] = metrics_id
         
         if 'd' not in a:
             a['d'] = d
-            players[player_id][1].append((d, metrics_id, a))
+            players[player_id][1].append([d, 0, metrics_id, a])
 
-        metrics_key = row[12]
-        if metrics_key == 'last_wave' or metrics_key == 'wave':
-            metrics_value = int(float(row[13])+1)
-        else:
-            metrics_value = float(row[13])
+        metrics_key = row[_CSV_METRICS_KEY]
+        metrics_value = float(row[_CSV_METRICS_VALUE])
 
         if 'm' not in a:
             a['m'] = {}
         a['m'][metrics_key] = metrics_value
             
-        if 'type' not in a:
-            if row[10].find('Level') == 0:
-                _, level, origin = row[10].split('_')
+        if 't' not in a:
+            context = row[_CSV_CONTEXT]
+            if context.find(_CONTEXT_LEVEL) == 0 or context.find(_CONTEXT_POLYGON) == 0:
+                if context.find(_CONTEXT_LEVEL) == 0:
+                    _, level, origin = row[_CSV_CONTEXT].split('_')
+                else:
+                    origin = row[_CSV_CONTEXT].split('_')[2]
+                    level = LEVEL_POLYGON
                 if level not in LEVELS:
                     print("Cannot read players' database from CSV: bad stat level {} at row {}".format(level, i))
                     exit(1)
@@ -104,32 +141,67 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
                 if origin in UNITS:
                     a['t'] = 'u'
                     a['u'] = origin
-                    uploaded = (row[19] == 'true')
-                    if uploaded:
-                        a['ac'] = (row[7], row[18])
+                    if len(row[_CSV_ARTEFACT]) > 0:
+                        a['ac'] = (row[_CSV_ARTEFACT], row[_CSV_CHECKSUM])
                 elif origin in TRADITIONS:
                     a['t'] = 't'
                     a['p'] = origin
                 else:
                     print("Cannot read players' database from CSV: bad stat origin {} at row {}".format(origin, i))
                     exit(1)
-            else:
+            elif context.find(_CONTEXT_RESULTS) == 0:
                 a['t'] = 'f'
+            elif context == _CONTEXT_RESULTS_POLYGON:
+                a['t'] = 'p'
+            elif context == _CONTEXT_START_PL:
+                a['t'] = 'sp'
+            elif context == _CONTEXT_FINISH_PL:
+                a['t'] = 'fp'
+            elif context == _CONTEXT_START_GAME:
+                a['t'] = 'sg'
+            elif context == _CONTEXT_CLOSE_GAME:
+                a['t'] = 'fg'
+            elif context == _CONTEXT_OPEN_EDITOR:
+                a['t'] = 'se'
+            elif context == _CONTEXT_CLOSE_EDITOR:
+                a['t'] = 'fe'
+            elif context == _CONTEXT_SAVE_PROGRAM:
+                a['t'] = 's'
+            else:
+                print("Cannot read players' database from CSV: unknown context {} at row {}".format(context, i))
+                exit(1)                
+
+        if metrics_key == 'creation_index':
+            index = int(metrics_value)
+            a['c'] = index
+            players[player_id][1][-1][1] = index
+        elif 'c' not in a:
+            a['c'] = 0
 
         if metrics_key == 'try' and a['t'] == 'f':
-            a['y'] = int(float(metrics_value))
-        if metrics_key == 'level' and a['t'] == 'f':
-            level = int(float(metrics_value))
+            a['y'] = int(metrics_value)
+        elif metrics_key == 'level' and a['t'] == 'f':
+            level = int(metrics_value)
             if level < 0 or level >= len(LEVELS):
                 print("Cannot read players' database from CSV: bad final level {} at row {}".format(level, i))
                 exit(1)
             a['l'] = LEVELS[level]
-        if (metrics_key == 'last_wave' or metrics_key == 'wave') and 'w' not in a:
-            a['w'] = metrics_value
+        elif (metrics_key == 'last_wave' or metrics_key == 'wave') and 'w' not in a:
+            a['w'] = int(metrics_value) + 1
+        elif metrics_key == 'placement_time':
+            a['pls_t'] = metrics_value
+        elif metrics_key == 'session_time':
+            a['gs_t'] = metrics_value
+        elif metrics_key == 'editing_time':
+            a['es_t'] = metrics_value
 
     print(i, "lines loaded")
-    print('recinstruct sessions...')
+    return players
 
+def read_players_sessions(csv_file, player_filter=None, print_sessions=False, delimiter=','):
+    players = read_players_data(csv_file, player_filter, delimiter)
+    print('reconstruct sessions...')
+    
     def avg_sum_session(session):
         total_tries = 0
         total_units = 0
@@ -158,79 +230,153 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
         session['avg_u'] = avg_units
         session['avg_p'] = avg_progs
         session['avg_d'] = avg_dmg
-    
+
+        total_gs = 0.0
+        total_pls = 0.0
+        total_es = 0.0
+        if len(session['gs']) > 0:
+            for t in session['gs']:
+                total_gs += t
+            total_gs /= len(session['gs'])
+        else:
+            diff = session['fd'] - session['sd']
+            if diff < _MAX_SESSION_LENGTH:
+                total_gs = diff
+        session['avg_gs'] = total_gs
+        if len(session['pls']) > 0:
+            for t in session['pls']:
+                total_pls += t
+            total_pls /= len(session['pls'])
+        session['avg_pls'] = total_pls
+        if len(session['es']) > 0:
+            for t in session['es']:
+                total_es += t
+            total_es /= len(session['es'])
+        session['avg_es'] = total_es
+
     for player, values in players.items():
         activities, datetable, sessions = values
 
         cur_session = None
         cur_try = 1
+        cur_start_game = None
+        cur_games = []
+        cur_placements = []
+        cur_editings = []
+        
+        for d, _, _, a in sorted(datetable, key = lambda x: (x[0], x[1], x[2])):
+            act_type = a['t']
+            tradition = a['p'] if act_type == 't' else None
+    
+            if act_type == 'fp':
+                cur_placements.append(a['pls_t'])
+            elif act_type == 'sg':
+                cur_start_game = d
+            elif act_type == 'fg':
+                cur_games.append(a['gs_t'])
+                cur_start_game = None
+            elif act_type == 'fe':
+                cur_editings.append(a['es_t'])
+            elif act_type == 'sa':
+                cur_session['sa'] += 1
 
-        for d, _, a in sorted(datetable, key = lambda x: (x[0], x[1])):
-            level = a['l']
-            if 'w' not in a: 
-                continue
-            wave = a['w']
+            if cur_session is not None:
+                cur_session['v'].add(a['v'])
             
-            unit = a['u'] if a['t'] == 'u' else None
-            tradition = a['p'] if a['t'] == 't' else None
-            art_cs = a['ac'] if 'ac' in a else None
+            if act_type in ('f', 'u', 't'):
+                level = a['l']
+                if 'w' not in a: 
+                    continue
+                wave = a['w']
+                version = a['v']
+            
+                unit = a['u'] if a['t'] == 'u' else None
+                art_cs = a['ac'] if 'ac' in a else None
 
-            if cur_session is not None and wave not in cur_session['ws']:
-                cur_try = 1
-                cur_session['ws'][wave] = {cur_try: [0, 0, 0.0]}
+                if cur_session is not None and wave not in cur_session['ws']:
+                    cur_try = 1
+                    cur_session['ws'][wave] = {cur_try: [0, 0, 0.0]}
+                
+                if cur_session is not None and level == cur_session['l'] and wave >= cur_session['w']:
+                    if unit is not None:
+                        if unit not in cur_session['u']:
+                            cur_session['u'].append(unit)
+                        if art_cs is not None:
+                            cur_session['art'][art_cs[0]] = unit
+                            #else:
+                            #    print('program {} is already in session, orig: {}'.format(art_cs[0], cur_session['art'][art_cs[1]]))
+                            cur_session['ws'][wave][cur_try][1] += 1
+                            if 'wp' not in cur_session:
+                                cur_session['wp'] = wave
+                        cur_session['ws'][wave][cur_try][0] += 1
+                        if 'drone_damage' in a['m']: 
+                            cur_session['ws'][wave][cur_try][2] += a['m']['drone_damage']
+                    if tradition is not None and cur_session['t'] is None:
+                        cur_session['t'] = tradition
+                    if act_type == 'f' and a['y'] > cur_try:
+                        cur_try += 1
+                        cur_session['ws'][wave][cur_try] = [0, 0, 0.0]
+                    cur_session['w'] = wave
+                    cur_session['a'].append(a)
+                    cur_session['fd'] = d
+                else:
+                    if cur_session is not None:
+                        cur_session['gs'] = cur_games
+                        if cur_start_game is not None:
+                            cur_session['gs'].append(cur_session['fd'] - cur_start_game)
+                        cur_session['pls'] = cur_placements
+                        cur_session['es'] = cur_editings
+                        cur_games = []
+                        cur_placements = []
+                        cur_editings = []
+                        avg_sum_session(cur_session)
+                        sessions.append(cur_session)
 
-            if cur_session is not None and level == cur_session['l'] and wave >= cur_session['w']:
-                if unit is not None:
-                    if unit not in cur_session['u']:
+                    cur_try = 1
+                    cur_session = {'v': set([a['v']]), 'l': level, 'w': wave, 'ws': {wave: {cur_try: [0, 0, 0.0]}}, 'sd': d, 'fd': d, 'a': [a],
+                                   'u': [], 't': tradition, 'art': {}, 'gs': [], 'pls': [], 'es': [], 'sa': 0}
+                    if unit is not None:
                         cur_session['u'].append(unit)
-                    if art_cs is not None:
-                        cur_session['art'][art_cs[0]] = unit
-                        #else:
-                        #    print('program {} is already in session, orig: {}'.format(art_cs[0], cur_session['art'][art_cs[1]]))
-                        cur_session['ws'][wave][cur_try][1] += 1
-                    cur_session['ws'][wave][cur_try][0] += 1
-                    if 'drone_damage' in a['m']: 
-                        cur_session['ws'][wave][cur_try][2] += a['m']['drone_damage']
-                if tradition is not None and cur_session['t'] is None:
-                    cur_session['t'] = tradition
-                if a['t'] == 'f' and a['y'] > cur_try:
-                    cur_try += 1
-                    cur_session['ws'][wave][cur_try] = [0, 0, 0.0]
-                cur_session['w'] = wave
-                cur_session['fd'] = d
-                cur_session['a'].append(a)
+                        cur_session['ws'][wave][cur_try][0] += 1
+                        if art_cs is not None:
+                            cur_session['art'][art_cs[0]] = unit
+                            cur_session['ws'][wave][cur_try][1] += 1
+                            cur_session['wp'] = wave
+                        if 'drone_damage' in a['m']:
+                            cur_session['ws'][wave][cur_try][2] += a['m']['drone_damage']
             else:
                 if cur_session is not None:
-                    avg_sum_session(cur_session)
-                    sessions.append(cur_session)
-
-                cur_try = 1
-                cur_session = {'l': level, 'w': wave, 'ws': {wave: {cur_try: [0, 0, 0.0]}}, 'sd': d, 'fd': d, 'a': [a],
-                               'u': [], 't': tradition, 'art': {}}
-                if unit is not None:
-                    cur_session['u'].append(unit)
-                    cur_session['ws'][wave][cur_try][0] += 1
-                    if art_cs is not None:
-                        cur_session['art'][art_cs[0]] = unit
-                        cur_session['ws'][wave][cur_try][1] += 1
-                    if 'drone_damage' in a['m']:
-                        cur_session['ws'][wave][cur_try][2] += a['m']['drone_damage']
+                    cur_session['fd'] = d
+            
         if cur_session is not None:
+            cur_session['gs'] = cur_games
+            if cur_start_game is not None:
+                cur_session['gs'].append(cur_session['fd'] - cur_start_game)
+            cur_session['pls'] = cur_placements
+            cur_session['es'] = cur_editings
+            cur_games = []
+            cur_placements = []
+            cur_editings = []
             avg_sum_session(cur_session)
             sessions.append(cur_session)
 
-    # for player, values in players.items():
-    #     _, _, sessions = values
-    #     for s in sessions:
-    #         print("level: {}, last wave: {}, waves(tries): {}, date from: {}, to: {}, activities: {}, tradition: {}, unit types: ({}), uniq progs: {}, avg units: {:5.2f}, avg prog percent: {:5.2f}%, avg dmg: {:6.1f}".format(
-    #             s['l'], s['w'], s['tries'],
-    #             datetime.datetime.fromtimestamp(s['sd']).strftime('%Y-%m-%d %H:%M:%S'),
-    #             datetime.datetime.fromtimestamp(s['fd']).strftime('%Y-%m-%d %H:%M:%S'),
-    #             len(s['a']),
-    #             s['t'],
-    #             ', '.join(s['u']),
-    #             len(s['art']),
-    #             s['avg_u'], s['avg_p'] * 100.0, s['avg_d']))
+    if print_sessions:
+        for player, values in players.items():
+            print(player, ':')
+            _, _, sessions = values
+            for s in sessions:
+                print("versions: ({}), level: {}, last wave: {}, waves(tries): {}, date from: {}, to: {}, activities: {}, tradition: {}, unit types: ({}), uniq progs: {}, saves: {}, avg units: {:5.2f}, avg prog percent: {:5.2f}%, avg dmg: {:6.1f}, avg g.s.: {:5.2f}, avg pl.s.: {:5.2f}, avg ed.s.: {:5.2f}".format(
+                    ', '.join(sorted(s['v'])),
+                    s['l'], s['w'], s['tries'],
+                    datetime.datetime.fromtimestamp(s['sd']).strftime('%Y-%m-%d %H:%M:%S'),
+                    datetime.datetime.fromtimestamp(s['fd']).strftime('%Y-%m-%d %H:%M:%S'),
+                    len(s['a']),
+                    s['t'],
+                    ', '.join(s['u']),
+                    len(s['art']),
+                    s['sa'],
+                    s['avg_u'], s['avg_p'] * 100.0, s['avg_d'],
+                    s['avg_gs'], s['avg_pls'], s['avg_es']))
 
     return players
 
@@ -292,7 +438,7 @@ def load_player_programs(player_id, programs, hashes, hashes_with_name):
             continue
         hashes[phash] = [artefact, p, 1]
 
-def check_isomorphic_programs(unit_program, program, diff = False):
+def check_isomorphic_programs(unit_program, program, words, diff = False):
     initial = ''
     diff_nodes = []
     diff_nodes_flags = []
@@ -305,6 +451,26 @@ def check_isomorphic_programs(unit_program, program, diff = False):
     res = unit_program.check_isomorphism(program, True, False, initial,
 					 diff_nodes, diff_nodes_flags, new_nodes, missing_nodes,
 					 diff_edges, diff_edges_flags, new_edges, missing_edges)
+    
+    index = 0
+    for n in diff_nodes_flags:
+        if n & CyberiadaML.smiNodeDiffFlagTitle:
+            node = diff_nodes[index]
+            e = program.find_element_by_id(node)
+            name = e.get_name()
+            if name not in words:
+                words[name] = 1
+            else:
+                words[name] += 1
+        index += 1
+    for n in new_nodes:
+        e = program.find_element_by_id(n)
+        name = e.get_name()
+        if name not in words:
+            words[name] = 1
+        else:
+            words[name] += 1
+
     if diff:
         diff_arrays = {}
         diff_arrays['res'] = res
@@ -323,13 +489,14 @@ def check_isomorphic_programs(unit_program, program, diff = False):
         default_names = 0
         for n in diff_nodes_flags:
             if n & CyberiadaML.smiNodeDiffFlagTitle:
-                diff_names += 1        
+                diff_names += 1
             if n & CyberiadaML.smiNodeDiffFlagActions:
                 diff_actions += 1
 
         for n in new_nodes:
             e = program.find_element_by_id(n)
-            if e.get_name() == DEFAULT_STATE_NAME:
+            name = e.get_name()
+            if name == DEFAULT_STATE_NAME:
                 default_names += 1
 
         return {'isomorphic to default': res == CyberiadaML.smiIsomorphic,

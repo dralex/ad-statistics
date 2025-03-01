@@ -26,14 +26,20 @@ import csv
 import data
 import datetime
 
-FILTER_PLAYERS_FILE = None # 'file name'
+FILTER_POSSIBLE_MULTIPLAYER = False
+FILTER_PLAYERS_FILE = None #'player_id_list.txt'
+BLACKLIST_PLAYERS_FILE = None # 'blacklist.txt'
 FILTER_PLAYERS = None # ['player-id-1', 'player-id-2', ...]
-PLAYERS_DATA = 'test.csv' 
+DAY_THRESHOLD = 350
+PLAYERS_DATA = 'test.csv'
 PLAYERS_LIMIT = None # number if needed
 
 if __name__ == '__main__':
 
     Players_n = 0
+    Players_wo_programs = 0
+    Players_less_programs = 0
+    
     Sessions_n = 0
     Levels_n = {}
     Traditions_n = {}
@@ -49,14 +55,23 @@ if __name__ == '__main__':
     Unique_programs = {}
     Unique_programs_n = 0
     Unique_programs_with_names = {}
+    Unique_programs_units = {}
+    
     Programs = {}
     Programs_stats = {}
+    Programs_words = {}
 
     if FILTER_PLAYERS_FILE:
         with open(FILTER_PLAYERS_FILE) as f:
             Players_filter = set(f.read().splitlines())
     else:
         Players_filter = None
+
+    if BLACKLIST_PLAYERS_FILE:
+        with open(BLACKLIST_PLAYERS_FILE) as f:
+            Blacklist_filter = set(f.read().splitlines())
+    else:
+        Blacklist_filter = set([])
 
     if FILTER_PLAYERS is not None:
         Filter = FILTER_PLAYERS
@@ -65,23 +80,151 @@ if __name__ == '__main__':
     else:
         Filter = None
         
-    Players = data.read_players_data(PLAYERS_DATA, Filter)
-
-    print()
-    print('Players statistics:')
-    print('------------------')
+    Players = data.read_players_sessions(PLAYERS_DATA, Filter, False)
+    
+    Dates = {}
+    Hist_Sessions = {}
+    Hist_Start_Levels = {}
+    Hist_Max_Levels = {}
+    Hist_Duration = {}
+    Hist_Duration_1h = {}
+    Hist_Prog_Units = {}
+    Hist_Prog_Percent_Units = {}
+    Hist_First_Program = {}
+    Hist_Uniq_Programs = {}
+    Players_selected = set([])
+    
     for player, values in Players.items():        
         if FILTER_PLAYERS is not None and player not in FILTER_PLAYERS:
             continue
         if FILTER_PLAYERS_FILE is not None and player not in Players_filter:
             continue
+        if player in Blacklist_filter:
+            continue
 
-        Players_n += 1
         activities, _, sessions = values
-        
+                
+        Player_sessions = 0        
+        Start_sessions = 0
+        Sessions_start = datetime.datetime.now().timestamp()
+        Sessions_finish = 0
+        Player_units = 0
+        Player_punits = 0
+        Player_level = 0
+        Player_uniq_programs = set([])
+
         #print("Load player's {} programs... ".format(player), end='')
         data.load_player_programs(player, Programs, Unique_programs, Unique_programs_with_names)
-        #print('done')        
+        #print('done')
+        
+        challenge = False
+        first_program_level = 5
+        first_profram_wave = 16
+        for s in sessions:
+            Player_sessions += 1
+            Player_units += s['units']
+            Player_punits += s['punits']
+            if s['sd'] < Sessions_start:
+                Sessions_start = s['sd']
+            if s['fd'] > Sessions_finish:
+                Sessions_finish = s['fd']
+            level = s['l']
+            nlevel = 0
+            if level == data.LEVEL_POLYGON:
+                pass
+            elif level == data.LEVEL_START:            
+                Start_sessions += 1
+            elif level == data.LEVEL_INFINITY:
+                nlevel = Player_level = 4
+            elif int(level) > Player_level:
+                nlevel = Player_level = int(level)
+            fdate = datetime.datetime.fromtimestamp(s['fd']).strftime('%Y-%m-%d')
+            if fdate not in Dates:
+                Dates[fdate] = 1
+            else:
+                Dates[fdate] += 1
+                if Dates[fdate] >= DAY_THRESHOLD:
+                    challenge = True
+            if 'wp' in s:
+                if first_program_level > nlevel:
+                    first_program_level = nlevel
+                    first_program_wave = s['wp']
+                elif first_program_level == nlevel and first_program_wave > s['wp']:
+                    first_program_wave = s['wp']
+            for artefact, unit in s['art'].items():
+                if artefact in Programs:
+                    phash = Programs[artefact]
+                    uniq_artefact, uniq_program, _ = Unique_programs[phash]
+                    if str(uniq_program) == str(Units[unit]):
+                        # skip programs equal to default
+                        continue
+                    Player_uniq_programs.add(uniq_artefact)
+
+        if Player_units == 0 or Player_punits == 0:
+            prog_percent = 0
+        elif Player_units == Player_punits:
+            prog_percent = 101
+        else:
+            prog_percent = (int(100.0 * float(Player_punits) / float(Player_units)) // 10 + 1) * 10 if Player_units > 0 else 0.0
+        duration = (Sessions_finish - Sessions_start) / 3600.0
+        uniq_prog = len(Player_uniq_programs)
+
+        if FILTER_POSSIBLE_MULTIPLAYER:
+            if (challenge or
+                Start_sessions < 1 or Start_sessions > 3 or
+                duration > 72 or
+                Player_units == 0 or
+                uniq_prog > 30 or
+                Player_sessions > 50 or
+                Player_punits > 1000):
+                continue
+
+        if prog_percent not in Hist_Prog_Percent_Units:
+            Hist_Prog_Percent_Units[prog_percent] = 1
+        else:
+            Hist_Prog_Percent_Units[prog_percent] += 1
+        if Player_punits not in Hist_Prog_Units:
+            Hist_Prog_Units[Player_punits] = 1
+        else:
+            Hist_Prog_Units[Player_punits] += 1
+        if duration < 1:
+            minutes = int(duration * 60.0)
+            if minutes not in Hist_Duration_1h:
+                Hist_Duration_1h[minutes] = 1
+            else:
+                Hist_Duration_1h[minutes] += 1
+        hours = int(duration)
+        if hours not in Hist_Duration:
+            Hist_Duration[hours] = 1
+        else:
+            Hist_Duration[hours] += 1
+        if Player_level not in Hist_Max_Levels:
+            Hist_Max_Levels[Player_level] = 1
+        else:
+            Hist_Max_Levels[Player_level] += 1
+        if Start_sessions not in Hist_Start_Levels:
+            Hist_Start_Levels[Start_sessions] = 1
+        else:
+            Hist_Start_Levels[Start_sessions] += 1
+        if first_program_level < 5 and first_program_wave < 16:
+            if first_program_level == 0 and first_program_wave == 10:
+                Players_selected.add(player)
+            first_program = "{}-{:02}".format(first_program_level, first_program_wave)
+            if first_program not in Hist_First_Program:
+                Hist_First_Program[first_program] = 1
+            else:
+                Hist_First_Program[first_program] += 1
+        if uniq_prog not in Hist_Uniq_Programs:
+            Hist_Uniq_Programs[uniq_prog] = 1
+        else:
+            Hist_Uniq_Programs[uniq_prog] += 1
+        if Player_sessions not in Hist_Sessions:
+            Hist_Sessions[Player_sessions] = 1
+        else:
+            Hist_Sessions[Player_sessions] += 1
+
+            #print(player, ', level: ', Player_level, ', sessions: ', Player_sessions, ', days: ', duration,
+            #      ', units: ', Player_punits, "/", Player_units)
 
         Max_Level = 0
         Avg_Units = 0.0
@@ -90,7 +233,9 @@ if __name__ == '__main__':
         Uniq_Prog = 0
         Player_Units = 0
         Player_Progs = 0
-
+            
+        Players_n += 1
+        
         for s in sessions:
             Sessions_n += 1
             Waves_n += s['w']
@@ -102,7 +247,7 @@ if __name__ == '__main__':
 
             if level == data.LEVEL_INFINITY:
                 Max_Level = 4
-            elif level != data.LEVEL_START:
+            elif level != data.LEVEL_START and level != data.LEVEL_POLYGON:
                 Max_Level = int(level)
             
             tradition = s['t']
@@ -138,8 +283,12 @@ if __name__ == '__main__':
                         Programs_stats[uniq_artefact][1].add(player)
                     if uniq_artefact == artefact:
                         Uniq_Prog += 1
+                        if unit_type not in Unique_programs_units:
+                            Unique_programs_units[unit_type] = 1
+                        else:
+                            Unique_programs_units[unit_type] += 1
                         # print('isomorphic check type {} artefact {}...'.format(unit_type, artefact))
-                        isom_stats = data.check_isomorphic_programs(Units[unit_type], uniq_program)
+                        isom_stats = data.check_isomorphic_programs(Units[unit_type], uniq_program, Programs_words)
                         # print('done')
                         for key,value in isom_stats.items():
                             if key not in Units_isomorphic_stats:
@@ -152,6 +301,11 @@ if __name__ == '__main__':
         Units_n += Player_Units
         Units_programs_n += Player_Progs
         Unique_programs_n += Uniq_Prog
+
+        if Player_Progs == 0:
+            Players_wo_programs += 1
+        if Player_Units > 0 and float(Player_Progs) / Player_Units < 0.1:
+            Players_less_programs += 1
 
         Avg_Units /= len(sessions)
         if Player_Units > 0:
@@ -170,9 +324,72 @@ if __name__ == '__main__':
             break
 
     print()
+    print('Berloga statistics:')
+    print('------------------')
+    print()
+    print('Excluded challenge dates statistics:')
+    print('-----------------------------------')
+    for d, v in sorted(Dates.items(), key = (lambda x: x[1]), reverse=True):
+        if v < DAY_THRESHOLD:
+            break
+        print(d, v)
+    print()
+    print('Player sessions distribution:')
+    print('------------------------')
+    for l, v in sorted(Hist_Sessions.items(), key = (lambda x: x[0])):
+        print(l, v)
+    print()
+    print('Start level distribution:')
+    print('------------------------')
+    for l, v in sorted(Hist_Start_Levels.items(), key = (lambda x: x[0])):
+        print(l, v)
+    print()
+    print('Max level distribution:')
+    print('----------------------')
+    for l, v in sorted(Hist_Max_Levels.items(), key = (lambda x: x[0])):
+        print(l, v)
+    print()
+    print('Playing time distribution:')
+    print('-------------------------')
+    for l, v in sorted(Hist_Duration.items(), key = (lambda x: x[0])):
+        print(l, v)
+    print()
+    print('Playing time distribution (< 1h):')
+    print('--------------------------------')
+    for l, v in sorted(Hist_Duration_1h.items(), key = (lambda x: x[0])):
+        print(l, v)
+    print()
+    print('Programmed units percent distribution:')
+    print('-------------------------------------')
+    for l, v in sorted(Hist_Prog_Percent_Units.items(), key = (lambda x: x[0])):
+        print(l, v)
+    print()
+    print('Programmed units distribution:')
+    print('------------------------------')
+    for l, v in sorted(Hist_Prog_Units.items(), key = (lambda x: x[0])):
+        print(l, v)
+    print()
+    print('Programming start distributions:')
+    print('------------------------------')
+    for lw, v in sorted(Hist_First_Program.items(), key = (lambda x: x[0])):
+        print(lw, v)
+    print()
+    print('Programming unique programs distribution:')
+    print('----------------------------------------')
+    for k, v in sorted(Hist_Uniq_Programs.items(), key=lambda x: x[0]):
+        print(k, v)
+    print()
+    print('Selected players:')
+    for p in Players_selected:
+        print(p)
+
+    print()
     print('Total statistics:')
     print('-----------------')
     print('Players: {}'.format(Players_n))
+    print('Players w/o programs: {}'.format(Players_wo_programs))
+    print('Players with <10% programs: {}'.format(Players_less_programs))
+    print()
     print('Sessions: {}'.format(Sessions_n))
     print('Levels by sessions:')
     for l in data.LEVELS:
@@ -195,9 +412,19 @@ if __name__ == '__main__':
     print('Broken unit programs: {}'.format(Units_with_broken_artefacts_n))
     print('Unique unit diagrams: {}'.format(Unique_programs_n))
     print()
+    print('Unique programs by unit:')
+    for k, v in sorted(Unique_programs_units.items(), key=lambda x: x[1], reverse=True):
+        print(k, v)
+    print()
     print('Isomorphic programs statistics:')
     for key,value in Units_isomorphic_stats.items():
         print('  {}: {}'.format(key, value))
+    print()
+    print('Popular new/updated state names:')
+    for k, v in sorted(Programs_words.items(), key=lambda x: x[1], reverse=True):
+        print('{}: {}'.format(k, v))
+#        if v < 40:
+#            break
     print()
     print('Most popular programs:')
     i = 0
