@@ -89,7 +89,7 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
             continue
         
         try:
-            if row[_CSV_DATETIME].find('.'):
+            if row[_CSV_DATETIME].find('.') > 0:
                 d = datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S.%f+03').timestamp()
             else:
                 d = datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S+03').timestamp()
