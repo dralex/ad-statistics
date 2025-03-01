@@ -53,6 +53,7 @@ _CONTEXT_OPEN_EDITOR = 'Оpening_editor'
 _CONTEXT_CLOSE_EDITOR = 'Closing_editor'
 _CONTEXT_SAVE_PROGRAM = 'Save_program'
 _CONTEXT_POLYGON = 'Polygon_Start'
+_CONTEXT_POLYGON_AB = 'Polygon_Autoborder'
 
 _CSV_ID = 0
 _CSV_DATETIME = 1
@@ -128,9 +129,12 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
             
         if 't' not in a:
             context = row[_CSV_CONTEXT]
-            if context.find(_CONTEXT_LEVEL) == 0 or context.find(_CONTEXT_POLYGON) == 0:
+            if context.find(_CONTEXT_LEVEL) == 0 or context.find(_CONTEXT_POLYGON) == 0 or context == _CONTEXT_POLYGON_AB:
                 if context.find(_CONTEXT_LEVEL) == 0:
                     _, level, origin = row[_CSV_CONTEXT].split('_')
+                elif context == _CONTEXT_POLYGON_AB:
+                    level = LEVEL_POLYGON
+                    origin = UNITS[0]
                 else:
                     origin = row[_CSV_CONTEXT].split('_')[2]
                     level = LEVEL_POLYGON
