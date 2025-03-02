@@ -28,8 +28,11 @@ import csv
 import data
 import datetime
 
-
-PLAYERS_DATA = 'all_players.csv' 
+if len(sys.argv) > 1:
+    PLAYERS_DATA = sys.argv[1]
+else:
+    # default database
+    PLAYERS_DATA = 'test.csv'
 
 def usage(msg = ''):
     print("Usage: {} <artefact-id>".format(sys.argv[0]))
