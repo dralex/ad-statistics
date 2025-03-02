@@ -1,3 +1,4 @@
+
 #!/usr/bin/python3
 # -----------------------------------------------------------------------------
 #  The Berloga Apiary Defence statistics analysis tool
@@ -435,9 +436,12 @@ def load_player_programs(player_id, programs, hashes, hashes_with_name):
             phash = hash(str(p))
             #print(hash(str(p)),str(p))
         except CyberiadaML.CybMLException:
-            print('Bad program:', filepath)
+            print('Bad program CyberiadaML file:', filepath)
             continue
         except CyberiadaML.XMLException:
+            print('Bad program xml file:', filepath)
+            continue
+        except CyberiadaML.FileException:
             print('Bad program file:', filepath)
             continue
         file_hashes[h] = phash
