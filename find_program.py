@@ -50,7 +50,7 @@ if __name__ == '__main__':
     Unique_programs = {}
     Unique_programs_with_names = {}
     Programs = {}    
-    Players = data.read_players_data(Players_data, None, False)
+    Players = data.read_players_data(Players_data, None)
     Found = set([])
     
     for player, values in Players.items():        
