@@ -20,12 +20,18 @@
 #  along with this program. If not, see https://www.gnu.org/licenses/
 #  ----------------------------------------------------------------------------- 
 
+import sys
 import os
 import csv
 import urllib.request
 import data
 
-PLAYERS_DATA = 'all_players.csv'
+if len(sys.argv) > 1:
+    PLAYERS_DATA = sys.argv[1]
+else:
+    # default database
+    PLAYERS_DATA = 'test.csv'
+
 FILTER_PLAYERS_FILE = None #'select_players.txt'
 FILTER_PLAYERS = None # ['player-id-1', 'player-id-2']
 ARTEFACT_URL = 'https://storage.yandexcloud.net/berloga-artefacts/{}/{}.xml'
