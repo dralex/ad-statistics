@@ -327,7 +327,8 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                         cur_session['ws'][wave][cur_try] = [0, 0, 0.0]
                     cur_session['w'] = wave
                     cur_session['a'].append(a)
-                    cur_session['fd'] = d
+                    if d > cur_session['fd']:
+                        cur_session['fd'] = d
                 else:
                     if cur_session is not None:
                         cur_session['gs'] = cur_games
@@ -355,7 +356,8 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                             cur_session['ws'][wave][cur_try][2] += a['m']['drone_damage']
             else:
                 if cur_session is not None:
-                    cur_session['fd'] = d
+                    if d > cur_session['fd']:
+                        cur_session['fd'] = d
             
         if cur_session is not None:
             cur_session['gs'] = cur_games
