@@ -28,24 +28,24 @@ import csv
 import data
 import datetime
 
-if len(sys.argv) > 1:
-    PLAYERS_DATA = sys.argv[1]
-else:
-    # default database
-    PLAYERS_DATA = 'test.csv'
+DEFAULT_PLAYERS_DATA = 'test.csv'
 
 def usage(msg = ''):
-    print("Usage: {} <artefact-id>".format(sys.argv[0]))
+    print("Usage: {} [database-path] <artefact-id>".format(sys.argv[0]))
     if msg:
         print(msg)
     exit(1)            
 
 if __name__ == '__main__':
 
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
         usage()
-    
-    Artefact = sys.argv[1]
+    if len(sys.argv) == 2:
+        Players_data = DEFAULT_PLAYERS_DATA
+        Artefact = sys.argv[1]
+    else:
+        Players_data = sys.argv[1]
+        Artefact = sys.argv[2]
     Units = data.load_default_programs()
     Unique_programs = {}
     Unique_programs_with_names = {}
