@@ -307,12 +307,17 @@ if __name__ == '__main__':
         if Player_Units > 0 and float(Player_Progs) / Player_Units < 0.1:
             Players_less_programs += 1
 
-        Avg_Units /= len(sessions)
+        if len(sessions) > 0:
+            Avg_Units /= len(sessions)
+            Avg_Dmg /= len(sessions)
+        else:
+            Avg_Units = 0.0
+            Avg_Dmg = 0.0            
+                
         if Player_Units > 0:
             Avg_Prog = 100.0 * float(Player_Progs) / float(Player_Units)
         else:
             Avg_Prog = 0.0
-        Avg_Dmg /= len(sessions)
         #print("Player {} - sessions {}, max level {}, avg units: {:5.2f}, avg prog: {:5.2f}%, avg dmg: {:6.1f}, uniq progs: {}".format(player,
         #                                                                                                                               len(sessions),
         #                                                                                                                               Max_Level,
