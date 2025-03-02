@@ -109,7 +109,10 @@ if __name__ == '__main__':
             continue
 
         activities, _, sessions = values
-                
+
+        if len(sessions) == 0:
+            continue
+        
         Player_sessions = 0        
         Start_sessions = 0
         Sessions_start = datetime.datetime.now().timestamp()
@@ -126,6 +129,7 @@ if __name__ == '__main__':
         challenge = False
         first_program_level = 5
         first_profram_wave = 16
+
         for s in sessions:
             Player_sessions += 1
             Player_units += s['units']
@@ -173,6 +177,10 @@ if __name__ == '__main__':
         else:
             prog_percent = (int(100.0 * float(Player_punits) / float(Player_units)) // 10 + 1) * 10 if Player_units > 0 else 0.0
         duration = (Sessions_finish - Sessions_start) / 3600.0
+        if duration < 0:
+            print(player, Sessions_start, Sessions_finish)
+            exit(1)
+        
         uniq_prog = len(Player_uniq_programs)
 
         if FILTER_POSSIBLE_MULTIPLAYER:
