@@ -20,18 +20,24 @@
 #  along with this program. If not, see https://www.gnu.org/licenses/
 #  ----------------------------------------------------------------------------- 
 
+import sys
 import os
 import csv
 
 import data
 import datetime
 
+if len(sys.argv) > 1:
+    PLAYERS_DATA = sys.argv[1]
+else:
+    # default database
+    PLAYERS_DATA = 'test.csv'
+
 FILTER_POSSIBLE_MULTIPLAYER = False
 FILTER_PLAYERS_FILE = None #'player_id_list.txt'
 BLACKLIST_PLAYERS_FILE = None # 'blacklist.txt'
 FILTER_PLAYERS = None # ['player-id-1', 'player-id-2', ...]
 DAY_THRESHOLD = 350
-PLAYERS_DATA = 'test.csv'
 PLAYERS_LIMIT = None # number if needed
 
 if __name__ == '__main__':
