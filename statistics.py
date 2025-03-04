@@ -236,7 +236,7 @@ if __name__ == '__main__':
                 Hist_First_Program[first_program] += 1
         if max_program_level < 5 and max_program_wave < 16:
             max_program = "{}-{:02}".format(max_program_level, max_program_wave)
-            if Super_Max_Level_Wave is None or Super_Max_Level_Wave[0] < max_program_level and Super_Max_Level_Wave[1] < max_program_wavel: 
+            if Super_Max_Level_Wave is None or Super_Max_Level_Wave[0] < max_program_level and Super_Max_Level_Wave[1] < max_program_wave: 
                 Super_Max_Level_Wave = (max_program_level, max_program_wave)
                 Super_Max_Level_Wave_Player = player
             if max_program not in Hist_Max_Program:
