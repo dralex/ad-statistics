@@ -151,8 +151,10 @@ if __name__ == '__main__':
                 Start_sessions += 1
             elif level == data.LEVEL_INFINITY:
                 nlevel = Player_level = 4
-            elif int(level) > Player_level:
-                nlevel = Player_level = int(level)
+            else:
+                nlevel = int(level)
+                if nlevel > Player_level:
+                    Player_level = nlevel
             fdate = datetime.datetime.fromtimestamp(s['fd']).strftime('%Y-%m-%d')
             if fdate not in Dates:
                 Dates[fdate] = 1
@@ -236,7 +238,8 @@ if __name__ == '__main__':
                 Hist_First_Program[first_program] += 1
         if max_program_level < 5 and max_program_wave < 16:
             max_program = "{}-{:02}".format(max_program_level, max_program_wave)
-            if Super_Max_Level_Wave is None or Super_Max_Level_Wave[0] < max_program_level and Super_Max_Level_Wave[1] < max_program_wave: 
+            if Super_Max_Level_Wave is None or (Super_Max_Level_Wave[0] < max_program_level or
+                                                Super_Max_Level_Wave[0] == max_program_level and Super_Max_Level_Wave[1] < max_program_wave): 
                 Super_Max_Level_Wave = (max_program_level, max_program_wave)
                 Super_Max_Level_Wave_Player = player
             if max_program not in Hist_Max_Program:
