@@ -100,6 +100,8 @@ if __name__ == '__main__':
     Hist_Max_Program = {}
     Hist_Uniq_Programs = {}
     Players_selected = set([])
+    Super_Max_Level_Wave = None
+    Super_Max_Level_Wave_Player = None
     
     for player, values in Players.items():        
         if FILTER_PLAYERS is not None and player not in FILTER_PLAYERS:
@@ -234,6 +236,9 @@ if __name__ == '__main__':
                 Hist_First_Program[first_program] += 1
         if max_program_level < 5 and max_program_wave < 16:
             max_program = "{}-{:02}".format(max_program_level, max_program_wave)
+            if Super_Max_Level_Wave is None or Super_Max_Level_Wave[0] < max_program_level and Super_Max_Level_Wave[1] < max_program_wavel: 
+                Super_Max_Level_Wave = (max_program_level, max_program_wave)
+                Super_Max_Level_Wave_Player = player
             if max_program not in Hist_Max_Program:
                 Hist_Max_Program[max_program] = 1
             else:
@@ -407,6 +412,10 @@ if __name__ == '__main__':
     print('---------------------------')
     for lw, v in sorted(Hist_Max_Program.items(), key = (lambda x: x[0])):
         print(lw, v)
+    if Super_Max_Level_Wave is not None:
+        print('Top level-wave: {}-{:02}, top player: {}'.format(Super_Max_Level_Wave[0],
+                                                                Super_Max_Level_Wave[1],
+                                                                Super_Max_Level_Wave_Player))
     print()
     print('Programming unique programs distribution:')
     print('----------------------------------------')
