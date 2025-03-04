@@ -81,6 +81,7 @@ if __name__ == '__main__':
         i += 1
         if i == LIMIT:
             break
+    i = 0
     print()
     print('Best {} unique programs with players\' programs (by damage):'.format(LIMIT))
     for art, art_data in sorted(Best_Uniq_Programs.items(), key=lambda x: x[1][1], reverse=True):
