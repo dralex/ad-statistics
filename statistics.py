@@ -97,6 +97,7 @@ if __name__ == '__main__':
     Hist_Prog_Units = {}
     Hist_Prog_Percent_Units = {}
     Hist_First_Program = {}
+    Hist_Max_Program = {}
     Hist_Uniq_Programs = {}
     Players_selected = set([])
     
@@ -128,7 +129,9 @@ if __name__ == '__main__':
         
         challenge = False
         first_program_level = 5
-        first_profram_wave = 16
+        first_program_wave = 16
+        max_program_level = 0
+        max_program_wave = 0
 
         for s in sessions:
             Player_sessions += 1
@@ -155,6 +158,11 @@ if __name__ == '__main__':
                 Dates[fdate] += 1
                 if Dates[fdate] >= DAY_THRESHOLD:
                     challenge = True
+            if max_program_level < nlevel:
+                max_program_level = nlevel
+                max_program_wave = s['w']
+            elif max_program_level == nlevel and max_program_wave < s['w']:
+                max_program_wave = s['w']
             if 'wp' in s:
                 if first_program_level > nlevel:
                     first_program_level = nlevel
@@ -177,10 +185,6 @@ if __name__ == '__main__':
         else:
             prog_percent = (int(100.0 * float(Player_punits) / float(Player_units)) // 10 + 1) * 10 if Player_units > 0 else 0.0
         duration = (Sessions_finish - Sessions_start) / 3600.0
-        if duration < 0:
-            print(player, Sessions_start, Sessions_finish)
-            exit(1)
-        
         uniq_prog = len(Player_uniq_programs)
 
         if FILTER_POSSIBLE_MULTIPLAYER:
@@ -221,13 +225,19 @@ if __name__ == '__main__':
         else:
             Hist_Start_Levels[Start_sessions] += 1
         if first_program_level < 5 and first_program_wave < 16:
-            if first_program_level == 0 and first_program_wave == 10:
-                Players_selected.add(player)
+            #if first_program_level == 0 and first_program_wave == 10:
+            #    Players_selected.add(player)
             first_program = "{}-{:02}".format(first_program_level, first_program_wave)
             if first_program not in Hist_First_Program:
                 Hist_First_Program[first_program] = 1
             else:
                 Hist_First_Program[first_program] += 1
+        if max_program_level < 5 and max_program_wave < 16:
+            max_program = "{}-{:02}".format(max_program_level, max_program_wave)
+            if max_program not in Hist_Max_Program:
+                Hist_Max_Program[max_program] = 1
+            else:
+                Hist_Max_Program[max_program] += 1
         if uniq_prog not in Hist_Uniq_Programs:
             Hist_Uniq_Programs[uniq_prog] = 1
         else:
@@ -389,8 +399,13 @@ if __name__ == '__main__':
         print(l, v)
     print()
     print('Programming start distributions:')
-    print('------------------------------')
+    print('-------------------------------')
     for lw, v in sorted(Hist_First_Program.items(), key = (lambda x: x[0])):
+        print(lw, v)
+    print()
+    print('Maximum level distribution:')
+    print('---------------------------')
+    for lw, v in sorted(Hist_Max_Program.items(), key = (lambda x: x[0])):
         print(lw, v)
     print()
     print('Programming unique programs distribution:')
