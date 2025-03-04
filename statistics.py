@@ -173,10 +173,11 @@ if __name__ == '__main__':
                     first_program_wave = s['wp']
                 elif first_program_level == nlevel and first_program_wave > s['wp']:
                     first_program_wave = s['wp']
-            for artefact, unit in s['art'].items():
+            for artefact, unit_data in s['art'].items():
                 if artefact in Programs:
                     phash = Programs[artefact]
                     uniq_artefact, uniq_program, _ = Unique_programs[phash]
+                    unit = unit_data[0]
                     if str(uniq_program) == str(Units[unit]):
                         # skip programs equal to default
                         continue
@@ -300,10 +301,11 @@ if __name__ == '__main__':
 
             Player_Units += s['units']
 
-            for artefact, unit in s['art'].items():
+            for artefact, unit_data in s['art'].items():
                 if artefact in Programs:
                     phash = Programs[artefact]
                     uniq_artefact, uniq_program, _ = Unique_programs[phash]
+                    unit = unit_data[0]
                     if str(uniq_program) == str(Units[unit]):
                         # skip programs equal to default
                         continue

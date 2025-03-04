@@ -151,8 +151,8 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
                 if origin in UNITS:
                     a['t'] = 'u'
                     a['u'] = origin
-                    if len(row[_CSV_ARTEFACT]) > 0:
-                        a['ac'] = (row[_CSV_ARTEFACT], row[_CSV_CHECKSUM])
+                    if len(row[_CSV_ARTEFACT]) > 0 and 'ac' not in a:
+                        a['ac'] = [row[_CSV_ARTEFACT], row[_CSV_CHECKSUM], 0.0, 0]
                 elif origin in TRADITIONS:
                     a['t'] = 't'
                     a['p'] = origin
@@ -198,6 +198,12 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
             a['l'] = LEVELS[level]
         elif (metrics_key == 'last_wave' or metrics_key == 'wave') and 'w' not in a:
             a['w'] = int(metrics_value) + 1
+        elif metrics_key == 'drone_damage':
+            if 'ac' in a:
+                a['ac'][2] += metrics_value
+        elif metrics_key == 'enemies_destroyed':
+            if 'ac' in a:
+                a['ac'][3] += int(metrics_value)            
         elif metrics_key == 'placement_time':
             a['pls_t'] = metrics_value
         elif metrics_key == 'session_time':
@@ -312,7 +318,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                         if unit not in cur_session['u']:
                             cur_session['u'].append(unit)
                         if art_cs is not None:
-                            cur_session['art'][art_cs[0]] = unit
+                            cur_session['art'][art_cs[0]] = (unit, art_cs[2], art_cs[3])
                             #else:
                             #    print('program {} is already in session, orig: {}'.format(art_cs[0], cur_session['art'][art_cs[1]]))
                             cur_session['ws'][wave][cur_try][1] += 1
@@ -350,7 +356,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                         cur_session['u'].append(unit)
                         cur_session['ws'][wave][cur_try][0] += 1
                         if art_cs is not None:
-                            cur_session['art'][art_cs[0]] = unit
+                            cur_session['art'][art_cs[0]] = (unit, art_cs[2], art_cs[3])
                             cur_session['ws'][wave][cur_try][1] += 1
                             cur_session['wp'] = wave
                         if 'drone_damage' in a['m']:
