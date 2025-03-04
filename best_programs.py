@@ -45,6 +45,7 @@ if __name__ == '__main__':
     Players = data.read_players_sessions(Players_data, None, False)
     Best_Programs = {}
     Best_Uniq_Programs = {}
+    Best_Player_Programs = {}
     
     for player, values in Players.items():        
         activities, _, sessions = values
@@ -55,7 +56,7 @@ if __name__ == '__main__':
                     phash = Programs[artefact]
                     uniq_artefact, uniq_program, _ = Unique_programs[phash]
                     unit, dmg, enemies = unit_data
-
+                    key = uniq_artefact + ':' + player
                     if uniq_artefact not in Best_Programs:
                         Best_Programs[uniq_artefact] = {}
                     if player not in Best_Programs[uniq_artefact]:
@@ -68,7 +69,13 @@ if __name__ == '__main__':
                         Best_Uniq_Programs[uniq_artefact] = [unit, dmg, enemies]
                     else:
                         Best_Uniq_Programs[uniq_artefact][1] += dmg
-                        Best_Uniq_Programs[uniq_artefact][2] += enemies 
+                        Best_Uniq_Programs[uniq_artefact][2] += enemies
+
+                    if key not in Best_Player_Programs:
+                        Best_Player_Programs[key] = [unit, dmg, enemies]
+                    else:
+                        Best_Player_Programs[key][1] += dmg
+                        Best_Player_Programs[key][2] += enemies
 
     i = 1
     print()
@@ -93,6 +100,19 @@ if __name__ == '__main__':
             _, dmg, enemies = data
             print('{:10} {} {} {:10.1f} {:6}  ({:10.1f} {:6})'.format(unit, art, player, dmg, enemies, art_dmg, art_enemies))
             break
+        i += 1
+        if i == LIMIT:
+            break
+    i = 0    
+    print()
+    print('Best {} unique player-programs pairs (by damage):'.format(LIMIT))
+    for key, data in sorted(Best_Player_Programs.items(), key=lambda x: x[1][1], reverse=True):
+        art, player = key.split(':')
+        _, uniq_dmg, uniq_enemies = Best_Uniq_Programs[art] 
+        unit, dmg, enemies = data
+        if dmg == 0.0:
+            break
+        print('{:10} {} {} {:10.1f} {:6} ({:10.1f} {:6})'.format(unit, art, player, dmg, enemies, uniq_dmg, uniq_enemies))
         i += 1
         if i == LIMIT:
             break
