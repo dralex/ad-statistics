@@ -46,7 +46,7 @@ def download_artefact(player_id, artefact):
     if not os.path.isdir(player_dir):
         os.mkdir(player_dir)
 
-    artefact_id, checksum, _, _ = artefact 
+    artefact_id, checksum, _, _, _ = artefact 
 
     if checksum not in Hashes:
         Hashes[checksum] = (player_id, artefact_id)

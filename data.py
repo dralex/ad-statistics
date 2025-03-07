@@ -152,7 +152,7 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
                     a['t'] = 'u'
                     a['u'] = origin
                     if len(row[_CSV_ARTEFACT]) > 0 and 'ac' not in a:
-                        a['ac'] = [row[_CSV_ARTEFACT], row[_CSV_CHECKSUM], 0.0, 0]
+                        a['ac'] = [row[_CSV_ARTEFACT], row[_CSV_CHECKSUM], 0.0, 0, 0]
                 elif origin in TRADITIONS:
                     a['t'] = 't'
                     a['p'] = origin
@@ -203,7 +203,12 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
                 a['ac'][2] += metrics_value
         elif metrics_key == 'enemies_destroyed':
             if 'ac' in a:
-                a['ac'][3] += int(metrics_value)            
+                a['ac'][3] += int(metrics_value)
+        elif metrics_key == 'manual_activation':
+            a['ma'] = int(metrics_value)
+        elif metrics_key == 'program_activation':
+            if 'ac' in a:
+                a['ac'][4] += int(metrics_value)            
         elif metrics_key == 'placement_time':
             a['pls_t'] = metrics_value
         elif metrics_key == 'session_time':
@@ -283,7 +288,8 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
         for d, _, _, a in sorted(datetable, key = lambda x: (x[0], x[1], x[2])):
             act_type = a['t']
             tradition = a['p'] if act_type == 't' else None
-    
+
+            save = 0
             if act_type == 'fp':
                 cur_placements.append(a['pls_t'])
             elif act_type == 'sg':
@@ -293,12 +299,17 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                 cur_start_game = None
             elif act_type == 'fe':
                 cur_editings.append(a['es_t'])
-            elif act_type == 'sa':
-                cur_session['sa'] += 1
+            elif act_type == 's':
+                save = 1
 
             if cur_session is not None:
                 cur_session['v'].add(a['v'])
-            
+
+            if 'ma' in a:
+                manual = a['ma']
+            else:
+                manual = 0
+                
             if act_type in ('f', 'u', 't'):
                 level = a['l']
                 if 'w' not in a: 
@@ -327,6 +338,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                         cur_session['ws'][wave][cur_try][0] += 1
                         if 'drone_damage' in a['m']: 
                             cur_session['ws'][wave][cur_try][2] += a['m']['drone_damage']
+                        cur_session['ma'] += manual
                     if tradition is not None and cur_session['t'] is None:
                         cur_session['t'] = tradition
                     if act_type == 'f' and a['y'] > cur_try:
@@ -336,6 +348,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                     cur_session['a'].append(a)
                     if d > cur_session['fd']:
                         cur_session['fd'] = d
+                    cur_session['sa'] += save
                 else:
                     if cur_session is not None:
                         cur_session['gs'] = cur_games
@@ -351,7 +364,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
 
                     cur_try = 1
                     cur_session = {'v': set([a['v']]), 'l': level, 'w': wave, 'ws': {wave: {cur_try: [0, 0, 0.0]}}, 'sd': d, 'fd': d, 'a': [a],
-                                   'u': [], 't': tradition, 'art': {}, 'gs': [], 'pls': [], 'es': [], 'sa': 0}
+                                   'u': [], 't': tradition, 'art': {}, 'gs': [], 'pls': [], 'es': [], 'sa': save, 'ma': manual}
                     if unit is not None:
                         cur_session['u'].append(unit)
                         cur_session['ws'][wave][cur_try][0] += 1
@@ -363,6 +376,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                             cur_session['ws'][wave][cur_try][2] += a['m']['drone_damage']
             else:
                 if cur_session is not None:
+                    cur_session['sa'] += save
                     if d > cur_session['fd']:
                         cur_session['fd'] = d
             
@@ -383,7 +397,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
             print(player, ':')
             _, _, sessions = values
             for s in sessions:
-                print("versions: ({}), level: {}, last wave: {}, waves(tries): {}, date from: {}, to: {}, activities: {}, tradition: {}, unit types: ({}), uniq progs: {}, saves: {}, avg units: {:5.2f}, avg prog percent: {:5.2f}%, avg dmg: {:6.1f}, avg g.s.: {:5.2f}, avg pl.s.: {:5.2f}, avg ed.s.: {:5.2f}".format(
+                print("versions: ({}), level: {}, last wave: {}, waves(tries): {}, date from: {}, to: {}, activities: {}, tradition: {}, unit types: ({}), uniq progs: {}, manual use: {}, saves: {}, avg units: {:5.2f}, avg prog percent: {:5.2f}%, avg dmg: {:6.1f}, avg g.s.: {:5.2f}, avg pl.s.: {:5.2f}, avg ed.s.: {:5.2f}".format(
                     ', '.join(sorted(s['v'])),
                     s['l'], s['w'], s['tries'],
                     datetime.datetime.fromtimestamp(s['sd']).strftime('%Y-%m-%d %H:%M:%S'),
@@ -392,7 +406,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                     s['t'],
                     ', '.join(s['u']),
                     len(s['art']),
-                    s['sa'],
+                    s['ma'], s['sa'],
                     s['avg_u'], s['avg_p'] * 100.0, s['avg_d'],
                     s['avg_gs'], s['avg_pls'], s['avg_es']))
 
