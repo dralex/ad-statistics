@@ -34,9 +34,10 @@ else:
     PLAYERS_DATA = 'test.csv'
 
 FILTER_POSSIBLE_MULTIPLAYER = False
+FILTER_PLAYERS_DATE_FILE = None #'player_id_date_list.txt'
 FILTER_PLAYERS_FILE = None #'player_id_list.txt'
+FILTER_PLAYERS = None # {'player-id-1': (date1, date2), 'player-id-2': None, ...}
 BLACKLIST_PLAYERS_FILE = None # 'blacklist.txt'
-FILTER_PLAYERS = None # ['player-id-1', 'player-id-2', ...]
 DAY_THRESHOLD = 350
 PLAYERS_LIMIT = None # number if needed
 
@@ -68,24 +69,29 @@ if __name__ == '__main__':
     Programs_words = {}
 
     if FILTER_PLAYERS_FILE:
-        with open(FILTER_PLAYERS_FILE) as f:
-            Players_filter = set(x.lower() for x in f.read().splitlines())
+        Players_filter = data.load_players_list(FILTER_PLAYERS_FILE)
     else:
         Players_filter = None
 
-    if BLACKLIST_PLAYERS_FILE:
-        with open(BLACKLIST_PLAYERS_FILE) as f:
-            Blacklist_filter = set(x.lower() for x in f.read().splitlines())
+    if FILTER_PLAYERS_DATE_FILE:
+        Players_date_filter = data.load_players_date_list(FILTER_PLAYERS_DATE_FILE)
     else:
-        Blacklist_filter = set([])
+        Players_date_filter = None
 
+    if BLACKLIST_PLAYERS_FILE:
+        Blacklist_filter = data.load_players_list(BLACKLIST_PLAYERS_FILE)
+    else:
+        Blacklist_filter = {}
+   
     if FILTER_PLAYERS is not None:
         Filter = FILTER_PLAYERS
+    elif FILTER_PLAYERS_DATE_FILE is not None:
+        Filter = Players_date_filter
     elif FILTER_PLAYERS_FILE is not None:
         Filter = Players_filter
     else:
         Filter = None
-        
+  
     Players = data.read_players_sessions(PLAYERS_DATA, Filter, False)
     
     Dates = {}
@@ -104,12 +110,6 @@ if __name__ == '__main__':
     Super_Max_Level_Wave_Player = None
     
     for player, values in Players.items():        
-        if FILTER_PLAYERS is not None and player not in FILTER_PLAYERS:
-            continue
-        if FILTER_PLAYERS_FILE is not None and player not in Players_filter:
-            continue
-        if player in Blacklist_filter:
-            continue
 
         activities, _, sessions = values
 

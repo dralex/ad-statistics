@@ -74,6 +74,14 @@ _MAX_SESSION_LENGTH = 6 * 3600.0
 def get_artefact_file(player_id, artefact_id):
     return os.path.join(PROGRAMS_DIR, player_id, artefact_id) + ".graphml"
 
+def pack_player(player, d):
+    return "{}:{}".format(player, int(d))
+def unpack_player(player):
+    if player.find(':') > 0:
+        return player.split(':')[0]
+    else:
+        return player
+
 def read_players_data(csv_file, player_filter = None, delimiter=','):
     players = {}
     print('read from file {}'.format(csv_file))
@@ -102,8 +110,21 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
 
         activity_id = row[_CSV_ID]
         player_id = row[_CSV_PLAYER]
-        if player_filter and player_id not in player_filter:
-            continue
+        if player_filter: 
+            if player_id not in player_filter:
+                continue
+            dates = player_filter[player_id]
+            if dates is not None:
+                found = False
+                for dates_pair in dates:
+                    date_from, date_to = dates_pair
+                    if date_from <= d <= date_to:
+                        player_id = pack_player(player_id, date_from)
+                        found = True
+                        break
+                if not found:
+                    continue                 
+
         if player_id not in players:
             players[player_id] = ({}, [], [])
 
@@ -437,7 +458,7 @@ def load_program(artefact_id):
 
 def load_player_programs(player_id, programs, hashes, hashes_with_name):
     file_hashes = {}
-    dir_path = os.path.join(PROGRAMS_DIR, player_id)
+    dir_path = os.path.join(PROGRAMS_DIR, unpack_player(player_id))
     if not os.path.isdir(dir_path):
         return 
     for f in os.listdir(dir_path):
@@ -472,6 +493,28 @@ def load_player_programs(player_id, programs, hashes, hashes_with_name):
             hashes[phash][2] += 1
             continue
         hashes[phash] = [artefact, p, 1]
+
+def load_players_list(filename):
+    players = {}
+    with open(filename) as f:
+        for line in f.read().splitlines():
+            players[line.lower()] = None
+    return players
+
+def load_players_date_list(filename):
+    players = {}
+    with open(filename) as f:
+        for line in f.read().splitlines():
+            pl_id, date_from, date_to = line.split(',')
+            pl_id = pl_id.lower()
+            date_pair = (datetime.datetime.strptime(date_from, '%Y-%m-%d %H:%M:%S').timestamp(),
+                         datetime.datetime.strptime(date_to, '%Y-%m-%d %H:%M:%S').timestamp())
+            if pl_id not in players:
+                players[pl_id] = [date_pair]
+            else:
+                players[pl_id].append(date_pair) 
+        return players
+    return players
 
 def check_isomorphic_programs(unit_program, program, words, diff = False):
     initial = ''
