@@ -69,13 +69,13 @@ if __name__ == '__main__':
 
     if FILTER_PLAYERS_FILE:
         with open(FILTER_PLAYERS_FILE) as f:
-            Players_filter = set(f.read().splitlines())
+            Players_filter = set(x.lower() for x in f.read().splitlines())
     else:
         Players_filter = None
 
     if BLACKLIST_PLAYERS_FILE:
         with open(BLACKLIST_PLAYERS_FILE) as f:
-            Blacklist_filter = set(f.read().splitlines())
+            Blacklist_filter = set(x.lower() for x in f.read().splitlines())
     else:
         Blacklist_filter = set([])
 
