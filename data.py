@@ -141,7 +141,7 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
         
         if 'd' not in a:
             a['d'] = d
-            players[player_id][1].append([d, 0, metrics_id, a])
+            #players[player_id][1].append([d, 0, metrics_id, a])
 
         metrics_key = row[_CSV_METRICS_KEY]
         metrics_value = float(row[_CSV_METRICS_VALUE])
@@ -205,7 +205,7 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
         if metrics_key == 'creation_index':
             index = int(metrics_value)
             a['c'] = index
-            players[player_id][1][-1][1] = index
+            #players[player_id][1][-1][1] = index
         elif 'c' not in a:
             a['c'] = 0
 
@@ -236,6 +236,11 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
             a['gs_t'] = metrics_value
         elif metrics_key == 'editing_time':
             a['es_t'] = metrics_value
+
+    for pl, pl_values in players.items():
+        activities, datetable, _ = pl_values
+        for a in activities.values():
+            datetable.append([a['d'], a['c'], a['i'], a])
 
     print(i, "lines loaded")
     return players
@@ -306,7 +311,10 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
         cur_placements = []
         cur_editings = []
         
-        for d, _, _, a in sorted(datetable, key = lambda x: (x[2], x[0], x[1])):
+        for d, cindex, metrics_id, a in sorted(datetable, key = lambda x: (x[1], x[2], x[0])):
+            if cindex == 0 and a['v'].find('1.5.3') == 0:
+                print('bad creation index for modern AD version: {}', a)
+                exit(1)
             act_type = a['t']
             tradition = a['p'] if act_type == 't' else None
 
@@ -384,8 +392,9 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                         sessions.append(cur_session)
 
                     cur_try = 1
-                    cur_session = {'v': set([a['v']]), 'l': level, 'w': wave, 'ws': {wave: {cur_try: [0, 0, 0.0]}}, 'sd': d, 'fd': d, 'a': [a],
-                                   'u': [], 't': tradition, 'art': {}, 'gs': [], 'pls': [], 'es': [], 'sa': save, 'ma': manual}
+                    cur_session = {'v': set([a['v']]), 'l': level, 'w': wave, 'ws': {wave: {cur_try: [0, 0, 0.0]}},
+                                   'sd': d, 'fd': d, 'smid': metrics_id, 'fmid': metrics_id, 'sidx': cindex, 'fidx': cindex,
+                                   'a': [a], 'u': [], 't': tradition, 'art': {}, 'gs': [], 'pls': [], 'es': [], 'sa': save, 'ma': manual}
                     if unit is not None:
                         cur_session['u'].append(unit)
                         cur_session['ws'][wave][cur_try][0] += 1
@@ -400,7 +409,11 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                     cur_session['sa'] += save
                     if d > cur_session['fd']:
                         cur_session['fd'] = d
-            
+                    if metrics_id > cur_session['fmid']:
+                        cur_session['fmid'] = metrics_id
+                    if cindex > cur_session['fidx']:
+                        cur_session['fidx'] = cindex
+
         if cur_session is not None:
             cur_session['gs'] = cur_games
             if cur_start_game is not None:
@@ -418,11 +431,13 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
             print(player, ':')
             _, _, sessions = values
             for s in sessions:
-                print("versions: ({}), level: {}, last wave: {}, waves(tries): {}, date from: {}, to: {}, activities: {}, tradition: {}, unit types: ({}), uniq progs: {}, manual use: {}, saves: {}, avg units: {:5.2f}, avg prog percent: {:5.2f}%, avg dmg: {:6.1f}, avg g.s.: {:5.2f}, avg pl.s.: {:5.2f}, avg ed.s.: {:5.2f}".format(
+                print("versions: ({}), level: {}, last wave: {}, waves(tries): {}, date from: {}, to: {}, metrics from: {}, to: {}, cindex from: {}, to: {}, activities: {}, tradition: {}, unit types: ({}), uniq progs: {}, manual use: {}, saves: {}, avg units: {:5.2f}, avg prog percent: {:5.2f}%, avg dmg: {:6.1f}, avg g.s.: {:5.2f}, avg pl.s.: {:5.2f}, avg ed.s.: {:5.2f}".format(
                     ', '.join(sorted(s['v'])),
                     s['l'], s['w'], s['tries'],
                     datetime.datetime.fromtimestamp(s['sd']).strftime('%Y-%m-%d %H:%M:%S'),
                     datetime.datetime.fromtimestamp(s['fd']).strftime('%Y-%m-%d %H:%M:%S'),
+                    s['smid'], s['fmid'],
+                    s['sidx'], s['fidx'],
                     len(s['a']),
                     s['t'],
                     ', '.join(s['u']),
