@@ -47,5 +47,5 @@ if __name__ == '__main__':
         Players_data = sys.argv[1]
         Player = sys.argv[2]
 
-    data.read_players_sessions(Players_data, {Player: None}, True)
+    data.read_players_sessions(Players_data, {Player.lower(): None}, True)
 
