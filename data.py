@@ -306,7 +306,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
         cur_placements = []
         cur_editings = []
         
-        for d, _, _, a in sorted(datetable, key = lambda x: (x[0], x[1], x[2])):
+        for d, _, _, a in sorted(datetable, key = lambda x: (x[2], x[0], x[1])):
             act_type = a['t']
             tradition = a['p'] if act_type == 't' else None
 
