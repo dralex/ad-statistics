@@ -103,6 +103,10 @@ if __name__ == '__main__':
     Hist_Prog_Units = {}
     Hist_Prog_Percent_Units = {}
     Hist_First_Program = {}
+    Hist_Places_Duration = {}
+    Hist_Edits_Duration = {}
+    Hist_Places_Percent_Duration = {}
+    Hist_Edits_Percent_Duration = {}
     Hist_Max_Program = {}
     Hist_Uniq_Programs = {}
     Players_selected = set([])
@@ -135,6 +139,9 @@ if __name__ == '__main__':
         max_program_level = 0
         max_program_wave = 0
 
+        Session_places = 0.0
+        Session_edits = 0.0
+        
         for s in sessions:
             Player_sessions += 1
             Player_units += s['units']
@@ -173,6 +180,8 @@ if __name__ == '__main__':
                     first_program_wave = s['wp']
                 elif first_program_level == nlevel and first_program_wave > s['wp']:
                     first_program_wave = s['wp']
+            Session_places += s['places']
+            Session_edits += s['edits']
             for artefact, unit_data in s['art'].items():
                 if artefact in Programs:
                     phash = Programs[artefact]
@@ -192,6 +201,21 @@ if __name__ == '__main__':
         duration = (Sessions_finish - Sessions_start) / 3600.0
         uniq_prog = len(Player_uniq_programs)
 
+        places_mins = int(Session_places / 6.0)
+        edits_mins = int(Session_edits / 6.0)
+        if duration == 0 or Session_places == 0:
+            places_percent = 0
+        elif Session_places >= duration:
+            places_percent = 101
+        else:
+            places_percent = (int(100.0 * float(Session_places) / float(duration)) // 10 + 1) * 10 if duration > 0 else 0.0
+        if duration == 0 or Session_edits == 0:
+            edits_percent = 0
+        elif Session_edits >= duration:
+            edits_percent = 101
+        else:
+            edits_percent = (int(100.0 * float(Session_edits) / float(duration)) // 10 + 1) * 10 if duration > 0 else 0.0
+        
         if FILTER_POSSIBLE_MULTIPLAYER:
             if (challenge or
                 Start_sessions < 1 or Start_sessions > 3 or
@@ -221,6 +245,24 @@ if __name__ == '__main__':
             Hist_Duration[hours] = 1
         else:
             Hist_Duration[hours] += 1
+        
+        if places_mins not in Hist_Places_Duration:
+            Hist_Places_Duration[places_mins] = 1
+        else:
+            Hist_Places_Duration[places_mins] += 1
+        if places_percent not in Hist_Places_Percent_Duration:
+            Hist_Places_Percent_Duration[places_percent] = 1
+        else:
+            Hist_Places_Percent_Duration[places_percent] += 1
+        if edits_mins not in Hist_Edits_Duration:
+            Hist_Edits_Duration[edits_mins] = 1
+        else:
+            Hist_Edits_Duration[edits_mins] += 1
+        if edits_percent not in Hist_Edits_Percent_Duration:
+            Hist_Edits_Percent_Duration[edits_percent] = 1
+        else:
+            Hist_Edits_Percent_Duration[edits_percent] += 1
+    
         if Player_level not in Hist_Max_Levels:
             Hist_Max_Levels[Player_level] = 1
         else:
@@ -398,6 +440,27 @@ if __name__ == '__main__':
     for l, v in sorted(Hist_Duration_1h.items(), key = (lambda x: x[0])):
         print(l, v)
     print()
+    print('Placement time distribution (minutes):')
+    print('-------------------------------------')
+    for l, v in sorted(Hist_Places_Duration.items(), key = (lambda x: x[0])):
+        print(l, v)
+    print()
+    print('Placement time distribution (%):')
+    print('--------------------------------')
+    for l, v in sorted(Hist_Places_Percent_Duration.items(), key = (lambda x: x[0])):
+        print(l, v)
+    print()
+    print('Programs edit time distribution (minutes):')
+    print('------------------------------------------')
+    for l, v in sorted(Hist_Edits_Duration.items(), key = (lambda x: x[0])):
+        print(l, v)
+    print()
+    print('Programs edit time distribution (%):')
+    print('------------------------------------')
+    for l, v in sorted(Hist_Edits_Percent_Duration.items(), key = (lambda x: x[0])):
+        print(l, v)
+    print()
+
     print('Programmed units percent distribution:')
     print('-------------------------------------')
     for l, v in sorted(Hist_Prog_Percent_Units.items(), key = (lambda x: x[0])):

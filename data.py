@@ -289,7 +289,6 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
         session['avg_u'] = avg_units
         session['avg_p'] = avg_progs
         session['avg_d'] = avg_dmg
-
         total_gs = 0.0
         total_pls = 0.0
         total_es = 0.0
@@ -302,16 +301,18 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
             if diff < _MAX_SESSION_LENGTH:
                 total_gs = diff
         session['avg_gs'] = total_gs
+        session['avg_pls'] = 0.0
         if len(session['pls']) > 0:
             for t in session['pls']:
                 total_pls += t
-            total_pls /= len(session['pls'])
-        session['avg_pls'] = total_pls
+            session['avg_pls'] = total_pls / len(session['pls'])
+        session['places'] = total_pls
+        session['avg_es'] = 0.0
         if len(session['es']) > 0:
             for t in session['es']:
                 total_es += t
-            total_es /= len(session['es'])
-        session['avg_es'] = total_es
+            session['avg_es'] = total_es / len(session['es'])
+        session['edits'] = total_es
 
     for player, values in players.items():
         activities, datetable, sessions = values
@@ -452,7 +453,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
             print(player, ':')
             _, _, sessions = values
             for s in sessions:
-                print("versions: ({}), level: {}, last wave: {}, waves(tries): {}, date from: {}, to: {}, metrics from: {}, to: {}, cindex from: {}, to: {}, activities: {}, tradition: {}, unit types: ({}), uniq progs: {}, manual use: {}, saves: {}, avg units: {:5.2f}, avg prog percent: {:5.2f}%, avg dmg: {:6.1f}, avg g.s.: {:5.2f}, avg pl.s.: {:5.2f}, avg ed.s.: {:5.2f}".format(
+                print("versions: ({}), level: {}, last wave: {}, waves(tries): {}, date from: {}, to: {}, metrics from: {}, to: {}, cindex from: {}, to: {}, activities: {}, tradition: {}, unit types: ({}), uniq progs: {}, manual use: {}, saves: {}, avg units: {:5.2f}, avg prog percent: {:5.2f}%, avg dmg: {:6.1f}, avg g.s.: {:5.2f}, avg pl.s.: {:5.2f}, avg ed.s.: {:5.2f}, pls: {:6.2f}, eds: {:6.2f}".format(
                     ', '.join(sorted(s['v'])),
                     s['l'], s['w'], s['tries'],
                     datetime.datetime.fromtimestamp(s['sd']).strftime('%Y-%m-%d %H:%M:%S'),
@@ -465,7 +466,8 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                     len(s['art']),
                     s['ma'], s['sa'],
                     s['avg_u'], s['avg_p'] * 100.0, s['avg_d'],
-                    s['avg_gs'], s['avg_pls'], s['avg_es']))
+                    s['avg_gs'], s['avg_pls'], s['avg_es'],
+                    s['places'], s['edits']))
 
     return players
 
