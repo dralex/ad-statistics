@@ -412,6 +412,10 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                         avg_sum_session(cur_session)
                         sessions.append(cur_session)
 
+                    if len(sessions) > 0:
+                        pre_sd = d
+                        pre_smid = metrics_id
+                        pre_cindex = pre_sidx
                     cur_try = 1
                     cur_session = {'v': set([a['v']]), 'l': level, 'w': wave, 'ws': {wave: {cur_try: [0, 0, 0.0]}},
                                    'sd': d if pre_sd is None else pre_sd, 'fd': d,
