@@ -27,14 +27,18 @@ import csv
 import data
 import datetime
 
-if len(sys.argv) > 1:
+if len(sys.argv) < 2 or len(sys.argv) > 3:
+    print('usage: {} <database.csv> [players-indexes-filter.txt]'.format(sys.argv[0]))
+    exit(1)
+else: 
     PLAYERS_DATA = sys.argv[1]
-else:
-    # default database
-    PLAYERS_DATA = 'test.csv'
+    if len(sys.argv) == 2:
+        FILTER_PLAYERS_INDEX_FILE = None #'player_id_index_list.txt'
+    else:
+        FILTER_PLAYERS_INDEX_FILE = sys.argv[2]
 
 FILTER_POSSIBLE_MULTIPLAYER = False
-FILTER_PLAYERS_INDEX_FILE = None #'player_id_index_list.txt'
+
 FILTER_PLAYERS_FILE = None #'player_id_list.txt'
 FILTER_PLAYERS = None # {'player-id-1': (date1, date2), 'player-id-2': None, ...}
 BLACKLIST_PLAYERS_FILE = None # 'blacklist.txt'
