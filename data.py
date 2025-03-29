@@ -231,6 +231,8 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
         to_delete = set([])
         to_add = {}
         for pl, pl_values in players.items():
+            if player_filter[pl] is None:
+                continue
             for indexes in player_filter[pl]:
                 first_index, last_index = indexes
                 activities, _, _ = pl_values
@@ -241,8 +243,6 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
                         if new_player not in to_add:
                             to_add[new_player] = {}
                         to_add[new_player][aid] = a
-        print('to delete: ', to_delete)
-        print('to add: ', to_add.keys())
         for p in to_delete:
             del players[p]
         for p, v in to_add.items():
