@@ -407,6 +407,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
             else:
                 if cur_session is not None:
                     cur_session['sa'] += save
+                    save = 0
                     if d > cur_session['fd']:
                         cur_session['fd'] = d
                     if metrics_id > cur_session['fmid']:
@@ -415,6 +416,14 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                         cur_session['fidx'] = cindex
 
         if cur_session is not None:
+            cur_session['sa'] += save
+            save = 0
+            if d > cur_session['fd']:
+                cur_session['fd'] = d
+            if metrics_id > cur_session['fmid']:
+                cur_session['fmid'] = metrics_id
+            if cindex > cur_session['fidx']:
+                cur_session['fidx'] = cindex
             cur_session['gs'] = cur_games
             if cur_start_game is not None:
                 cur_session['gs'].append(cur_session['fd'] - cur_start_game)
