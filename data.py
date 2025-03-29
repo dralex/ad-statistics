@@ -323,6 +323,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
         cur_games = []
         cur_placements = []
         cur_editings = []
+        pre_sd = pre_smid = pre_sidx = None
         
         for d, cindex, metrics_id, a in sorted(datetable, key = lambda x: (x[1], x[2], x[0])):
             if cindex == 0 and a['v'].find('1.5.3') == 0:
@@ -332,17 +333,26 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
             tradition = a['p'] if act_type == 't' else None
 
             save = 0
-            if act_type == 'fp':
-                cur_placements.append(a['pls_t'])
-            elif act_type == 'sg':
-                cur_start_game = d
-            elif act_type == 'fg':
-                cur_games.append(a['gs_t'])
-                cur_start_game = None
-            elif act_type == 'fe':
-                cur_editings.append(a['es_t'])
-            elif act_type == 's':
-                save = 1
+            if act_type in ('fp', 'sg', 'fg', 'fe', 's'):
+                
+                if pre_sd is None:
+                    pre_sd = d
+                if pre_smid is None:
+                    pre_smid = metrics_id
+                if pre_sidx is None:
+                    pre_sidx = cindex
+
+                if act_type == 'fp':
+                    cur_placements.append(a['pls_t'])
+                elif act_type == 'sg':
+                    cur_start_game = d
+                elif act_type == 'fg':
+                    cur_games.append(a['gs_t'])
+                    cur_start_game = None
+                elif act_type == 'fe':
+                    cur_editings.append(a['es_t'])
+                elif act_type == 's':
+                    save = 1
 
             if cur_session is not None:
                 cur_session['v'].add(a['v'])
@@ -406,7 +416,9 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
 
                     cur_try = 1
                     cur_session = {'v': set([a['v']]), 'l': level, 'w': wave, 'ws': {wave: {cur_try: [0, 0, 0.0]}},
-                                   'sd': d, 'fd': d, 'smid': metrics_id, 'fmid': metrics_id, 'sidx': cindex, 'fidx': cindex,
+                                   'sd': d if pre_sd is None else pre_sd, 'fd': d,
+                                   'smid': metrics_id if pre_smid is None else pre_smid, 'fmid': metrics_id,
+                                   'sidx': cindex if pre_sidx is None else pre_sidx, 'fidx': cindex,
                                    'a': [a], 'u': [], 't': tradition, 'art': {}, 'gs': [], 'pls': [], 'es': [], 'sa': save, 'ma': manual}
                     if unit is not None:
                         cur_session['u'].append(unit)
