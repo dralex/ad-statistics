@@ -39,6 +39,7 @@ LEVELS = [LEVEL_START, '1', '2', '3', LEVEL_INFINITY, LEVEL_POLYGON]
 UNITS = ['Autoborder', 'Stapler', 'Smoker', 'Generator']
 TRADITIONS = ['Constructor', 'Beekeeper', 'Programmer']
 DEFAULT_STATE_NAME = 'Состояние'
+BASIC_STATE_NAMES = ('Скан', 'Атака', 'Сближение','Бой')
 
 # CSV file format:
 # id,created_at,player,app_version,context,metrics_id,metrics_key,metrics_value,artefact,checksum
@@ -615,6 +616,7 @@ def check_isomorphic_programs(unit_program, program, words, diff = False):
         diff_names = 0
         diff_actions = 0
         default_names = 0
+        nontrivial_names = 0
         for n in diff_nodes_flags:
             if n & CyberiadaML.smiNodeDiffFlagTitle:
                 diff_names += 1
@@ -626,6 +628,8 @@ def check_isomorphic_programs(unit_program, program, words, diff = False):
             name = e.get_name()
             if name == DEFAULT_STATE_NAME:
                 default_names += 1
+            elif name not in BASIC_STATE_NAMES:
+                nontrivial_names += 1
 
         return {'isomorphic to default': res == CyberiadaML.smiIsomorphic,
                 'extended default': ((len(new_nodes) > 0 or len(new_edges) > 0 or diff_actions > 0) and
@@ -636,6 +640,7 @@ def check_isomorphic_programs(unit_program, program, words, diff = False):
                 'detached nodes': (len(new_nodes) > 0 and len(missing_nodes) == 0 and
                                    len(missing_edges) == 0 and len(new_edges) == 0),
                 'diff names': diff_names > 0,
+                'non-trivial names': nontrivial_names > 0,
                 'diff actions': diff_actions > 0,
                 'diff edges': len(diff_edges) > 0,
                 'new edges': len(new_edges) > 0,

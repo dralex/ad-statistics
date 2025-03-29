@@ -114,6 +114,7 @@ if __name__ == '__main__':
     Hist_Max_Program = {}
     Hist_Uniq_Programs = {}
     Players_selected = set([])
+    Players_with_nontrivial_states = set([])
     Super_Max_Level_Wave = None
     Super_Max_Level_Wave_Player = None
     
@@ -373,13 +374,15 @@ if __name__ == '__main__':
                         else:
                             Unique_programs_units[unit_type] += 1
                         # print('isomorphic check type {} artefact {}...'.format(unit_type, artefact))
-                        isom_stats = data.check_isomorphic_programs(Units[unit_type], uniq_program, Programs_words)
+                        isom_stats = data.check_isomorphic_programs(Units[unit_type], uniq_program, Programs_words)                        
                         # print('done')
                         for key,value in isom_stats.items():
                             if key not in Units_isomorphic_stats:
                                 Units_isomorphic_stats[key] = 0
                             if value:
                                 Units_isomorphic_stats[key] += 1
+                            if key == 'non-trivial names' and value:
+                                Players_with_nontrivial_states.add(player)
                 else:
                     Units_with_broken_artefacts_n += 1
 
@@ -509,6 +512,9 @@ if __name__ == '__main__':
     print('Players: {}'.format(Players_n))
     print('Players w/o programs: {}'.format(Players_wo_programs))
     print('Players with <10% programs: {}'.format(Players_less_programs))
+    print('Players with non-trivial program states: {}'.format(len(Players_with_nontrivial_states)))
+    for p in Players_with_nontrivial_states:
+        print(p)
     print()
     print('Sessions: {}'.format(Sessions_n))
     print('Levels by sessions:')
