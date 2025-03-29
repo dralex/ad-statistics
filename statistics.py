@@ -206,6 +206,8 @@ if __name__ == '__main__':
         duration = (Sessions_finish - Sessions_start) / 3600.0
         uniq_prog = len(Player_uniq_programs)
 
+        if Session_places < 0:
+            Session_places = 0.0
         places_mins = int(Session_places / 60.0)
         edits_mins = int(Session_edits / 60.0)
         if duration == 0 or Session_places == 0:
