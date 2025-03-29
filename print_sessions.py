@@ -31,21 +31,30 @@ import datetime
 DEFAULT_PLAYERS_DATA = 'test.csv'
 
 def usage(msg = ''):
-    print("Usage: {} [database-path] <player-id>".format(sys.argv[0]))
+    print("Usage: {} [database-path] <player-id> [<start-index> <finish-index>]".format(sys.argv[0]))
     if msg:
         print(msg)
     exit(1)            
 
 if __name__ == '__main__':
 
-    if len(sys.argv) < 2 or len(sys.argv) > 3:
+    if len(sys.argv) < 2 or len(sys.argv) > 5:
         usage()
+        
+    start_index = finish_index = None
     if len(sys.argv) == 2:
         Players_data = DEFAULT_PLAYERS_DATA
-        Player = sys.argv[1]
+        Player = sys.argv[1]        
+    elif len(sys.argv) == 3:
+        Players_data = sys.argv[1]
+        Player = sys.argv[2]
     else:
         Players_data = sys.argv[1]
         Player = sys.argv[2]
+        start_index = int(sys.argv[3])
+        finish_index = int(sys.argv[4])
 
-    data.read_players_sessions(Players_data, {Player.lower(): None}, True)
-
+    if start_index is None:
+        data.read_players_sessions(Players_data, {Player.lower(): None}, True)
+    else:
+        data.read_players_sessions(Players_data, {Player.lower(): [(start_index, finish_index)]}, True)
