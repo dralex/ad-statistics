@@ -61,7 +61,7 @@ if __name__ == '__main__':
                 if artefact in Programs:
                     phash = Programs[artefact]
                     uniq_artefact, uniq_program, _ = Unique_programs[phash]
-                    if str(uniq_program) == str(Units[unit]):
+                    if str(uniq_program) == str(Units[unit[0]]):
                         # skip programs equal to default
                         continue
                     if uniq_artefact == Artefact: 
