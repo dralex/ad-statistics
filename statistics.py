@@ -120,6 +120,9 @@ if __name__ == '__main__':
     
     for player, values in Players.items():        
 
+        if Blacklist_filter is not None and player in Blacklist_filter:
+            continue
+        
         activities, _, sessions = values
 
         if len(sessions) == 0:
