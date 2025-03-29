@@ -198,23 +198,24 @@ if __name__ == '__main__':
             prog_percent = 101
         else:
             prog_percent = (int(100.0 * float(Player_punits) / float(Player_units)) // 10 + 1) * 10 if Player_units > 0 else 0.0
+        duration_min = (Sessions_finish - Sessions_start) / 60.0
         duration = (Sessions_finish - Sessions_start) / 3600.0
         uniq_prog = len(Player_uniq_programs)
 
-        places_mins = int(Session_places / 6.0)
-        edits_mins = int(Session_edits / 6.0)
+        places_mins = int(Session_places / 60.0)
+        edits_mins = int(Session_edits / 60.0)
         if duration == 0 or Session_places == 0:
             places_percent = 0
-        elif Session_places >= duration:
+        elif Session_places >= duration_min:
             places_percent = 101
         else:
-            places_percent = (int(100.0 * float(Session_places) / float(duration)) // 10 + 1) * 10 if duration > 0 else 0.0
+            places_percent = (int(100.0 * float(Session_places) / float(duration_min)) // 10 + 1) * 10 if duration_min > 0 else 0.0
         if duration == 0 or Session_edits == 0:
             edits_percent = 0
-        elif Session_edits >= duration:
+        elif Session_edits >= duration_min:
             edits_percent = 101
         else:
-            edits_percent = (int(100.0 * float(Session_edits) / float(duration)) // 10 + 1) * 10 if duration > 0 else 0.0
+            edits_percent = (int(100.0 * float(Session_edits) / float(duration_min)) // 10 + 1) * 10 if duration_min > 0 else 0.0
         
         if FILTER_POSSIBLE_MULTIPLAYER:
             if (challenge or
