@@ -231,7 +231,7 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
         to_delete = set([])
         to_add = {}
         for pl, pl_values in players.items():
-            for indexes in player_filter[player_id]:
+            for indexes in player_filter[pl]:
                 first_index, last_index = indexes
                 activities, _, _ = pl_values
                 for aid, a in activities.items():
