@@ -302,17 +302,15 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                 total_gs = diff
         session['avg_gs'] = total_gs
         session['avg_pls'] = 0.0
+        if len(session['es']) > 0:
+            total_es = sum(session['es'])
+            session['avg_es'] = total_es / len(session['es'])
+        session['edits'] = total_es
         if len(session['pls']) > 0:
-            for t in session['pls']:
-                total_pls += t
+            total_pls = sum(session['pls']) - total_es
             session['avg_pls'] = total_pls / len(session['pls'])
         session['places'] = total_pls
         session['avg_es'] = 0.0
-        if len(session['es']) > 0:
-            for t in session['es']:
-                total_es += t
-            session['avg_es'] = total_es / len(session['es'])
-        session['edits'] = total_es
 
     for player, values in players.items():
         activities, datetable, sessions = values
