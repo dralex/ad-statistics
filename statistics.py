@@ -206,16 +206,16 @@ if __name__ == '__main__':
         edits_mins = int(Session_edits / 60.0)
         if duration == 0 or Session_places == 0:
             places_percent = 0
-        elif Session_places >= duration_min:
+        elif places_mins >= duration_min:
             places_percent = 101
         else:
-            places_percent = (int(100.0 * float(Session_places) / float(duration_min)) // 10 + 1) * 10 if duration_min > 0 else 0.0
+            places_percent = (int(100.0 * float(places_mins) / float(duration_min)) // 10 + 1) * 10 if duration_min > 0 else 0.0
         if duration == 0 or Session_edits == 0:
             edits_percent = 0
-        elif Session_edits >= duration_min:
+        elif edits_mins >= duration_min:
             edits_percent = 101
         else:
-            edits_percent = (int(100.0 * float(Session_edits) / float(duration_min)) // 10 + 1) * 10 if duration_min > 0 else 0.0
+            edits_percent = (int(100.0 * float(edits_mins) / float(duration_min)) // 10 + 1) * 10 if duration_min > 0 else 0.0
         
         if FILTER_POSSIBLE_MULTIPLAYER:
             if (challenge or
