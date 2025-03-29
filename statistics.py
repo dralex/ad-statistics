@@ -34,7 +34,7 @@ else:
     PLAYERS_DATA = 'test.csv'
 
 FILTER_POSSIBLE_MULTIPLAYER = False
-FILTER_PLAYERS_DATE_FILE = None #'player_id_date_list.txt'
+FILTER_PLAYERS_INDEX_FILE = None #'player_id_index_list.txt'
 FILTER_PLAYERS_FILE = None #'player_id_list.txt'
 FILTER_PLAYERS = None # {'player-id-1': (date1, date2), 'player-id-2': None, ...}
 BLACKLIST_PLAYERS_FILE = None # 'blacklist.txt'
@@ -73,10 +73,10 @@ if __name__ == '__main__':
     else:
         Players_filter = None
 
-    if FILTER_PLAYERS_DATE_FILE:
-        Players_date_filter = data.load_players_date_list(FILTER_PLAYERS_DATE_FILE)
+    if FILTER_PLAYERS_INDEX_FILE:
+        Players_index_filter = data.load_players_index_list(FILTER_PLAYERS_INDEX_FILE)
     else:
-        Players_date_filter = None
+        Players_index_filter = None
 
     if BLACKLIST_PLAYERS_FILE:
         Blacklist_filter = data.load_players_list(BLACKLIST_PLAYERS_FILE)
@@ -85,8 +85,8 @@ if __name__ == '__main__':
    
     if FILTER_PLAYERS is not None:
         Filter = FILTER_PLAYERS
-    elif FILTER_PLAYERS_DATE_FILE is not None:
-        Filter = Players_date_filter
+    elif FILTER_PLAYERS_INDEX_FILE is not None:
+        Filter = Players_index_filter
     elif FILTER_PLAYERS_FILE is not None:
         Filter = Players_filter
     else:

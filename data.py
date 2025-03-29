@@ -74,8 +74,8 @@ _MAX_SESSION_LENGTH = 6 * 3600.0
 def get_artefact_file(player_id, artefact_id):
     return os.path.join(PROGRAMS_DIR, player_id, artefact_id) + ".graphml"
 
-def pack_player(player, d):
-    return "{}:{}".format(player, int(d))
+def pack_player(player, idx):
+    return "{}:{}".format(player, idx)
 def unpack_player(player):
     if player.find(':') > 0:
         return player.split(':')[0]
@@ -113,17 +113,6 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
         if player_filter: 
             if player_id not in player_filter:
                 continue
-            dates = player_filter[player_id]
-            if dates is not None:
-                found = False
-                for dates_pair in dates:
-                    date_from, date_to = dates_pair
-                    if date_from <= d <= date_to:
-                        player_id = pack_player(player_id, date_from)
-                        found = True
-                        break
-                if not found:
-                    continue                 
 
         if player_id not in players:
             players[player_id] = ({}, [], [])
@@ -236,7 +225,30 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
             a['gs_t'] = metrics_value
         elif metrics_key == 'editing_time':
             a['es_t'] = metrics_value
+            
+    # split multi-players
+    if player_filter:
+        to_delete = set([])
+        to_add = {}
+        for pl, pl_values in players.items():
+            for indexes in player_filter[player_id]:
+                first_index, last_index = indexes
+                activities, _, _ = pl_values
+                for aid, a in activities.items():
+                    if first_index <= a['c'] <= last_index:
+                        new_player = pack_player(pl, first_index)
+                        to_delete.add(pl)
+                        if new_player not in to_add:
+                            to_add[new_player] = {}
+                        to_add[new_player][aid] = a
+        print('to delete: ', to_delete)
+        print('to add: ', to_add.keys())
+        for p in to_delete:
+            del players[p]
+        for p, v in to_add.items():
+            players[p] = (v, [], [])
 
+    # build date table
     for pl, pl_values in players.items():
         activities, datetable, _ = pl_values
         for a in activities.values():
@@ -525,19 +537,17 @@ def load_players_list(filename):
             players[line.lower()] = None
     return players
 
-def load_players_date_list(filename):
+def load_players_index_list(filename):
     players = {}
     with open(filename) as f:
         for line in f.read().splitlines():
-            pl_id, date_from, date_to = line.split(',')
+            pl_id, index_from, index_to = line.split(',')
             pl_id = pl_id.lower()
-            date_pair = (datetime.datetime.strptime(date_from, '%Y-%m-%d %H:%M:%S').timestamp(),
-                         datetime.datetime.strptime(date_to, '%Y-%m-%d %H:%M:%S').timestamp())
+            index_pair = (int(index_from), int(index_to))
             if pl_id not in players:
-                players[pl_id] = [date_pair]
+                players[pl_id] = [index_pair]
             else:
-                players[pl_id].append(date_pair) 
-        return players
+                players[pl_id].append(index_pair)
     return players
 
 def check_isomorphic_programs(unit_program, program, words, diff = False):
