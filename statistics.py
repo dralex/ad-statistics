@@ -115,6 +115,7 @@ if __name__ == '__main__':
     Hist_Uniq_Programs = {}
     Players_selected = set([])
     Players_with_nontrivial_states = set([])
+    Players_with_debugging = set([])
     Super_Max_Level_Wave = None
     Super_Max_Level_Wave_Player = None
     
@@ -386,6 +387,8 @@ if __name__ == '__main__':
                                 Units_isomorphic_stats[key] += 1
                             if key == 'non-trivial names' and value:
                                 Players_with_nontrivial_states.add(player)
+                            if key == 'debug actions' and value:
+                                Players_with_debugging.add(player)
                 else:
                     Units_with_broken_artefacts_n += 1
 
@@ -517,6 +520,10 @@ if __name__ == '__main__':
     print('Players with <10% programs: {}'.format(Players_less_programs))
     print('Players with non-trivial program states: {}'.format(len(Players_with_nontrivial_states)))
     for p in Players_with_nontrivial_states:
+        print(p)
+    print()
+    print('Players with debugging tecniques in programs: {}'.format(len(Players_with_debugging)))
+    for p in Players_with_debugging:
         print(p)
     print()
     print('Sessions: {}'.format(Sessions_n))

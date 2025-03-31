@@ -40,6 +40,7 @@ UNITS = ['Autoborder', 'Stapler', 'Smoker', 'Generator']
 TRADITIONS = ['Constructor', 'Beekeeper', 'Programmer']
 DEFAULT_STATE_NAME = 'Состояние'
 BASIC_STATE_NAMES = ('Скан', 'Атака', 'Сближение','Бой')
+DEBUG_ACTION = 'Диод'
 
 # CSV file format:
 # id,created_at,player,app_version,context,metrics_id,metrics_key,metrics_value,artefact,checksum
@@ -580,7 +581,6 @@ def check_isomorphic_programs(unit_program, program, words, diff = False):
     res = unit_program.check_isomorphism(program, True, False, initial,
 					 diff_nodes, diff_nodes_flags, new_nodes, missing_nodes,
 					 diff_edges, diff_edges_flags, new_edges, missing_edges)
-    
     index = 0
     for n in diff_nodes_flags:
         if n & CyberiadaML.smiNodeDiffFlagTitle:
@@ -600,6 +600,27 @@ def check_isomorphic_programs(unit_program, program, words, diff = False):
         else:
             words[name] += 1
 
+    diod_flag = False
+    for nid in diff_nodes + new_nodes:
+        if diod_flag: break
+        n = program.find_element_by_id(nid)
+        for a in n.get_actions():
+            if a.has_behavior():
+                behav = a.get_behavior()
+                if behav.find(DEBUG_ACTION) > 0:
+                    diod_flag = True
+                    break
+    if not diod_flag:
+        for e in program.find_elements_by_type(CyberiadaML.elementTransition):
+            if e.has_action():
+                a = e.get_action()
+                if a.has_behavior():
+                    behav = a.get_behavior()
+                    if behav.find(DEBUG_ACTION) > 0:
+                        diod_flag = True
+                        break
+    if diod_flag:
+        print(program)
     if diff:
         diff_arrays = {}
         diff_arrays['res'] = res
@@ -641,6 +662,7 @@ def check_isomorphic_programs(unit_program, program, words, diff = False):
                                    len(missing_edges) == 0 and len(new_edges) == 0),
                 'diff names': diff_names > 0,
                 'non-trivial names': nontrivial_names > 0,
+                'debug actions': diod_flag,
                 'diff actions': diff_actions > 0,
                 'diff edges': len(diff_edges) > 0,
                 'new edges': len(new_edges) > 0,
