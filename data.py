@@ -604,6 +604,8 @@ def check_isomorphic_programs(unit_program, program, words, diff = False):
     for nid in diff_nodes + new_nodes:
         if diod_flag: break
         n = program.find_element_by_id(nid)
+        if n.get_type() != CyberiadaML.elementSimpleState and n.get_type() != CyberiadaML.elementCompositeState:
+            continue
         for a in n.get_actions():
             if a.has_behavior():
                 behav = a.get_behavior()
