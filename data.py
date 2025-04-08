@@ -621,8 +621,6 @@ def check_isomorphic_programs(unit_program, program, words, diff = False):
                     if behav.find(DEBUG_ACTION) > 0:
                         diod_flag = True
                         break
-    if diod_flag:
-        print(program)
     if diff:
         diff_arrays = {}
         diff_arrays['res'] = res
