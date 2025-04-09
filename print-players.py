@@ -163,7 +163,10 @@ if __name__ == '__main__':
             else:
                 Unit_types_str += ut[0]
 
-        player_data = [
+        if first_program_level == 5:
+            first_program_level = first_program_wave = 0
+
+        player_data = (
             player,
             len(sessions),
             Waves_n,
@@ -173,17 +176,35 @@ if __name__ == '__main__':
             Traditions_str,
             Unit_types_str,
             Player_Units,
-            Player_PUnits,
-            Uniq_Prog,
             Avg_Dmg,
+            Player_PUnits,
             Uniq_Prog,
             Programs_with_non_trivial_names,
             Programs_with_debugging,
             Duration,
             Places,
             Edits
-        ]
+        )
 
+        if len(Data) == 0:
+            Data.append(('Player-ID',
+                         'Всего сессий',
+                         'Всего волн',
+                         'Макс. уровень',
+                         'Первый уровень прогр.',
+                         'Первая волна прогр.',
+                         'Традиции',
+                         'Типы дронов',
+                         'Всего дронов',
+                         'Среднее повреждение от дронов',
+                         'Запрограммировано дронов',
+                         'Уникальных программ',
+                         'Программ с собств. именами'
+                         'Программ с отладкой',
+                         'Общая продолжительность (с)'
+                         'Время расстановки (с)',
+                         'Время редактирования прогр. (с)'))
+            
         Data.append(player_data)
 
     save_csv(output_file, Data)
