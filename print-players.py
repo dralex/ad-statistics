@@ -149,6 +149,7 @@ if __name__ == '__main__':
             Unit_types_str += ut[0:2]
 
         player_data = [
+            player,
             len(sessions),
             Waves_n,
             Max_Level,
