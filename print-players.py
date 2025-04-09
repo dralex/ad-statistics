@@ -131,11 +131,6 @@ if __name__ == '__main__':
                 else:
                     Units_with_broken_artefacts_n += 1
 
-        if Player_Progs == 0:
-            Players_wo_programs += 1
-        if Player_Units > 0 and float(Player_Progs) / Player_Units < 0.1:
-            Players_less_programs += 1
-
         if len(sessions) > 0:
             Avg_Units /= len(sessions)
             Avg_Dmg /= len(sessions)
