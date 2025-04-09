@@ -128,8 +128,6 @@ if __name__ == '__main__':
                                 Programs_with_non_trivial_names += 1
                             if key == 'debug actions' and value:
                                 Programs_with_debugging += 1
-                else:
-                    Units_with_broken_artefacts_n += 1
 
         if len(sessions) > 0:
             Avg_Units /= len(sessions)
