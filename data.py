@@ -236,6 +236,7 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
             if player_filter[pl] is None:
                 continue
             for indexes in player_filter[pl]:
+                if indexes is None: continue
                 first_index, last_index = indexes
                 activities, _, _ = pl_values
                 for aid, a in activities.items():
@@ -572,7 +573,7 @@ def load_players_index_list(filename):
                 players[pl_id].append(index_pair)
     return players
 
-def check_isomorphic_programs(unit_program, program, words, diff = False):
+def check_isomorphic_programs(unit_program, program, words = None, diff = False):
     initial = ''
     diff_nodes = []
     diff_nodes_flags = []
@@ -585,24 +586,25 @@ def check_isomorphic_programs(unit_program, program, words, diff = False):
     res = unit_program.check_isomorphism(program, True, False, initial,
 					 diff_nodes, diff_nodes_flags, new_nodes, missing_nodes,
 					 diff_edges, diff_edges_flags, new_edges, missing_edges)
-    index = 0
-    for n in diff_nodes_flags:
-        if n & CyberiadaML.smiNodeDiffFlagTitle:
-            node = diff_nodes[index]
-            e = program.find_element_by_id(node)
+    if words is not None:
+        index = 0
+        for n in diff_nodes_flags:
+            if n & CyberiadaML.smiNodeDiffFlagTitle:
+                node = diff_nodes[index]
+                e = program.find_element_by_id(node)
+                name = e.get_name()
+                if name not in words:
+                    words[name] = 1
+                else:
+                    words[name] += 1
+        index += 1
+        for n in new_nodes:
+            e = program.find_element_by_id(n)
             name = e.get_name()
             if name not in words:
                 words[name] = 1
             else:
                 words[name] += 1
-        index += 1
-    for n in new_nodes:
-        e = program.find_element_by_id(n)
-        name = e.get_name()
-        if name not in words:
-            words[name] = 1
-        else:
-            words[name] += 1
 
     diod_flag = False
     for nid in diff_nodes + new_nodes:
