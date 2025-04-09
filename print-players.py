@@ -182,7 +182,7 @@ if __name__ == '__main__':
             Programs_with_non_trivial_names,
             Programs_with_debugging,
             Duration,
-            Places,
+            Places if Places > 0 else 0,
             Edits
         )
 
