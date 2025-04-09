@@ -559,9 +559,13 @@ def load_players_index_list(filename):
     players = {}
     with open(filename) as f:
         for line in f.read().splitlines():
-            pl_id, index_from, index_to = line.split(',')
+            if line.find(',') > 0:
+                pl_id, index_from, index_to = line.split(',')
+                index_pair = (int(index_from), int(index_to))
+            else:
+                pl_id = line
+                index_pair = None
             pl_id = pl_id.lower()
-            index_pair = (int(index_from), int(index_to))
             if pl_id not in players:
                 players[pl_id] = [index_pair]
             else:
