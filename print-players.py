@@ -62,8 +62,6 @@ if __name__ == '__main__':
         Start_sessions = 0
         Sessions_start = datetime.datetime.now().timestamp()
         Sessions_finish = 0
-        Player_units = 0
-        Player_punits = 0
         Player_level = 0
         Player_uniq_programs = set([])
 
@@ -71,26 +69,34 @@ if __name__ == '__main__':
 
         Waves_n = 0
         Max_Level = 0
-        Avg_Units = 0.0
-        Avg_Prog = 0.0
         Avg_Dmg = 0.0
         Uniq_Prog = 0
         Player_Units = 0
-        Player_Progs = 0
+        Player_PUnits = 0
         Traditions = set([])
         Unit_types = set([])
         Programs_with_non_trivial_names = 0
         Programs_with_debugging = 0
-    
+
+        Sessions_start = datetime.datetime.now().timestamp()
+        Sessions_finish = 0
+        first_program_level = 5
+        first_program_wave = 16
+        Places = 0.0
+        Edits = 0.0
+        Duration = 0.0
+        
         for s in sessions:
             Waves_n += s['w']
             
             level = s['l']
-
+            nlevel = 0
             if level == data.LEVEL_INFINITY:
-                Max_Level = 4
-            elif level != data.LEVEL_START and level != data.LEVEL_POLYGON:
-                Max_Level = int(level)
+                nlevel = Max_Level = 4
+            elif level != data.LEVEL_POLYGON and level != data.LEVEL_START:
+                nlevel = int(level)
+                if nlevel > Max_Level:
+                    Max_Level = nlevel
             
             tradition = s['t']
             if tradition is not None:
@@ -99,12 +105,24 @@ if __name__ == '__main__':
             for unit_type in s['u']:
                 Unit_types.add(unit_type)
 
-            Avg_Units += s['avg_u']
-            Avg_Prog += s['avg_p']
-            Avg_Dmg += s['avg_d']
-
             Player_Units += s['units']
+            Player_PUnits += s['punits']
+            Avg_Dmg += s['avg_d']
+            Places += s['places']
+            Edits += s['edits']
 
+            if s['sd'] < Sessions_start:
+                Sessions_start = s['sd']
+            if s['fd'] > Sessions_finish:
+                Sessions_finish = s['fd']
+            
+            if 'wp' in s:
+                if first_program_level > nlevel:
+                    first_program_level = nlevel
+                    first_program_wave = s['wp']
+                elif first_program_level == nlevel and first_program_wave > s['wp']:
+                    first_program_wave = s['wp']
+            
             for artefact, unit_data in s['art'].items():
                 if artefact in Programs:
                     phash = Programs[artefact]
@@ -113,7 +131,6 @@ if __name__ == '__main__':
                     if str(uniq_program) == str(Units[unit]):
                         # skip programs equal to default
                         continue
-                    Player_Progs += 1
                     if uniq_artefact == artefact:
                         Uniq_Prog += 1
                         # print('isomorphic check type {} artefact {}...'.format(unit_type, artefact))
@@ -130,40 +147,41 @@ if __name__ == '__main__':
                                 Programs_with_debugging += 1
 
         if len(sessions) > 0:
-            Avg_Units /= len(sessions)
             Avg_Dmg /= len(sessions)
         else:
-            Avg_Units = 0.0
             Avg_Dmg = 0.0            
-                
-        if Player_Units > 0:
-            Avg_Prog = 100.0 * float(Player_Progs) / float(Player_Units)
-        else:
-            Avg_Prog = 0.0
 
+        Duration = (Sessions_finish - Sessions_start) 
+           
         Traditions_str = ''
         for t in Traditions:
             Traditions_str += t[0]
         Unit_types_str = ''
         for ut in Unit_types:
-            Unit_types_str += ut[0:2]
+            if ut[0] == 'S':
+                Unit_types_str += ut[0:2]
+            else:
+                Unit_types_str += ut[0]
 
         player_data = [
             player,
             len(sessions),
             Waves_n,
             Max_Level,
+            first_program_level,
+            first_program_wave,
             Traditions_str,
             Unit_types_str,
             Player_Units,
-            Player_Progs,
+            Player_PUnits,
             Uniq_Prog,
-            Avg_Units,
-            Avg_Prog,
             Avg_Dmg,
             Uniq_Prog,
             Programs_with_non_trivial_names,
-            Programs_with_debugging
+            Programs_with_debugging,
+            Duration,
+            Places,
+            Edits
         ]
 
         Data.append(player_data)
