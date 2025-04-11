@@ -673,3 +673,74 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                 'diff edges': len(diff_edges) > 0,
                 'new edges': len(new_edges) > 0,
                 'missing edges': len(missing_edges) > 0}
+
+def inspect_program(unit_type, default_units, program):
+    isom_results = (CyberiadaML.smiIdentical,
+		    CyberiadaML.smiEqual,
+		    CyberiadaML.smiIsomorphic,
+		    CyberiadaML.smiDiffStates,
+		    CyberiadaML.smiDiffInitial,
+		    CyberiadaML.smiDiffEdges)
+    diff_flags = (CyberiadaML.smiNodeDiffFlagID,
+		  CyberiadaML.smiNodeDiffFlagType,
+		  CyberiadaML.smiNodeDiffFlagTitle,
+		  CyberiadaML.smiNodeDiffFlagActions,
+		  CyberiadaML.smiNodeDiffFlagSMLink,
+		  CyberiadaML.smiNodeDiffFlagChildren,
+		  CyberiadaML.smiNodeDiffFlagEdges,
+		  CyberiadaML.smiEdgeDiffFlagID,
+		  CyberiadaML.smiEdgeDiffFlagAction)
+    words = {}
+    isom_stats = check_isomorphic_programs(default_units[unit_type], program, words, True)
+    nodes_to_print = []
+    for key,value in isom_stats.items():
+        if key == 'res':
+            flags = []
+            if value & CyberiadaML.smiIdentical:
+                flags.append('identical')
+            if value & CyberiadaML.smiEqual:
+                flags.append('equal')
+            if value & CyberiadaML.smiIsomorphic:
+                flags.append('isomorphic')
+            if value & CyberiadaML.smiDiffStates:
+                flags.append('diff states')
+            if value & CyberiadaML.smiDiffInitial:
+                flags.append('diff initial')
+            if value & CyberiadaML.smiDiffEdges:
+                flags.append('diff edges')
+            print("{:20}: {}".format('Flags:', ', '.join(flags)))
+        elif key.find('flags') > 0:
+            flags = []
+            for v in value:
+                if v & CyberiadaML.smiNodeDiffFlagID:
+                    flags.append('id')
+                if v & CyberiadaML.smiNodeDiffFlagType:
+                    flags.append('type')
+                if v & CyberiadaML.smiNodeDiffFlagTitle:
+                    flags.append('title')
+                if v & CyberiadaML.smiNodeDiffFlagActions:
+                    flags.append('actions')
+                if v & CyberiadaML.smiNodeDiffFlagSMLink:
+                    flags.append('sm link')
+                if v & CyberiadaML.smiNodeDiffFlagChildren:
+                    flags.append('children')
+                if v & CyberiadaML.smiNodeDiffFlagEdges:
+                    flags.append('edges')
+                if v & CyberiadaML.smiEdgeDiffFlagID:
+                    flags.append('id')
+                if v & CyberiadaML.smiEdgeDiffFlagAction:
+                    flags.append('action')
+            print("{:20}: {}".format(key, flags))
+        else:
+            if key.find('node') > 0:
+                nodes_to_print += value
+            print("{:20}: {}".format(key, value))
+
+    print()
+    print('Popular state names:')
+    for k, v in sorted(words.items(), key=lambda x: x[1], reverse=True):
+        print(k, v)
+    print()
+    for n in nodes_to_print:
+        node = program.find_element_by_id(n)
+        print('Node {}: {}'.format(n, node))

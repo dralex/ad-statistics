@@ -93,7 +93,11 @@ if __name__ == '__main__':
     print('Unique programs:')
     for artefact in sorted(Player_programs.keys()):
         unit_count, unit_dmg, unit_enemies, unit_type, program = Player_programs[artefact]
+        print('-----------------------------------------------------------------------------------------------------')
         print('{}: {:5} {:5.2f} {:5}'.format(unit_type, unit_count, unit_dmg, unit_enemies))
         print(str(program))
         print()
-    
+        print('Diff with the default {}:'.format(unit_type))
+        data.inspect_program(unit_type, Units, program)
+        print()
+
