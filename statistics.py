@@ -104,6 +104,7 @@ if __name__ == '__main__':
     Hist_Start_Levels = {}
     Hist_Start_Levels_Extra = set([])
     Hist_Max_Levels = {}
+    Hist_Max_Levels_Nonprog = {}
     Hist_Duration = {}
     Hist_Duration_Extra = set([])
     Hist_Duration_1h = {}
@@ -139,6 +140,7 @@ if __name__ == '__main__':
         Player_units = 0
         Player_punits = 0
         Player_level = 0
+        Player_level_prog = 0
         Player_uniq_programs = set([])
 
         #print("Load player's {} programs... ".format(player), end='')
@@ -216,7 +218,7 @@ if __name__ == '__main__':
             prog_percent = (int(100.0 * float(Player_punits) / float(Player_units)) // 10 + 1) * 10 if Player_units > 0 else 0.0
         duration_min = (Sessions_finish - Sessions_start) / 60.0
         duration = (Sessions_finish - Sessions_start) / 3600.0
-        if duration > 72:
+        if duration > 1440:
             Hist_Duration_Extra.add(player)
         uniq_prog = len(Player_uniq_programs)
 
@@ -312,6 +314,11 @@ if __name__ == '__main__':
                 Hist_Max_Program[max_program] = 1
             else:
                 Hist_Max_Program[max_program] += 1
+            if Player_punits > 0:
+                if Player_level not in Hist_Max_Levels_Nonprog:
+                    Hist_Max_Levels_Nonprog[max_program] = 1
+                else:
+                    Hist_Max_Levels_Nonprog[max_program] += 1
         if uniq_prog not in Hist_Uniq_Programs:
             Hist_Uniq_Programs[uniq_prog] = 1
         else:
@@ -524,7 +531,13 @@ if __name__ == '__main__':
     print('---------------------------')
     for lw, v in sorted(Hist_Max_Program.items(), key = (lambda x: x[0])):
         print(lw, v)
+    print()
+    print('Maximum level distribution (w/o programs):')
+    print('-----------------------------------------')
+    for lw, v in sorted(Hist_Max_Levels_Nonprog.items(), key = (lambda x: x[0])):
+        print(lw, v)
     if Super_Max_Level_Wave is not None:
+        print()
         print('Top level-wave: {}-{:02}, top player: {}'.format(Super_Max_Level_Wave[0],
                                                                 Super_Max_Level_Wave[1],
                                                                 Super_Max_Level_Wave_Player))
