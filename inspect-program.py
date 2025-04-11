@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 #  The Berloga Apiary Defence statistics analysis tool
 # 
-#  Program inspector
+#  The program inspector
 # 
 #  Copyright (C) 2025 Alexey Fedoseev <aleksey@fedoseev.net>
 # 
@@ -43,3 +43,7 @@ if __name__ == '__main__':
         usage('Cannot load program')
     units = data.load_default_programs()
     data.inspect_program(unit_type, units, program)
+    print()
+    print('The program:')
+    print(str(program))
+
