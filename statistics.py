@@ -314,8 +314,8 @@ if __name__ == '__main__':
                 Hist_Max_Program[max_program] = 1
             else:
                 Hist_Max_Program[max_program] += 1
-            if Player_punits > 0:
-                if Player_level not in Hist_Max_Levels_Nonprog:
+            if Player_punits == 0:
+                if max_program not in Hist_Max_Levels_Nonprog:
                     Hist_Max_Levels_Nonprog[max_program] = 1
                 else:
                     Hist_Max_Levels_Nonprog[max_program] += 1
