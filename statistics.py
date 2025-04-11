@@ -100,9 +100,12 @@ if __name__ == '__main__':
     
     Dates = {}
     Hist_Sessions = {}
+    Hist_Sessions_Extra = set([])
     Hist_Start_Levels = {}
+    Hist_Start_Levels_Extra = set([])
     Hist_Max_Levels = {}
     Hist_Duration = {}
+    Hist_Duration_Extra = set([])
     Hist_Duration_1h = {}
     Hist_Prog_Units = {}
     Hist_Prog_Percent_Units = {}
@@ -153,6 +156,8 @@ if __name__ == '__main__':
         
         for s in sessions:
             Player_sessions += 1
+            if Player_sessions > 15:
+                Hist_Sessions_Extra.add(player)
             Player_units += s['units']
             Player_punits += s['punits']
             if s['sd'] < Sessions_start:
@@ -165,6 +170,8 @@ if __name__ == '__main__':
                 pass
             elif level == data.LEVEL_START:            
                 Start_sessions += 1
+                if Start_sessions > 7:
+                    Hist_Start_Levels_Extra.add(player)
             elif level == data.LEVEL_INFINITY:
                 nlevel = Player_level = 4
             else:
@@ -209,6 +216,8 @@ if __name__ == '__main__':
             prog_percent = (int(100.0 * float(Player_punits) / float(Player_units)) // 10 + 1) * 10 if Player_units > 0 else 0.0
         duration_min = (Sessions_finish - Sessions_start) / 60.0
         duration = (Sessions_finish - Sessions_start) / 3600.0
+        if duration > 72:
+            Hist_Duration_Extra.add(player)
         uniq_prog = len(Player_uniq_programs)
 
         if Session_places < 0:
@@ -439,11 +448,21 @@ if __name__ == '__main__':
     print('------------------------')
     for l, v in sorted(Hist_Sessions.items(), key = (lambda x: x[0])):
         print(l, v)
+    if len(Hist_Sessions_Extra) > 0:
+        print()
+        print('Players out of the limits:')
+        for p in Hist_Sessions_Extra:
+            print(p)
     print()
     print('Start level distribution:')
     print('------------------------')
     for l, v in sorted(Hist_Start_Levels.items(), key = (lambda x: x[0])):
         print(l, v)
+    if len(Hist_Start_Levels_Extra) > 0:
+        print()
+        print('Players out of the limits:')
+        for p in Hist_Start_Levels_Extra:
+            print(p)
     print()
     print('Max level distribution:')
     print('----------------------')
@@ -454,6 +473,11 @@ if __name__ == '__main__':
     print('-------------------------')
     for l, v in sorted(Hist_Duration.items(), key = (lambda x: x[0])):
         print(l, v)
+    if len(Hist_Duration_Extra) > 0:
+        print()
+        print('Players out of the limits:')
+        for p in Hist_Duration_Extra:
+            print(p)
     print()
     print('Playing time distribution (< 1h):')
     print('--------------------------------')
