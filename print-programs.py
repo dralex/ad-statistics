@@ -83,14 +83,14 @@ if __name__ == '__main__':
                             Player_programs[uniq_artefact][1] += unit_dmg
                             Player_programs[uniq_artefact][2] += unit_enemies
 
-    print('Default programs:')
+    print('Default programs ({}):'.format(len(Player_defaults)))
     for unit_type in sorted(Player_defaults.keys()):
         unit_count, unit_dmg, unit_enemies = Player_defaults[unit_type]
         print('{}: {:5} {:5.2f} {:5}'.format(unit_type, unit_count, unit_dmg, unit_enemies))
 
     print()
     print()
-    print('Unique programs:')
+    print('Unique programs ({}):'.format(len(Player_programs)))
     for artefact in sorted(Player_programs.keys()):
         unit_count, unit_dmg, unit_enemies, unit_type, program = Player_programs[artefact]
         print('-----------------------------------------------------------------------------------------------------')

@@ -75,6 +75,7 @@ if __name__ == '__main__':
         Player_PUnits = 0
         Traditions = set([])
         Unit_types = set([])
+        Program_modifications = set([])
         Programs_with_non_trivial_names = 0
         Programs_with_debugging = 0
 
@@ -131,7 +132,8 @@ if __name__ == '__main__':
                     if str(uniq_program) == str(Units[unit]):
                         # skip programs equal to default
                         continue
-                    if uniq_artefact == artefact:
+                    if uniq_artefact not in Program_modifications:
+                        Program_modifications.add(uniq_artefact)
                         Uniq_Prog += 1
                         # print('isomorphic check type {} artefact {}...'.format(unit_type, artefact))
                         isom_stats = data.check_isomorphic_programs(Units[unit_type], uniq_program)                        
@@ -208,5 +210,3 @@ if __name__ == '__main__':
         Data.append(player_data)
 
     save_csv(output_file, Data)
-
-

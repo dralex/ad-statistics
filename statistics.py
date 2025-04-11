@@ -320,6 +320,7 @@ if __name__ == '__main__':
         Avg_Prog = 0.0
         Avg_Dmg = 0.0
         Uniq_Prog = 0
+        Uniq_Prog_set = set([])
         Player_Units = 0
         Player_Progs = 0
             
@@ -371,7 +372,8 @@ if __name__ == '__main__':
                     else:
                         Programs_stats[uniq_artefact][0] += 1
                         Programs_stats[uniq_artefact][1].add(player)
-                    if uniq_artefact == artefact:
+                    if uniq_artefact not in Uniq_Prog_set:
+                        Uniq_Prog_set.add(uniq_artefact)
                         Uniq_Prog += 1
                         if unit_type not in Unique_programs_units:
                             Unique_programs_units[unit_type] = 1
