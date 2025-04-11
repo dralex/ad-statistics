@@ -593,6 +593,9 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                 node = diff_nodes[index]
                 e = program.find_element_by_id(node)
                 name = e.get_name()
+                if len(name) == 0 and e.get_type() == elementInitial:
+                    # initial node
+                    continue
                 if name not in words:
                     words[name] = 1
                 else:
