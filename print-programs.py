@@ -40,7 +40,7 @@ if __name__ == '__main__':
         usage()
 
     Players_data = sys.argv[1]
-    Player_id = sys.argv[2]
+    Player_id = sys.argv[2].lower()
     
     if Player_id.find(',') > 0:
         Player_id, index_from, index_to = Player_id.split(',')
