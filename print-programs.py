@@ -29,14 +29,14 @@ import data
 import datetime
 
 def usage(msg = ''):
-    print("Usage: {} <database-path> <player-id>".format(sys.argv[0]))
+    print("Usage: {} <database-path> <player-id|player-id-with-comma-separated-indexes> [index-from index-to]".format(sys.argv[0]))
     if msg:
         print(msg)
     exit(1)            
 
 if __name__ == '__main__':
 
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 3 and len(sys.argv) != 5:
         usage()
 
     Players_data = sys.argv[1]
@@ -45,6 +45,8 @@ if __name__ == '__main__':
     if Player_id.find(',') > 0:
         Player_id, index_from, index_to = Player_id.split(',')
         indexes = (int(index_from), int(index_to))
+    elif len(sys.argv) == 5:
+        indexes = (int(sys.argv[3]), int(sys.argv[4]))
     else:
         indexes = None
 
