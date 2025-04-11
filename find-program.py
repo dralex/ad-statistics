@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 #  The Berloga Apiary Defence statistics analysis tool
 # 
-#  Programs archive collector
+#  Find players with the choosen program
 # 
 #  Copyright (C) 2025 Alexey Fedoseev <aleksey@fedoseev.net>
 # 
