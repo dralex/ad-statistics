@@ -700,6 +700,7 @@ def inspect_program(unit_type, default_units, program):
     words = {}
     isom_stats = check_isomorphic_programs(default_units[unit_type], program, words, True)
     nodes_to_print = []
+    edges_to_print = []
     for key,value in isom_stats.items():
         if key == 'res':
             flags = []
@@ -741,6 +742,8 @@ def inspect_program(unit_type, default_units, program):
         else:
             if key.find('node') > 0:
                 nodes_to_print += value
+            if key.find('edge') > 0:
+                edges_to_print += value
             print("{:20}: {}".format(key, value))
 
     print()
@@ -751,3 +754,7 @@ def inspect_program(unit_type, default_units, program):
     for n in nodes_to_print:
         node = program.find_element_by_id(n)
         print('Node {}: {}'.format(n, node))
+    print()
+    for e in edges_to_print:
+        edge = program.find_element_by_id(e)
+        print('Edge {}: {}'.format(e, edge))
