@@ -643,6 +643,7 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
         diff_names = 0
         diff_actions = 0
         default_names = 0
+        empty_names = 0
         nontrivial_names = 0
         for n in diff_nodes_flags:
             if n & CyberiadaML.smiNodeDiffFlagTitle:
@@ -655,6 +656,8 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
             name = e.get_name()
             if name == DEFAULT_STATE_NAME:
                 default_names += 1
+            elif len(name) == 0:
+                empty_names += 1
             elif name not in BASIC_STATE_NAMES:
                 nontrivial_names += 1
 
@@ -663,6 +666,7 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                                      len(missing_nodes) == 0 and len(missing_edges) == 0),
                 'new nodes': len(new_nodes) > 0,
                 'new nodes with default state name': default_names > 0,
+                'new nodes with empty state name': empty_names > 0,
                 'missing nodes': len(missing_nodes) > 0,
                 'detached nodes': (len(new_nodes) > 0 and len(missing_nodes) == 0 and
                                    len(missing_edges) == 0 and len(new_edges) == 0),
