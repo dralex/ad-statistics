@@ -158,7 +158,7 @@ if __name__ == '__main__':
         
         for s in sessions:
             Player_sessions += 1
-            if Player_sessions > 15:
+            if Player_sessions > 32:
                 Hist_Sessions_Extra.add(player)
             Player_units += s['units']
             Player_punits += s['punits']
