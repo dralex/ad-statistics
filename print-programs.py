@@ -64,7 +64,7 @@ if __name__ == '__main__':
         data.load_player_programs(player, Programs, Unique_programs, Unique_programs_with_names)
         for s in sessions:
             for artefact, unit in s['art'].items():
-                unit_type, unit_dmg, unit_enemies = unit
+                unit_type, unit_dmg, unit_enemies, unit_date = unit
                 
                 if artefact in Programs:
                     phash = Programs[artefact]
@@ -72,31 +72,33 @@ if __name__ == '__main__':
                     if str(uniq_program) == str(Units[unit_type]):
                         # programs equal to default
                         if unit_type not in Player_defaults:
-                            Player_defaults[unit_type] = [1, unit_dmg, unit_enemies]
+                            Player_defaults[unit_type] = [1, unit_dmg, unit_enemies, unit_date]
                         else:
                             Player_defaults[unit_type][0] += 1
                             Player_defaults[unit_type][1] += unit_dmg
                             Player_defaults[unit_type][2] += unit_enemies
                     else:
                         if uniq_artefact not in Player_programs:
-                            Player_programs[uniq_artefact] = [1, unit_dmg, unit_enemies, unit_type, uniq_program]
+                            Player_programs[uniq_artefact] = [1, unit_dmg, unit_enemies, unit_date, unit_type, uniq_program]
                         else:
                             Player_programs[uniq_artefact][0] += 1
                             Player_programs[uniq_artefact][1] += unit_dmg
                             Player_programs[uniq_artefact][2] += unit_enemies
 
     print('Default programs ({}):'.format(len(Player_defaults)))
-    for unit_type in sorted(Player_defaults.keys()):
-        unit_count, unit_dmg, unit_enemies = Player_defaults[unit_type]
-        print('{}: {:5} {:5.2f} {:5}'.format(unit_type, unit_count, unit_dmg, unit_enemies))
-
+    for unit_type, art_data in sorted(Player_defaults.items(), key=(lambda x: x[1][3])):
+        unit_count, unit_dmg, unit_enemies, unit_date = art_data
+        date = datetime.datetime.fromtimestamp(unit_date).strftime('%Y-%m-%d %H:%M:%S')
+        print('{}: {} {:5} {:5.2f} {:5}'.format(unit_type, date, unit_count, unit_dmg, unit_enemies))
+        
     print()
     print()
     print('Unique programs ({}):'.format(len(Player_programs)))
-    for artefact in sorted(Player_programs.keys()):
-        unit_count, unit_dmg, unit_enemies, unit_type, program = Player_programs[artefact]
+    for artefact, art_data in sorted(Player_programs.items(), key=(lambda x: x[1][3])):
+        unit_count, unit_dmg, unit_enemies, unit_date, unit_type, program = art_data
+        date = datetime.datetime.fromtimestamp(unit_date).strftime('%Y-%m-%d %H:%M:%S')
         print('-----------------------------------------------------------------------------------------------------')
-        print('{}: {:5} {:5.2f} {:5}'.format(unit_type, unit_count, unit_dmg, unit_enemies))
+        print('{}: {} {:5} {:5.2f} {:5}'.format(unit_type, date, unit_count, unit_dmg, unit_enemies))
         print(str(program))
         print()
         print('Diff with the default {}:'.format(unit_type))
