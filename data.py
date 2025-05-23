@@ -103,9 +103,11 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
         
         try:
             if row[_CSV_DATETIME].find('.') > 0:
-                d = datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S.%f+03').timestamp()
+                d = datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S.%f+03')
             else:
-                d = datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S+03').timestamp()
+                d = datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S+03')
+            d_date = datetime.datetime.strftime(d, '%Y-%m-%d')
+            d = d.timestamp()
         except ValueError:
             print("Cannot read players' database from CSV: bad data {} at row {}".format(row[_CSV_DATETIME], i))
             continue
@@ -132,6 +134,7 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
         
         if 'd' not in a:
             a['d'] = d
+            a['ddate'] = d_date
             #players[player_id][1].append([d, 0, metrics_id, a])
 
         metrics_key = row[_CSV_METRICS_KEY]
@@ -488,6 +491,29 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
 
     return players
 
+def read_time_statistics(csv_file, player_filter=None):
+    players = read_players_data(csv_file, player_filter)
+
+    players_stats = {}
+    actions_stats = {}
+
+    for player, values in players.items():
+        activities, _, _ = values
+        for a in activities.values():
+            d = a['ddate']
+            if d not in players_stats:
+                players_stats[d] = set([player])
+            else:
+                players_stats[d].add(player)
+            if d not in actions_stats:
+                actions_stats[d] = 1
+            else:
+                actions_stats[d] += 1
+    for d, v in players_stats.items():
+        players_stats[d] = len(v)
+
+    return players_stats, actions_stats
+
 def load_default_programs():
     print('Loading default programs...')
     programs = {}
@@ -498,7 +524,7 @@ def load_default_programs():
         p.set_name('SM')
         programs[u] = p
         # print(u, programs[u])
-    return programs
+    return programs            
 
 def load_program(artefact_id):
     for u in os.listdir(PROGRAMS_DIR):
