@@ -1,4 +1,3 @@
-
 #!/usr/bin/python3
 # -----------------------------------------------------------------------------
 #  The Berloga Apiary Defence statistics analysis tool
@@ -106,6 +105,7 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
                 d = datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S.%f+03')
             else:
                 d = datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S+03')
+            d_pydate = d
             d_date = datetime.datetime.strftime(d, '%Y-%m-%d')
             d = d.timestamp()
         except ValueError:
@@ -135,6 +135,7 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
         if 'd' not in a:
             a['d'] = d
             a['ddate'] = d_date
+            a['dpydate'] = d_pydate
             #players[player_id][1].append([d, 0, metrics_id, a])
 
         metrics_key = row[_CSV_METRICS_KEY]
