@@ -290,7 +290,7 @@ def print_html_table(f, sheets, year):
     f.write('  <tr class="{}">\n'.format(HTML_ROW_CLASS))
     f.write('    <th class="{}">Неделя</td>\n'.format(HTML_CELL_NAME_CLASS))
     for week, w_data in sorted(y_sheet.items(), key=lambda x: x[0]):
-        f.write('    <th class="{}">{}</td>\n'.format(HTML_CELL_WEEK_CLASS, week + 1))
+        f.write('    <th class="{}">{}</td>\n'.format(HTML_CELL_WEEK_CLASS, week))
     f.write('  </tr>\n')
     print_html_row(f, y_sheet, 'Активности', 'actions', max_actions, True)
     f.write('  <tr class="{}"><td class={} colspan="{}">ПОЛЬЗОВАТЕЛИ</td></tr>\n'.format(HTML_ROW_CLASS,
