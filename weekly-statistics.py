@@ -123,8 +123,19 @@ def calc_statistics(players):
             else:
                 prev_week = {'players': set([])}
 
+            if week == 0 and (year - 1) in sheets:
+                prevprev_week = sheets[year - 1][MAX_WEEK - 1]
+            elif week == 1 and (year - 1) in sheets:
+                prevprev_week = sheets[year - 1][MAX_WEEK]
+            elif week > 1:
+                prevprev_week = y_sheet[week - 2]
+            else:
+                prevprev_week = {'players': set([])}
+
             w_data['all players'] = len(w_data['players'])
-            w_data['old players'] = len(w_data['players'] & prev_week['players'])
+            w_data['prev players'] = len(w_data['players'] & prev_week['players'])
+            w_data['2week players'] = len(w_data['players'] & (prev_week['players'] | prevprev_week['players']))
+            w_data['3week players'] = len(w_data['players'] & prev_week['players'] & prevprev_week['players'])
 
             w_data['all versions'] = {}
             for v in _all_versions:
@@ -150,7 +161,10 @@ def print_statistics(sheets):
         for week, w_data in sorted(y_sheet.items(), key=lambda x: x[0]):
             print()
             print('  WEEK {}:'.format(week + 1))
-            print('  players: {} old: {}'.format(w_data['all players'], w_data['old players']))
+            print('  players: {} 2w: {} 2-3w: {} 3w: {}'.format(w_data['all players'],
+                                                                w_data['prev players'],
+                                                                w_data['2week players'],
+                                                                w_data['3week players']))
             print('  units: {} punits: {}'.format(w_data['units'], w_data['prunits']))
             print('  versions:')
             for v, num in sorted(w_data['all versions'].items(), key=lambda x: x[0]):
