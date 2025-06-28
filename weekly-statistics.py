@@ -25,7 +25,7 @@ import csv
 
 import data
 
-MAX_WEEK = 52
+MAX_WEEK = 53
 HTML_TEMPLATE_FILE = 'web/weekly-table-tmpl.html'
 HTML_TEMPLATE_STRING = '##DATA_'
 HTML_TABLE_CLASS = 'tabtable'
@@ -119,9 +119,11 @@ def calc_statistics(players):
             max_week = max(y_sheet.keys())
         else:
             max_week = MAX_WEEK
-        for w in range(max_week + 1):
-            if w not in y_sheet:
-                y_sheet[w] = {
+        print(y_sheet.keys())
+        print(max_week)
+        for w in range(max_week):
+            if w + 1 not in y_sheet:
+                y_sheet[w + 1] = {
                     'players': set([]),
                     'actions': 0,
                     'units': 0,
@@ -131,18 +133,18 @@ def calc_statistics(players):
                 }
         for week, w_data in sorted(y_sheet.items(), key=lambda x: x[0]):
 
-            if week == 0 and (year - 1) in sheets:
+            if week == 1 and (year - 1) in sheets:
                 prev_week = sheets[year - 1][MAX_WEEK]
-            elif week > 0:
+            elif week > 1:
                 prev_week = y_sheet[week - 1]
             else:
                 prev_week = {'players': set([])}
 
-            if week == 0 and (year - 1) in sheets:
+            if week == 1 and (year - 1) in sheets:
                 prevprev_week = sheets[year - 1][MAX_WEEK - 1]
-            elif week == 1 and (year - 1) in sheets:
+            elif week == 2 and (year - 1) in sheets:
                 prevprev_week = sheets[year - 1][MAX_WEEK]
-            elif week > 1:
+            elif week > 2:
                 prevprev_week = y_sheet[week - 2]
             else:
                 prevprev_week = {'players': set([])}
@@ -172,6 +174,7 @@ def print_statistics(sheets):
 
     print()
     for year, y_sheet in sorted(sheets.items(), key=lambda x: x[0]):
+        print()
         print("YEAR {}:".format(year))
 
         max_actions = 0
@@ -193,7 +196,7 @@ def print_statistics(sheets):
 
         for week, w_data in sorted(y_sheet.items(), key=lambda x: x[0]):
             print()
-            print('  WEEK {}:'.format(week + 1))
+            print('  WEEK {}:'.format(week))
             print('  actions: {} [{}]'.format(w_data['actions'], 100 * w_data['actions'] / max_actions))
             print('  players: {} [{}] 2w: {} 2-3w: {} 3w: {}'.format(w_data['all players'],
                                                                      100 * w_data['all players'] / max_all_players,
