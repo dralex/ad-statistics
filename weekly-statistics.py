@@ -102,7 +102,10 @@ def calc_statistics(players):
                         level = '4'
                     else:
                         level = a['l']
-                    levelwave = '{}-{:02d}'.format(level, a['w'])
+                    if level == '4' and a['w'] > 10:
+                        levelwave = '4-10'
+                    else:
+                        levelwave = '{}-{:02d}'.format(level, a['w'])
                 if levelwave not in _all_levelwaves:
                     print('Unknown level+wave {} in year {} week {}'.format(levelwave, year, week))
                     sys.exit(1)
