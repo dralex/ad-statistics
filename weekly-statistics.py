@@ -74,6 +74,8 @@ def calc_statistics(players):
                 else:
                     if a['l'] == 'Start':
                         level = '0'
+                    elif a['l'] == 'Infinity':
+                        level = '4'
                     else:
                         level = a['l']
                     levelwave = '{}-{:02d}'.format(level, a['w'])
