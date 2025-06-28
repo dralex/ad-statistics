@@ -36,7 +36,17 @@ def calc_statistics(players):
     sheets = {}
 
     _all_versions = set([])
+    
     _all_levelwaves = set([])
+    for level in ('0', '1', '2', '3', '4'):
+        if level == '0' or level == '4':
+            level_range = 10
+        else:
+            level_range = 15
+        for w in range(level_range):
+            levelwave = '{}-{:02d}'.format(level, w + 1)
+            _all_levelwaves.add(levelwave)
+    _all_levelwaves.add('Poly')
 
     for player, values in players.items():
         activities, _, _ = values
@@ -69,6 +79,8 @@ def calc_statistics(players):
                 if 'ac' in a and a['ac'] is not None:
                     sheets[year][week]['prunits'] += 1
 
+                if 'l' not in a or 'w' not in a:
+                    continue
                 if a['l'] == 'Polygon':
                     levelwave = 'Poly'
                 else:
@@ -79,7 +91,9 @@ def calc_statistics(players):
                     else:
                         level = a['l']
                     levelwave = '{}-{:02d}'.format(level, a['w'])
-                _all_levelwaves.add(levelwave)
+                if levelwave not in _all_levelwaves:
+                    print('Unknown level+wave {} in year {} week {}'.format(levelwave, year, week))
+                    sys.exit(1)
                 if levelwave not in sheets[year][week]['levelwaves']:
                     sheets[year][week]['levelwaves'][levelwave] = set([player])
                 else:
@@ -135,7 +149,7 @@ def print_statistics(sheets):
         print("YEAR {}:".format(year))
         for week, w_data in sorted(y_sheet.items(), key=lambda x: x[0]):
             print()
-            print('  WEEK {}:'.format(week))
+            print('  WEEK {}:'.format(week + 1))
             print('  players: {} old: {}'.format(w_data['all players'], w_data['old players']))
             print('  units: {} punits: {}'.format(w_data['units'], w_data['prunits']))
             print('  versions:')
