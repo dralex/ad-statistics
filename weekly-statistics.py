@@ -224,7 +224,7 @@ def print_html_key_row(f, y_sheet, param, k, maximum):
         f.write('    <td class="{}">{}</td>\n'.format(cell_class, w_data[param][k]))
     f.write('  </tr>\n')
                 
-def print_html_row(f, y_sheet, name, param, maximum):
+def print_html_row(f, y_sheet, name, param, maximum, short=False):
     f.write('  <tr class="{}">\n'.format(HTML_ROW_CLASS))
     f.write('    <td class="{}">{}</td>\n'.format(HTML_CELL_NAME_CLASS, name))    
     for _, w_data in sorted(y_sheet.items(), key=lambda x: x[0]):
@@ -240,7 +240,10 @@ def print_html_row(f, y_sheet, name, param, maximum):
                 cell_class = HTML_CELL_100_CLASS
         else:
             cell_class = HTML_CELL_0_CLASS
-        f.write('    <td class="{}">{}</td>\n'.format(cell_class, w_data[param]))
+        if w_data[param] >= 1000 and short:
+            f.write('    <td class="{}">{}K</td>\n'.format(cell_class, int(w_data[param] / 1000.0)))
+        else:
+            f.write('    <td class="{}">{}</td>\n'.format(cell_class, w_data[param]))
     f.write('  </tr>\n')
 
 def print_html_table(f, sheets, year):
@@ -283,7 +286,7 @@ def print_html_table(f, sheets, year):
     for week, w_data in sorted(y_sheet.items(), key=lambda x: x[0]):
         f.write('    <th class="{}">{}</td>\n'.format(HTML_CELL_WEEK_CLASS, week + 1))
     f.write('  </tr>\n')
-    print_html_row(f, y_sheet, 'Активности', 'actions', max_actions)
+    print_html_row(f, y_sheet, 'Активности', 'actions', max_actions, True)
     f.write('  <tr class="{}"><td class={} colspan="{}">ПОЛЬЗОВАТЕЛИ</td></tr>\n'.format(HTML_ROW_CLASS,
                                                                                          HTML_CELL_NAME_CLASS,
                                                                                          len(y_sheet.keys()) + 1))  
@@ -294,8 +297,8 @@ def print_html_table(f, sheets, year):
     f.write('  <tr class="{}"><td class={} colspan="{}">ДРОНЫ</td></tr>\n'.format(HTML_ROW_CLASS,
                                                                                   HTML_CELL_NAME_CLASS,
                                                                                   len(y_sheet.keys()) + 1))  
-    print_html_row(f, y_sheet, 'Дроны', 'units', max_units)
-    print_html_row(f, y_sheet, 'Прогр. дроны', 'prunits', max_prunits)
+    print_html_row(f, y_sheet, 'Дроны', 'units', max_units, True)
+    print_html_row(f, y_sheet, 'Прогр. дроны', 'prunits', max_prunits, True)
     f.write('  <tr class="{}"><td class={} colspan="{}">УРОВНИ</td></tr>\n'.format(HTML_ROW_CLASS,
                                                                                    HTML_CELL_NAME_CLASS,
                                                                                    len(y_sheet.keys()) + 1))  
