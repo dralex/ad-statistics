@@ -1,0 +1,89 @@
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+}
+
+.tab button:hover {
+  background-color: #ddd;
+}
+
+.tab button.active {
+  background-color: #ccc;
+}
+
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+} 
+
+.tabtable, .tabheader, .tabrow, .tabcellname, .tabcellweek {
+    border-collapse: collapse;
+    border: 1px solid #222;
+}
+
+.tabtable {
+    width: 100%;
+    cellspacing: 1px;
+    cellpadding: 5px;
+}
+
+.tabheader {
+}
+
+.tabrow {
+}
+
+.tabcellname, .tabcellweek {
+    vertical-align: middle;
+    text-align: center;
+    font-weight: bold;
+    background-color: #ccc;
+    color: black;    
+}
+
+.tabcellname {
+    width: 10%;
+}
+
+.tabcellweek, .tabcell0, .tabcell25, .tabcell50, .tabcell75, .tabcell100 {
+    width: 50px;
+    text-align: center;
+}
+
+.tabcell0 {
+    background-color: black;
+    color: white;        
+}
+
+.tabcell25 {
+    background-color: red;
+    color: black; 
+}
+
+.tabcell50 {
+    background-color: orange;
+    color: black;        
+}
+
+.tabcell75 {
+    background-color: yellow;
+    color: black;        
+}
+
+.tabcell100 {
+    background-color: green;
+    color: white;        
+}

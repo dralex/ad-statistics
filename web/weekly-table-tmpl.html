@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>Еженедельная статистика игры «Берлога: Защита пасеки»</title>
+<link rel="stylesheet" href="weekly-table.css"/>
+<script type="text/javascript" src="weekly-table.js"></script>
+</head>
+
+<body>
+<h1>Еженедельная статистика игры «Берлога: Защита пасеки»</h1>
+
+<div class="tab">
+  <button class="tablinks" onclick="openTab(event, '2023')">2023</button>
+  <button class="tablinks" onclick="openTab(event, '2024')">2024</button>
+  <button class="tablinks" onclick="openTab(event, '2025')" id="defaultTab">2025</button>
+</div>
+
+<div id="2023" class="tabcontent">
+<h3>2023</h3>
+<div style="overflow-x:auto;">
+##DATA_2023
+</div>
+</div>
+
+<div id="2024" class="tabcontent">
+<h3>2024</h3>
+<div style="overflow-x:auto;">
+##DATA_2024
+</div>
+</div>
+
+<div id="2025" class="tabcontent">
+<h3>2025</h3>
+<div style="overflow-x:auto;">
+##DATA_2025
+</div>
+</div>
+
+<script type="text/javascript">
+initTab("defaultTab");
+</script>
+
+</body>
+</html>

@@ -26,9 +26,21 @@ import csv
 import data
 
 MAX_WEEK = 52
+HTML_TEMPLATE_FILE = 'web/weekly-table-tmpl.html'
+HTML_TEMPLATE_STRING = '##DATA_'
+HTML_TABLE_CLASS = 'tabtable'
+HTML_HEADER_CLASS = 'tabheader'
+HTML_ROW_CLASS = 'tabrow'
+HTML_CELL_NAME_CLASS = 'tabcellname'
+HTML_CELL_WEEK_CLASS = 'tabcellweek'
+HTML_CELL_0_CLASS = 'tabcell0'
+HTML_CELL_25_CLASS = 'tabcell25'
+HTML_CELL_50_CLASS = 'tabcell50'
+HTML_CELL_75_CLASS = 'tabcell75'
+HTML_CELL_100_CLASS = 'tabcell100'
 
 def usage():
-    print('usage: {} <database.csv>'.format(sys.argv[0]))
+    print('usage: {} <database.csv> [output.html]'.format(sys.argv[0]))
     exit(1)
 
 def calc_statistics(players):
@@ -158,13 +170,33 @@ def print_statistics(sheets):
     print()
     for year, y_sheet in sorted(sheets.items(), key=lambda x: x[0]):
         print("YEAR {}:".format(year))
+
+        max_actions = 0
+        max_units = 0
+        max_prunits = 0
+        max_all_players = 0
+        max_prev_players = 0
+        max_2week_players = 0
+        max_3week_players = 0
+
+        for w_data in y_sheet.values():
+            if w_data['all players'] > max_all_players: max_all_players = w_data['all players']
+            if w_data['prev players'] > max_prev_players: max_prev_players = w_data['prev players']
+            if w_data['2week players'] > max_2week_players: max_2week_players = w_data['2week players']
+            if w_data['3week players'] > max_3week_players: max_3week_players = w_data['3week players']
+            if w_data['actions'] > max_actions: max_actions = w_data['actions']
+            if w_data['units'] > max_units: max_units = w_data['units']
+            if w_data['prunits'] > max_units: max_units = w_data['prunits']
+
         for week, w_data in sorted(y_sheet.items(), key=lambda x: x[0]):
             print()
             print('  WEEK {}:'.format(week + 1))
-            print('  players: {} 2w: {} 2-3w: {} 3w: {}'.format(w_data['all players'],
-                                                                w_data['prev players'],
-                                                                w_data['2week players'],
-                                                                w_data['3week players']))
+            print('  actions: {} [{}]'.format(w_data['actions'], 100 * w_data['actions'] / max_actions))
+            print('  players: {} [{}] 2w: {} 2-3w: {} 3w: {}'.format(w_data['all players'],
+                                                                     100 * w_data['all players'] / max_all_players,
+                                                                     w_data['prev players'],
+                                                                     w_data['2week players'],
+                                                                     w_data['3week players']))
             print('  units: {} punits: {}'.format(w_data['units'], w_data['prunits']))
             print('  versions:')
             for v, num in sorted(w_data['all versions'].items(), key=lambda x: x[0]):
@@ -173,12 +205,116 @@ def print_statistics(sheets):
             for lw, num in sorted(w_data['all levelwaves'].items(), key=lambda x: x[0]):
                 print('    {}: {}'.format(lw, num))
 
+def print_html_key_row(f, y_sheet, param, k, maximum):
+    f.write('  <tr class="{}">\n'.format(HTML_ROW_CLASS))
+    f.write('    <td class="{}">{}</td>\n'.format(HTML_CELL_NAME_CLASS, k))    
+    for _, w_data in sorted(y_sheet.items(), key=lambda x: x[0]):
+        if w_data[param][k] > 0 and maximum > 0:
+            percent = int(100.0 * w_data[param][k] / maximum)
+            if percent <= 25:
+                cell_class = HTML_CELL_25_CLASS
+            elif percent <= 50:
+                cell_class = HTML_CELL_50_CLASS
+            elif percent <= 75:
+                cell_class = HTML_CELL_75_CLASS
+            else:
+                cell_class = HTML_CELL_100_CLASS
+        else:
+            cell_class = HTML_CELL_0_CLASS
+        f.write('    <td class="{}">{}</td>\n'.format(cell_class, w_data[param][k]))
+    f.write('  </tr>\n')
+                
+def print_html_row(f, y_sheet, name, param, maximum):
+    f.write('  <tr class="{}">\n'.format(HTML_ROW_CLASS))
+    f.write('    <td class="{}">{}</td>\n'.format(HTML_CELL_NAME_CLASS, name))    
+    for _, w_data in sorted(y_sheet.items(), key=lambda x: x[0]):
+        if w_data[param] > 0 and maximum > 0:
+            percent = int(100.0 * w_data[param] / maximum)
+            if percent <= 25:
+                cell_class = HTML_CELL_25_CLASS
+            elif percent <= 50:
+                cell_class = HTML_CELL_50_CLASS
+            elif percent <= 75:
+                cell_class = HTML_CELL_75_CLASS
+            else:
+                cell_class = HTML_CELL_100_CLASS
+        else:
+            cell_class = HTML_CELL_0_CLASS
+        f.write('    <td class="{}">{}</td>\n'.format(cell_class, w_data[param]))
+    f.write('  </tr>\n')
+
+def print_html_table(f, sheets, year):
+
+    y_sheet = sheets[year]
+    
+    max_actions = 0
+    max_units = 0
+    max_players = 0
+
+    all_levelwaves = None
+    all_versions = None
+    
+    for w_data in y_sheet.values():
+        if w_data['all players'] > max_players: max_players = w_data['all players']
+        if w_data['actions'] > max_actions: max_actions = w_data['actions']
+        if w_data['units'] > max_units: max_units = w_data['units']
+        if not all_levelwaves:
+            all_levelwaves = tuple(sorted(w_data['all levelwaves'].keys()))
+        if not all_versions:
+            all_versions = tuple(sorted(w_data['all versions'].keys()))
+
+    f.write('<table class="{}">\n'.format(HTML_TABLE_CLASS))
+    f.write('  <tr class="{}">\n'.format(HTML_ROW_CLASS))
+    f.write('    <th class="{}">Неделя</td>\n'.format(HTML_CELL_NAME_CLASS))
+    for week, w_data in sorted(y_sheet.items(), key=lambda x: x[0]):
+        f.write('    <th class="{}">{}</td>\n'.format(HTML_CELL_WEEK_CLASS, week + 1))
+    f.write('  </tr>\n')
+    print_html_row(f, y_sheet, 'Активности', 'actions', max_actions)
+    f.write('  <tr class="{}"><td class={} colspan="{}">ПОЛЬЗОВАТЕЛИ</td></tr>\n'.format(HTML_ROW_CLASS,
+                                                                                         HTML_CELL_NAME_CLASS,
+                                                                                         len(y_sheet.keys()) + 1))  
+    print_html_row(f, y_sheet, 'Пользователи', 'all players', max_players)
+    print_html_row(f, y_sheet, 'Пользователи (+ пред.нед.)', 'prev players', max_players)
+    print_html_row(f, y_sheet, 'Пользователи (+ 2 пред.нед.)', '2week players', max_players)
+    print_html_row(f, y_sheet, 'Пользователи (обе пред.нед.)', '3week players', max_players)
+    f.write('  <tr class="{}"><td class={} colspan="{}">ДРОНЫ</td></tr>\n'.format(HTML_ROW_CLASS,
+                                                                                  HTML_CELL_NAME_CLASS,
+                                                                                  len(y_sheet.keys()) + 1))  
+    print_html_row(f, y_sheet, 'Дроны', 'units', max_units)
+    print_html_row(f, y_sheet, 'Прогр. дроны', 'prunits', max_units)
+    f.write('  <tr class="{}"><td class={} colspan="{}">УРОВНИ</td></tr>\n'.format(HTML_ROW_CLASS,
+                                                                                   HTML_CELL_NAME_CLASS,
+                                                                                   len(y_sheet.keys()) + 1))  
+    for lw in all_levelwaves:
+        print_html_key_row(f, y_sheet, 'all levelwaves', lw, max_players)
+    f.write('  <tr class="{}"><td class={} colspan="{}">ВЕРСИИ</td></tr>\n'.format(HTML_ROW_CLASS,
+                                                                                   HTML_CELL_NAME_CLASS,
+                                                                                   len(y_sheet.keys()) + 1))  
+    for v in all_versions:
+        print_html_key_row(f, y_sheet, 'all versions', v, max_players)
+    f.write('</table>\n')
+
+def save_statistics_to_html(sheets, filename):
+    html_output = open(filename, 'w')
+    html_template = open(HTML_TEMPLATE_FILE)
+    for line in html_template.read().splitlines():
+        if line.find(HTML_TEMPLATE_STRING) == 0:
+            year = int(line.split('_')[1])
+            if year in sheets:
+                print_html_table(html_output, sheets, year)
+        else:
+            html_output.write(line + "\n")
+    html_output.close()
+
 if __name__ == '__main__':
 
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
         usage()
 
     players = data.read_players_data(sys.argv[1])
     sheets = calc_statistics(players)
-    print_statistics(sheets)
+    if len(sys.argv) == 2:
+        print_statistics(sheets)
+    else:
+        save_statistics_to_html(sheets, sys.argv[2])
 
