@@ -249,20 +249,34 @@ def print_html_table(f, sheets, year):
     
     max_actions = 0
     max_units = 0
-    max_players = 0
+    max_prunits = 0
+    max_all_players = 0
+    max_prev_players = 0
+    max_2week_players = 0
+    max_3week_players = 0
+    max_levelwaves_players = 0
+    max_versions_players = 0
 
     all_levelwaves = None
     all_versions = None
-    
+
     for w_data in y_sheet.values():
-        if w_data['all players'] > max_players: max_players = w_data['all players']
+        if w_data['all players'] > max_all_players: max_all_players = w_data['all players']
+        if w_data['prev players'] > max_prev_players: max_prev_players = w_data['prev players']
+        if w_data['2week players'] > max_2week_players: max_2week_players = w_data['2week players']
+        if w_data['3week players'] > max_3week_players: max_3week_players = w_data['3week players']
         if w_data['actions'] > max_actions: max_actions = w_data['actions']
         if w_data['units'] > max_units: max_units = w_data['units']
+        if w_data['prunits'] > max_prunits: max_prunits = w_data['prunits']
         if not all_levelwaves:
             all_levelwaves = tuple(sorted(w_data['all levelwaves'].keys()))
         if not all_versions:
             all_versions = tuple(sorted(w_data['all versions'].keys()))
-
+        for lw_players in w_data['all levelwaves'].values():
+            if lw_players > max_levelwaves_players: max_levelwaves_players = lw_players
+        for v_players in w_data['all versions'].values():
+            if v_players > max_versions_players: max_versions_players = v_players
+    
     f.write('<table class="{}">\n'.format(HTML_TABLE_CLASS))
     f.write('  <tr class="{}">\n'.format(HTML_ROW_CLASS))
     f.write('    <th class="{}">Неделя</td>\n'.format(HTML_CELL_NAME_CLASS))
@@ -273,25 +287,25 @@ def print_html_table(f, sheets, year):
     f.write('  <tr class="{}"><td class={} colspan="{}">ПОЛЬЗОВАТЕЛИ</td></tr>\n'.format(HTML_ROW_CLASS,
                                                                                          HTML_CELL_NAME_CLASS,
                                                                                          len(y_sheet.keys()) + 1))  
-    print_html_row(f, y_sheet, 'Пользователи', 'all players', max_players)
-    print_html_row(f, y_sheet, 'Пользователи (+ пред.нед.)', 'prev players', max_players)
-    print_html_row(f, y_sheet, 'Пользователи (+ 2 пред.нед.)', '2week players', max_players)
-    print_html_row(f, y_sheet, 'Пользователи (обе пред.нед.)', '3week players', max_players)
+    print_html_row(f, y_sheet, 'Пользователи', 'all players', max_all_players)
+    print_html_row(f, y_sheet, 'Пользователи (+ пред.нед.)', 'prev players', max_prev_players)
+    print_html_row(f, y_sheet, 'Пользователи (+ 2 пред.нед.)', '2week players', max_2week_players)
+    print_html_row(f, y_sheet, 'Пользователи (обе пред.нед.)', '3week players', max_3week_players)
     f.write('  <tr class="{}"><td class={} colspan="{}">ДРОНЫ</td></tr>\n'.format(HTML_ROW_CLASS,
                                                                                   HTML_CELL_NAME_CLASS,
                                                                                   len(y_sheet.keys()) + 1))  
     print_html_row(f, y_sheet, 'Дроны', 'units', max_units)
-    print_html_row(f, y_sheet, 'Прогр. дроны', 'prunits', max_units)
+    print_html_row(f, y_sheet, 'Прогр. дроны', 'prunits', max_prunits)
     f.write('  <tr class="{}"><td class={} colspan="{}">УРОВНИ</td></tr>\n'.format(HTML_ROW_CLASS,
                                                                                    HTML_CELL_NAME_CLASS,
                                                                                    len(y_sheet.keys()) + 1))  
     for lw in all_levelwaves:
-        print_html_key_row(f, y_sheet, 'all levelwaves', lw, max_players)
+        print_html_key_row(f, y_sheet, 'all levelwaves', lw, max_levelwaves_players)
     f.write('  <tr class="{}"><td class={} colspan="{}">ВЕРСИИ</td></tr>\n'.format(HTML_ROW_CLASS,
                                                                                    HTML_CELL_NAME_CLASS,
                                                                                    len(y_sheet.keys()) + 1))  
     for v in all_versions:
-        print_html_key_row(f, y_sheet, 'all versions', v, max_players)
+        print_html_key_row(f, y_sheet, 'all versions', v, max_versions_players)
     f.write('</table>\n')
 
 def save_statistics_to_html(sheets, filename):
