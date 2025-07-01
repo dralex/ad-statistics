@@ -38,6 +38,7 @@ HTML_CELL_25_CLASS = 'tabcell25'
 HTML_CELL_50_CLASS = 'tabcell50'
 HTML_CELL_75_CLASS = 'tabcell75'
 HTML_CELL_100_CLASS = 'tabcell100'
+BLACKLIST_PLAYERS_FILE = None # 'blacklist.txt'
 
 def usage():
     print('usage: {} <database.csv> [output.html]'.format(sys.argv[0]))
@@ -47,6 +48,10 @@ def calc_statistics(players):
 
     sheets = {}
 
+    _blacklist_filter = None
+    if BLACKLIST_PLAYERS_FILE is not None:
+        _blacklist_filter = data.load_players_list(BLACKLIST_PLAYERS_FILE)
+    
     _all_versions = set([])
     
     _all_levelwaves = set([])
@@ -61,6 +66,10 @@ def calc_statistics(players):
     _all_levelwaves.add('Poly')
 
     for player, values in players.items():
+
+        if _blacklist_filter is not None and player in _blacklist_filter:
+            continue
+
         activities, _, _ = values
         for a in activities.values():
             d = a['dpydate']
