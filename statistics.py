@@ -354,7 +354,7 @@ if __name__ == '__main__':
             dpw = 0
         dpw = int(dpw / 10.0 + 1) * 10
         if dpw > 30:
-            Hist_Drones_Per_Wave_Extra[player] = (dpw, prog_percent)
+            Hist_Drones_Per_Wave_Extra[player] = (dpw, prog_percent, Player_level)
         if dpw not in Hist_Drones_Per_Wave:
             Hist_Drones_Per_Wave[dpw] = 1
         else:
@@ -580,7 +580,7 @@ if __name__ == '__main__':
         print()
         print('Players with DPW > 50:')
         for p, v in sorted(Hist_Drones_Per_Wave_Extra.items(), key=(lambda x: x[1][0])):
-            print("{} dpw {:.1f} pp {}".format(p, v[0], v[1]))
+            print("{} dpw {:.1f} pp {} lev {}".format(p, v[0], v[1], v[2]))
     print()
     print('Maximum level distribution (w/o programs):')
     print('-----------------------------------------')
