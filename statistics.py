@@ -583,7 +583,7 @@ if __name__ == '__main__':
     if len(Hist_Drones_Per_Wave_Extra) > 0:
         print()
         print('Players with DPW > 50:')
-        for p, v in sorted(Hist_Drones_Per_Wave_Extra.items(), key=(lambda x: x[1])):
+        for p, v in sorted(Hist_Drones_Per_Wave_Extra.items(), key=(lambda x: x[1][0])):
             print("{} dpw {:.1f} pp {}".format(p, v[0], v[1]))
     print()
     print('Maximum level distribution (w/o programs):')
