@@ -118,6 +118,8 @@ if __name__ == '__main__':
     Hist_Max_Program = {}
     Hist_Uniq_Programs = {}
     Hist_Drones_Per_Wave = {}
+    Hist_Drones_Per_Wave_Less_Prog = {}
+    Hist_Drones_Per_Wave_Extra = {}
     Players_selected = set([])
     Players_with_nontrivial_states = set([])
     Players_with_debugging = set([])
@@ -139,6 +141,7 @@ if __name__ == '__main__':
         Sessions_start = datetime.datetime.now().timestamp()
         Sessions_finish = 0
         Player_units = 0
+        Player_units_no_polygon = 0
         Player_waves = 0
         Player_punits = 0
         Player_level = 0
@@ -170,6 +173,8 @@ if __name__ == '__main__':
             if s['fd'] > Sessions_finish:
                 Sessions_finish = s['fd']
             level = s['l']
+            if level != data.LEVEL_POLYGON:
+                Player_units_no_polygon += s['units']
             nlevel = 0
             if level == data.LEVEL_POLYGON:
                 pass
@@ -227,7 +232,7 @@ if __name__ == '__main__':
         elif Player_units == Player_punits:
             prog_percent = 101
         else:
-            prog_percent = (int(100.0 * float(Player_punits) / float(Player_units)) // 10 + 1) * 10 if Player_units > 0 else 0.0
+            prog_percent = (int(100.0 * float(Player_punits) / float(Player_units)) // 10 + 1) * 10 if Player_units > 0 else 0
         duration_min = (Sessions_finish - Sessions_start) / 60.0
         duration = (Sessions_finish - Sessions_start) / 3600.0
         if duration > 1440:
@@ -339,23 +344,30 @@ if __name__ == '__main__':
             Hist_Sessions[Player_sessions] = 1
         else:
             Hist_Sessions[Player_sessions] += 1
-
-            #print(player, ', level: ', Player_level, ', sessions: ', Player_sessions, ', days: ', duration,
-            #      ', units: ', Player_punits, "/", Player_units)
+#
+#            print(player, ', level: ', Player_level, ', sessions: ', Player_sessions, ', days: ', duration,
+#                  ', units: ', Player_punits, "/", Player_units)
         wave = max_wave
         if Player_level == 1:
             wave += 10
         elif Player_level in (2, 3, 4):
             wave += 10 + 15 * (Player_level - 1)
         if wave > 0:
-            dpw = float(Player_units) / wave
+            dpw = float(Player_units_no_polygon) / wave
         else:
             dpw = 0
         dpw = int(dpw / 10.0 + 1) * 10
+        if dpw > 50:
+            Hist_Drones_Per_Wave_Extra[player] = (dpw, prog_percent)
         if dpw not in Hist_Drones_Per_Wave:
             Hist_Drones_Per_Wave[dpw] = 1
         else:
             Hist_Drones_Per_Wave[dpw] += 1
+        if prog_percent <= 10:
+            if dpw not in Hist_Drones_Per_Wave_Less_Prog:
+                Hist_Drones_Per_Wave_Less_Prog[dpw] = 1
+            else:
+                Hist_Drones_Per_Wave_Less_Prog[dpw] += 1            
 
         Max_Level = 0
         Avg_Units = 0.0
@@ -559,9 +571,20 @@ if __name__ == '__main__':
         print(lw, v)
     print()
     print('Drones per wave distribution:')
-    print('---------------------------')
+    print('-----------------------------')
     for w, v in sorted(Hist_Drones_Per_Wave.items(), key = (lambda x: x[0])):
         print("<{}: {}".format(w, v))
+    print()
+    print('Drones per wave distribution (<=10% programmed):')
+    print('----------------------------------------------')
+    for w, v in sorted(Hist_Drones_Per_Wave_Less_Prog.items(), key = (lambda x: x[0])):
+        print("<{}: {}".format(w, v))
+    print()
+    if len(Hist_Drones_Per_Wave_Extra) > 0:
+        print()
+        print('Players with DPW > 50:')
+        for p, v in sorted(Hist_Drones_Per_Wave_Extra.items(), key=(lambda x: x[1])):
+            print("{} dpw {:.1f} pp {}".format(p, v[0], v[1]))
     print()
     print('Maximum level distribution (w/o programs):')
     print('-----------------------------------------')
