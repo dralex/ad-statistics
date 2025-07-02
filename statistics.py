@@ -353,7 +353,7 @@ if __name__ == '__main__':
         else:
             dpw = 0
         dpw = int(dpw / 10.0 + 1) * 10
-        if dpw > 50:
+        if dpw > 30:
             Hist_Drones_Per_Wave_Extra[player] = (dpw, prog_percent)
         if dpw not in Hist_Drones_Per_Wave:
             Hist_Drones_Per_Wave[dpw] = 1
