@@ -142,7 +142,7 @@ if __name__ == '__main__':
         Sessions_finish = 0
         Player_units = 0
         Player_units_no_polygon = 0
-        Player_waves = 0
+        Player_tries = 0
         Player_punits = 0
         Player_level = 0
         Player_level_prog = 0
@@ -175,6 +175,7 @@ if __name__ == '__main__':
             level = s['l']
             if level != data.LEVEL_POLYGON:
                 Player_units_no_polygon += s['units']
+                Player_tries += s['tries']
             nlevel = 0
             if level == data.LEVEL_POLYGON:
                 pass
@@ -347,13 +348,8 @@ if __name__ == '__main__':
 #
 #            print(player, ', level: ', Player_level, ', sessions: ', Player_sessions, ', days: ', duration,
 #                  ', units: ', Player_punits, "/", Player_units)
-        wave = max_wave
-        if Player_level == 1:
-            wave += 10
-        elif Player_level in (2, 3, 4):
-            wave += 10 + 15 * (Player_level - 1)
-        if wave > 0:
-            dpw = float(Player_units_no_polygon) / wave
+        if Player_tries > 0:
+            dpw = float(Player_units_no_polygon) / Player_tries
         else:
             dpw = 0
         dpw = int(dpw / 10.0 + 1) * 10
