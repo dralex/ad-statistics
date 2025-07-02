@@ -474,7 +474,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
             print(player, ':')
             _, _, sessions = values
             for s in sessions:
-                print("versions: ({}), level: {}, last wave: {}, waves(tries): {}, date from: {}, to: {}, metrics from: {}, to: {}, cindex from: {}, to: {}, activities: {}, tradition: {}, unit types: ({}), uniq progs: {}, manual use: {}, saves: {}, avg units: {:5.2f}, avg prog percent: {:5.2f}%, avg dmg: {:6.1f}, avg g.s.: {:5.2f}, avg pl.s.: {:5.2f}, avg ed.s.: {:5.2f}, pls: {:6.2f}, eds: {:6.2f}".format(
+                print("versions: ({}), level: {}, last wave: {}, waves(tries): {}, date from: {}, to: {}, metrics from: {}, to: {}, cindex from: {}, to: {}, activities: {}, tradition: {}, unit types: ({}), units: {}, pr.units: {}, uniq progs: {}, manual use: {}, saves: {}, avg units: {:5.2f}, avg prog percent: {:5.2f}%, avg dmg: {:6.1f}, avg g.s.: {:5.2f}, avg pl.s.: {:5.2f}, avg ed.s.: {:5.2f}, pls: {:6.2f}, eds: {:6.2f}".format(
                     ', '.join(sorted(s['v'])),
                     s['l'], s['w'], s['tries'],
                     datetime.datetime.fromtimestamp(s['sd']).strftime('%Y-%m-%d %H:%M:%S'),
@@ -484,6 +484,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                     len(s['a']),
                     s['t'],
                     ', '.join(s['u']),
+                    s['units'], s['punits'],
                     len(s['art']),
                     s['ma'], s['sa'],
                     s['avg_u'], s['avg_p'] * 100.0, s['avg_d'],
