@@ -84,7 +84,8 @@ def calc_statistics(players):
                     'units': 0,
                     'prunits': 0,
                     'versions': {},
-                    'levelwaves': {}
+                    'levelwaves': {},
+                    'gsessions': {}
                 }
                 
             version = a['v']
@@ -122,6 +123,11 @@ def calc_statistics(players):
                     sheets[year][week]['levelwaves'][levelwave] = set([player])
                 else:
                     sheets[year][week]['levelwaves'][levelwave].add(player)
+            elif a['t'] == 'sg':
+                if player not in sheets[year][week]['gsessions']:
+                    sheets[year][week]['gsessions'][player] = 1
+                else:
+                    sheets[year][week]['gsessions'][player] += 1
 
     for year, y_sheet in sorted(sheets.items(), key=lambda x: x[0]):
         if year + 1 not in sheets:
@@ -138,7 +144,8 @@ def calc_statistics(players):
                     'units': 0,
                     'prunits': 0,
                     'versions': {},
-                    'levelwaves': {}
+                    'levelwaves': {},
+                    'gsessions': {}
                 }
         for week, w_data in sorted(y_sheet.items(), key=lambda x: x[0]):
 
@@ -176,7 +183,16 @@ def calc_statistics(players):
                     w_data['all levelwaves'][lw] = len(w_data['levelwaves'][lw])
                 else:
                     w_data['all levelwaves'][lw] = 0
-            
+
+            w_data['all gsessions'] = {}
+            for pl, gs in w_data['gsessions'].items():
+                if gs not in w_data['all gsessions']:
+                    w_data['all gsessions'][gs] = set([pl])
+                else:
+                    w_data['all gsessions'][gs].add(pl)
+            for gs in tuple(w_data['all gsessions']):
+                w_data['all gsessions'][gs] = len(w_data['all gsessions'][gs])
+
     return sheets
 
 def print_statistics(sheets):
@@ -219,13 +235,20 @@ def print_statistics(sheets):
             print('  level+wave:')
             for lw, num in sorted(w_data['all levelwaves'].items(), key=lambda x: x[0]):
                 print('    {}: {}'.format(lw, num))
+            print('  game sessions:')
+            for gs, num in sorted(w_data['all gsessions'].items(), key=lambda x: x[0]):
+                print('    {}: {}'.format(gs, num))
 
 def print_html_key_row(f, y_sheet, param, k, maximum):
     f.write('  <tr class="{}">\n'.format(HTML_ROW_CLASS))
     f.write('    <td class="{}">{}</td>\n'.format(HTML_CELL_NAME_CLASS, k))    
     for _, w_data in sorted(y_sheet.items(), key=lambda x: x[0]):
-        if w_data[param][k] > 0 and maximum > 0:
-            percent = int(100.0 * w_data[param][k] / maximum)
+        if k not in w_data[param]:
+            cell_class = HTML_CELL_0_CLASS
+            value = 0
+        elif w_data[param][k] > 0 and maximum > 0:
+            value = w_data[param][k]
+            percent = int(100.0 * value / maximum)
             if percent <= 25:
                 cell_class = HTML_CELL_25_CLASS
             elif percent <= 50:
@@ -236,7 +259,8 @@ def print_html_key_row(f, y_sheet, param, k, maximum):
                 cell_class = HTML_CELL_100_CLASS
         else:
             cell_class = HTML_CELL_0_CLASS
-        f.write('    <td class="{}">{}</td>\n'.format(cell_class, w_data[param][k]))
+            value = 0
+        f.write('    <td class="{}">{}</td>\n'.format(cell_class, value))
     f.write('  </tr>\n')
                 
 def print_html_row(f, y_sheet, name, param, maximum, short=False):
@@ -274,9 +298,11 @@ def print_html_table(f, sheets, year):
     max_3week_players = 0
     max_levelwaves_players = 0
     max_versions_players = 0
+    max_gsession_players = 0
 
     all_levelwaves = None
     all_versions = None
+    all_gsessions = set([])
 
     for w_data in y_sheet.values():
         if w_data['all players'] > max_all_players: max_all_players = w_data['all players']
@@ -294,7 +320,11 @@ def print_html_table(f, sheets, year):
             if lw_players > max_levelwaves_players: max_levelwaves_players = lw_players
         for v_players in w_data['all versions'].values():
             if v_players > max_versions_players: max_versions_players = v_players
-    
+        for gs in w_data['all gsessions'].keys():
+            all_gsessions.add(gs)
+            if w_data['all gsessions'][gs] > max_gsession_players:
+                max_gsession_players = w_data['all gsessions'][gs]
+
     f.write('<table class="{}">\n'.format(HTML_TABLE_CLASS))
     f.write('  <tr class="{}">\n'.format(HTML_ROW_CLASS))
     f.write('    <th class="{}">Неделя</td>\n'.format(HTML_CELL_NAME_CLASS))
@@ -314,6 +344,11 @@ def print_html_table(f, sheets, year):
                                                                                   len(y_sheet.keys()) + 1))  
     print_html_row(f, y_sheet, 'Дроны', 'units', max_units, True)
     print_html_row(f, y_sheet, 'Прогр. дроны', 'prunits', max_prunits, True)
+    f.write('  <tr class="{}"><td class={} colspan="{}">ИГРОВЫЕ СЕССИИ</td></tr>\n'.format(HTML_ROW_CLASS,
+                                                                                   HTML_CELL_NAME_CLASS,
+                                                                                   len(y_sheet.keys()) + 1))  
+    for gs in sorted(all_gsessions):
+        print_html_key_row(f, y_sheet, 'all gsessions', gs, max_gsession_players)
     f.write('  <tr class="{}"><td class={} colspan="{}">УРОВНИ</td></tr>\n'.format(HTML_ROW_CLASS,
                                                                                    HTML_CELL_NAME_CLASS,
                                                                                    len(y_sheet.keys()) + 1))  
