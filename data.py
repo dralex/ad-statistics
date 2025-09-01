@@ -209,11 +209,8 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
         elif metrics_key == 'level' and a['t'] == 'f':
             level = int(metrics_value)
             if level < 0 or level >= len(LEVELS):
-                if level == 6:
-                    level = 0
-                else:
-                    print("Cannot read players' database from CSV: bad final level {} at row {}".format(level, i))
-                    exit(1)
+                print("Bad final level {} at row {}".format(level, i))
+                level = len(LEVELS) - 1
             a['l'] = LEVELS[level]
         elif (metrics_key == 'last_wave' or metrics_key == 'wave') and 'w' not in a:
             a['w'] = int(metrics_value) + 1
