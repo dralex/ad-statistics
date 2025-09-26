@@ -77,7 +77,7 @@ if __name__ == '__main__':
             if s['fd'] > finish_time:
                 finish_time = s['sd']
             for v in s['v']:
-                if v.index(VERSIONS) != 0:
+                if v.find(VERSIONS) != 0:
                     wrong_versions = True
         if wrong_versions:
             continue
