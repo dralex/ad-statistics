@@ -56,7 +56,8 @@ if __name__ == '__main__':
     Start_players = {}
     Start_programs = {}
     Programs_words = {}
-    
+    Programs_stats = {}
+
     for player, values in Players.items():        
         activities, _, sessions = values
         if not (MIN_PLAYING_SESSIONS <= len(sessions) <= MAX_PLAYING_SESSIONS):
@@ -86,6 +87,8 @@ if __name__ == '__main__':
             continue
         if not (MIN_PROGRAMM_UNITS <= programmed_units <= MAX_PROGRAMM_UNITS):
             continue
+        if len(s['art']) == 0:
+            continue
         data.load_player_programs(player, Programs, Unique_programs, Unique_programs_with_names)
         player_programs = {}
         for artefact, unit_data in s['art'].items():
@@ -99,6 +102,11 @@ if __name__ == '__main__':
                 player_programs[uniq_artefact] = uniq_program
                 if uniq_artefact not in Start_programs:
                     isom_stats = data.check_isomorphic_programs(Units[unit], uniq_program, Programs_words)
+                    for k, v in isom_stats.item():
+                        if k not in Programs_stats:
+                            Programs_stats[k] = 0
+                        if v:
+                            Programs_stats[k] += 1
                     Start_programs[uniq_artefact] = (unit, set([]), isom_stats)
                 if player not in Start_programs[uniq_artefact][1]:
                     Start_programs[uniq_artefact][1].add(player)
@@ -109,8 +117,14 @@ if __name__ == '__main__':
     print()
     print('total players: {}'.format(len(Players)))
     print('players: {}'.format(len(Start_players)))
-    print('player programs: {}'.format(len(Start_programs)))
+    n = len(Start_programs)
+    print('player programs: {}'.format(n))
 
+    print()
+    print('Scripts statistics:')
+    for k, v in Programs_stats:
+        print("{:30} {:3} {:4.2}".format(k, v, v / n))
+    
     i = 1
     print()
     print('Top {} start programs (by usage):'.format(PROGRAMS_LIMIT))
