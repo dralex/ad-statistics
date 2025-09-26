@@ -37,6 +37,7 @@ MAX_PLAYING_SESSIONS = 5             # several sessions
 MAX_LEVEL =            1             # maximum level
 MIN_PROGRAMM_UNITS =   1             # at least one program
 MAX_PROGRAMM_UNITS =   20            # no more than 20 programmed units
+VERSIONS           =   '1.5'
 
 PROGRAMS_LIMIT     =   20            # most used programs limit
 
@@ -64,6 +65,7 @@ if __name__ == '__main__':
         programmed_units = 0
         start_time = datetime.datetime.now().timestamp()
         finish_time = 0
+        wrong_versions = False
         for s in sessions:
             programmed_units += s['punits']
             level = s['l']
@@ -74,6 +76,11 @@ if __name__ == '__main__':
                 start_time = s['sd']
             if s['fd'] > finish_time:
                 finish_time = s['sd']
+            for v in s['v']:
+                if v.index(VERSIONS) != 0:
+                    wrong_versions = True
+        if wrong_versions:
+            continue
         duration = (finish_time - start_time) / 3600.0
         if not (MIN_PLAYING_DURATION <= duration <= MAX_PLAYING_DURATION):
             continue
