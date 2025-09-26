@@ -49,7 +49,7 @@ if __name__ == '__main__':
     Start_players = set([])
 
     for player, values in Players.items():        
-        activities, _, sessions = values
+        _, _, sessions = values
         if not (MIN_PLAYING_SESSIONS <= len(sessions) <= MAX_PLAYING_SESSIONS):
             continue
         max_level = 0
@@ -65,7 +65,7 @@ if __name__ == '__main__':
             if s['sd'] < start_time:
                 start_time = s['sd']
             if s['fd'] > finish_time:
-                finish_time = s['sd']
+                finish_time = s['fd']
         duration = (finish_time - start_time) / 3600.0
         if not (MIN_PLAYING_DURATION <= duration <= MAX_PLAYING_DURATION):
             continue
