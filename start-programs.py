@@ -38,6 +38,8 @@ MAX_LEVEL =            1             # maximum level
 MIN_PROGRAMM_UNITS =   1             # at least one program
 MAX_PROGRAMM_UNITS =   20            # no more than 20 programmed units
 
+PROGRAMS_LIMIT     =   20            # most used programs limit
+
 if __name__ == '__main__':
 
     if len(sys.argv) < 2:
@@ -50,7 +52,8 @@ if __name__ == '__main__':
     Unique_programs_with_names = {}
     Programs = {}
     Players = data.read_players_sessions(Players_data, None, False)
-    Start_players = set([])
+    Start_players = {}
+    Start_programs = {}
     
     for player, values in Players.items():        
         activities, _, sessions = values
@@ -75,48 +78,36 @@ if __name__ == '__main__':
             continue
         if not (MIN_PROGRAMM_UNITS <= programmed_units <= MAX_PROGRAMM_UNITS):
             continue
-        Start_players.add(player)
+        data.load_player_programs(player, Programs, Unique_programs, Unique_programs_with_names)
+        player_programs = {}
+        for artefact, unit_data in s['art'].items():
+            if artefact in Programs:
+                phash = Programs[artefact]
+                uniq_artefact, uniq_program, _ = Unique_programs[phash]
+                unit, _, _ = unit_data
+                if str(uniq_program) == str(Units[unit]):
+                    # skip programs equal to default
+                    continue
+                player_programs[uniq_artefact] = uniq_program
+                if uniq_artefact not in Start_programs:
+                    Start_programs[uniq_artefact] = (unit, set([]))
+                if player not in Start_programs[uniq_artefact][1]:
+                    Start_programs[uniq_artefact][1].add(player)
+                
+        if len(player_programs) > 0:
+            Start_players[player] = player_programs
 
+    print()
     print('total players: {}'.format(len(Players)))
     print('players: {}'.format(len(Start_players)))
+    print('player programs: {}'.format(len(Start_programs)))
 
-    # for player, values in Players.items():                
-    #     data.load_player_programs(player, Programs, Unique_programs, Unique_programs_with_names)
-    #     for s in sessions:
-    #         for artefact, unit_data in s['art'].items():
-    #             if artefact in Programs:
-    #                 phash = Programs[artefact]
-    #                 uniq_artefact, uniq_program, _ = Unique_programs[phash]
-    #                 unit, dmg, enemies = unit_data
-    #                 key = uniq_artefact + ':' + player
-    #                 if uniq_artefact not in Best_Programs:
-    #                     Best_Programs[uniq_artefact] = {}
-    #                 if player not in Best_Programs[uniq_artefact]:
-    #                     Best_Programs[uniq_artefact][player] = [unit, dmg, enemies]
-    #                 else:
-    #                     Best_Programs[uniq_artefact][player][1] += dmg
-    #                     Best_Programs[uniq_artefact][player][2] += enemies
-
-    #                 if uniq_artefact not in Best_Uniq_Programs:
-    #                     Best_Uniq_Programs[uniq_artefact] = [unit, dmg, enemies]
-    #                 else:
-    #                     Best_Uniq_Programs[uniq_artefact][1] += dmg
-    #                     Best_Uniq_Programs[uniq_artefact][2] += enemies
-
-    #                 if key not in Best_Player_Programs:
-    #                     Best_Player_Programs[key] = [unit, dmg, enemies]
-    #                 else:
-    #                     Best_Player_Programs[key][1] += dmg
-    #                     Best_Player_Programs[key][2] += enemies
-
-    # i = 1
-    # print()
-    # print('Best {} unique programs (by damage):'.format(LIMIT))
-    # for art, data in sorted(Best_Uniq_Programs.items(), key=lambda x: x[1][1], reverse=True):
-    #     unit, dmg, enemies = data
-    #     if dmg == 0.0:
-    #         break
-    #     print('{:10} {} {:10.1f} {:6}'.format(unit, art, dmg, enemies))
-    #     i += 1
-    #     if i == LIMIT:
-    #         break
+    i = 1
+    print()
+    print('Top {} start programs (by usage):'.format(PROGRAMS_LIMIT))
+    for art, data in sorted(Start_programs.items(), key=lambda x: len(x[1][1]), reverse=True):
+        unit, pl = data
+        print('{:10} {} {:6}'.format(unit, art, len(pl)))
+        i += 1
+        if i == PROGRAMS_LIMIT:
+            break
