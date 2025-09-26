@@ -90,7 +90,8 @@ if __name__ == '__main__':
                     continue
                 player_programs[uniq_artefact] = uniq_program
                 if uniq_artefact not in Start_programs:
-                    Start_programs[uniq_artefact] = (unit, set([]))
+                    isom_stats = data.check_isomorphic_programs(Units[unit], uniq_program, Programs_words)
+                    Start_programs[uniq_artefact] = (unit, set([]), isom_stats)
                 if player not in Start_programs[uniq_artefact][1]:
                     Start_programs[uniq_artefact][1].add(player)
                 
@@ -106,8 +107,10 @@ if __name__ == '__main__':
     print()
     print('Top {} start programs (by usage):'.format(PROGRAMS_LIMIT))
     for art, data in sorted(Start_programs.items(), key=lambda x: len(x[1][1]), reverse=True):
-        unit, pl = data
-        print('{:10} {} {:6}'.format(unit, art, len(pl)))
+        unit, pl, isom = data
+        print('{:10} {} {:6} {} {:3}'.format(unit, art, len(pl),
+                                             'I' if isom['isomorphic to default'] else ' ',
+                                             isom['new nodes']))
         i += 1
         if i == PROGRAMS_LIMIT:
             break
