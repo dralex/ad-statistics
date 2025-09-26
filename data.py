@@ -521,7 +521,10 @@ def load_default_programs():
     programs = {}
     for u in UNITS:
         d = CyberiadaML.LocalDocument()
-        d.open(os.path.join(DEFAULT_PROGRAMS_DIR, u + '.graphml'), CyberiadaML.formatDetect, CyberiadaML.geometryFormatNone)
+        d.open(os.path.join(DEFAULT_PROGRAMS_DIR, u + '.graphml'),
+               CyberiadaML.formatDetect,
+               CyberiadaML.geometryFormatNone,
+               False, False, True)
         p = CyberiadaML.StateMachine(d.get_state_machines()[0])
         p.set_name('SM')
         programs[u] = p
