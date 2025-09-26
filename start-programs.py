@@ -54,6 +54,7 @@ if __name__ == '__main__':
     Players = data.read_players_sessions(Players_data, None, False)
     Start_players = {}
     Start_programs = {}
+    Programs_words = {}
     
     for player, values in Players.items():        
         activities, _, sessions = values
