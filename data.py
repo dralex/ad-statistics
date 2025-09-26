@@ -29,6 +29,7 @@ import hashlib
 import CyberiadaML
 
 DEFAULT_PROGRAMS_DIR = 'default_programs'
+NEW_VERSION = '1.6'
 PROGRAMS_DIR = 'programs'
 LAST_WAVE_METRICS = 'last_wave'
 LEVEL_START = 'Start'
@@ -516,12 +517,16 @@ def read_time_statistics(csv_file, player_filter=None):
 
     return players_stats, actions_stats
 
-def load_default_programs():
-    print('Loading default programs...')
+def load_default_programs(version = False):
+    print('Loading default programs {}...'.format(version if version is not None else ''))
     programs = {}
+    if version:
+        default_programs_dir = os.path.join(DEFAULT_PROGRAMS_DIR, NEW_VERSION)
+    else:
+        default_programs_dir = DEFAULT_PROGRAMS_DIR
     for u in UNITS:
         d = CyberiadaML.LocalDocument()
-        d.open(os.path.join(DEFAULT_PROGRAMS_DIR, u + '.graphml'),
+        d.open(os.path.join(default_programs_dir, u + '.graphml'),
                CyberiadaML.formatDetect,
                CyberiadaML.geometryFormatNone,
                False, False, True)
@@ -680,14 +685,26 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
     else:
         diff_names = 0
         diff_actions = 0
+        diff_actions_num = 0
+        diff_actions_args = 0
+        diff_actions_order = 0
         default_names = 0
         empty_names = 0
         nontrivial_names = 0
-        for n in diff_nodes_flags:
-            if n & CyberiadaML.smiNodeDiffFlagTitle:
+        for i, f in enumerate(diff_nodes_flags):
+            if f & CyberiadaML.smiNodeDiffFlagTitle:
                 diff_names += 1
-            if n & CyberiadaML.smiNodeDiffFlagActions:
+            if f & CyberiadaML.smiNodeDiffFlagActions:
                 diff_actions += 1
+                id1 = diff_nodes1[i]
+                node1 = unit_program.find_element_by_id(id1)
+                id2 = diff_nodes2[i]
+                node2 = program.find_element_by_id(id2)
+                f2 = node1.compare_actions(node2)
+                if f2 != 0:
+                    if f2 & CyberiadaML.adiffArguments: diff_actions_args += 1
+                    if f2 & CyberiadaML.adiffOrder: diff_actions_order += 1
+                    if f2 & CyberiadaML.adiffNumber: diff_actions_num += 1
 
         for n in new_nodes:
             e = program.find_element_by_id(n)
@@ -714,7 +731,10 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                 'diff actions': diff_actions > 0,
                 'diff edges': len(diff_edges2) > 0,
                 'new edges': len(new_edges) > 0,
-                'missing edges': len(missing_edges) > 0}
+                'missing edges': len(missing_edges) > 0,
+                'diff actions args': diff_actions_args > 0,
+                'diff actions order': diff_actions_order > 0,
+                'diff actions num': diff_actions_num > 0}
 
 def inspect_program(unit_type, default_units, program):
     isom_results = (CyberiadaML.smiIdentical,
