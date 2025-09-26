@@ -518,7 +518,7 @@ def read_time_statistics(csv_file, player_filter=None):
     return players_stats, actions_stats
 
 def load_default_programs(version = False):
-    print('Loading default programs {}...'.format(version if version is not None else ''))
+    print('Loading default programs {}...'.format(NEW_VERSION if version else ''))
     programs = {}
     if version:
         default_programs_dir = os.path.join(DEFAULT_PROGRAMS_DIR, NEW_VERSION)
