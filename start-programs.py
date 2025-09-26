@@ -102,7 +102,7 @@ if __name__ == '__main__':
                 player_programs[uniq_artefact] = uniq_program
                 if uniq_artefact not in Start_programs:
                     isom_stats = data.check_isomorphic_programs(Units[unit], uniq_program, Programs_words)
-                    for k, v in isom_stats.item():
+                    for k, v in isom_stats.items():
                         if k not in Programs_stats:
                             Programs_stats[k] = 0
                         if v:
@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
     print()
     print('Scripts statistics:')
-    for k, v in Programs_stats:
+    for k, v in Programs_stats.items():
         print("{:30} {:3} {:4.2}".format(k, v, v / n))
     
     i = 1
