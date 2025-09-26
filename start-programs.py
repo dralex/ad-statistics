@@ -84,7 +84,7 @@ if __name__ == '__main__':
             if artefact in Programs:
                 phash = Programs[artefact]
                 uniq_artefact, uniq_program, _ = Unique_programs[phash]
-                unit, _, _ = unit_data
+                unit, _, _, _ = unit_data
                 if str(uniq_program) == str(Units[unit]):
                     # skip programs equal to default
                     continue
