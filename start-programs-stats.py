@@ -84,9 +84,11 @@ if __name__ == '__main__':
                                 Programs_stats[k] = 0
                             if v:
                                 Programs_stats[k] += 1
-                        Start_programs[uniq_artefact] = (unit, set([]), isom_stats)
+                        print(isom_stats)
+                        Start_programs[uniq_artefact] = [unit, set([]), 0, isom_stats]
                     if player not in Start_programs[uniq_artefact][1]:
                         Start_programs[uniq_artefact][1].add(player)
+                    Start_programs[uniq_artefact][2] += 1
 
         if len(player_programs) > 0:
             Start_players[player] = player_programs
@@ -106,13 +108,16 @@ if __name__ == '__main__':
     i = 1
     print()
     print('Top {} start programs (by usage):'.format(PROGRAMS_LIMIT))
-    print('                                                   pls I N E')
-    for art, data in sorted(Start_programs.items(), key=lambda x: len(x[1][1]), reverse=True):
-        unit, pl, isom = data
-        print('{:10} {} {:6} {} {} {}'.format(unit, art, len(pl),
-                                           'E' if isom['extended default'] else ('I' if isom['isomorphic to default'] else ' '),
-                                           '+' if isom['new nodes'] else ' ',
-                                           '+' if isom['new edges'] else ' '))
+    print('                                                   pls  units I No Ed nu o d')
+    for art, data in sorted(Start_programs.items(), key=lambda x: (len(x[1][1]), x[1][2]), reverse=True):
+        unit, pl, units, isom = data
+        print('{:10} {} {:6} {:6} {}  {}  {}  {} {} {}'.format(unit, art, len(pl), units,
+                                              'E' if isom['extended default'] else ('I' if isom['isomorphic to default'] else ' '),
+                                              'e' if isom['new nodes with default state name'] else ('+' if isom['new nodes'] else ' '),
+                                              '+' if isom['new edges'] else ' ',
+                                              '+' if isom['diff actions num'] else ' ',
+                                              '+' if isom['diff actions order'] else ' ',
+                                              '+' if isom['debug actions'] else ' '))
         i += 1
         if i == PROGRAMS_LIMIT:
             break

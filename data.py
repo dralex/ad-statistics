@@ -40,7 +40,7 @@ UNITS = ['Autoborder', 'Stapler', 'Smoker', 'Generator']
 TRADITIONS = ['Constructor', 'Beekeeper', 'Programmer']
 DEFAULT_STATE_NAME = 'Состояние'
 BASIC_STATE_NAMES = ('Скан', 'Атака', 'Сближение','Бой')
-DEBUG_ACTION = 'Диод'
+DEBUG_ACTIONS = ('Диод', 'LED')
 
 # CSV file format:
 # id,created_at,player,app_version,context,metrics_id,metrics_key,metrics_value,artefact,checksum
@@ -660,20 +660,22 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
         if n.get_type() != CyberiadaML.elementSimpleState and n.get_type() != CyberiadaML.elementCompositeState:
             continue
         for a in n.get_actions():
-            if a.has_behavior():
+            if not diod_flag and a.has_behavior():
                 behav = a.get_behavior()
-                if behav.find(DEBUG_ACTION) > 0:
-                    diod_flag = True
-                    break
+                for d in DEBUG_ACTIONS:
+                    if behav.find(d) >= 0:
+                        diod_flag = True
+                        break
     if not diod_flag:
         for e in program.find_elements_by_type(CyberiadaML.elementTransition):
-            if e.has_action():
+            if not diod_flag and e.has_action():
                 a = e.get_action()
                 if a.has_behavior():
                     behav = a.get_behavior()
-                    if behav.find(DEBUG_ACTION) > 0:
-                        diod_flag = True
-                        break
+                    for d in DEBUG_ACTIONS:
+                        if behav.find(d) >= 0:
+                            diod_flag = True
+                            break
     if diff:
         diff_arrays = {}
         diff_arrays['res'] = res
