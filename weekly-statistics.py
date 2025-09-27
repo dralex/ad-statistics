@@ -45,10 +45,6 @@ def usage():
     exit(1)
 
 def calc_statistics(players, sheets):
-
-    _blacklist_filter = None
-    if BLACKLIST_PLAYERS_FILE is not None:
-        _blacklist_filter = data.load_players_list(BLACKLIST_PLAYERS_FILE)
     
     _all_versions = set([])
     
@@ -393,9 +389,14 @@ if __name__ == '__main__':
     if key_found and not output_html:
         usage()
 
+
+    _blacklist_filter = None
+    if BLACKLIST_PLAYERS_FILE is not None:
+        _blacklist_filter = data.load_players_list(BLACKLIST_PLAYERS_FILE)
+
     sheets = {}
     for p in player_files:
-        players = data.read_players_data(p)
+        players = data.read_players_data(p, None, _blacklist_filter)
         calc_statistics(players, sheets)
 
     if not output_html:

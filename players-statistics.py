@@ -30,12 +30,8 @@ def usage():
     print('usage: {} <database1.csv> [<database2.csv> ...]'.format(sys.argv[0]))
     exit(1)
 
-def calc_statistics(players, stats, _blacklist_filter):
+def calc_statistics(players, stats):
     for player, values in players.items():
-
-        if _blacklist_filter is not None and player in _blacklist_filter:
-            continue
-
         activities, _, _ = values
         if player not in stats:
             stats[player] = 0
@@ -67,7 +63,7 @@ if __name__ == '__main__':
 
     stats = {}
     for p in players_data:
-        players = data.read_players_data(p)
-        calc_statistics(players, stats, _blacklist_filter)
+        players = data.read_players_data(p, None, _blacklist_filter)
+        calc_statistics(players, stats)
     print_statistics(stats, 100)
 

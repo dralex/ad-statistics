@@ -84,7 +84,7 @@ def unpack_player(player):
     else:
         return player
 
-def read_players_data(csv_file, player_filter = None, delimiter=','):
+def read_players_data(csv_file, player_filter = None, blacklist_filter = None, delimiter=','):
     players = {}
     print('read from file {}'.format(csv_file))
     the_file = open(csv_file)
@@ -101,7 +101,15 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
         if len(row[_CSV_METRICS_ID]) == 0:
             # skip empty metrics
             continue
-        
+
+        player_id = row[_CSV_PLAYER]
+        if player_filter: 
+            if player_id not in player_filter:
+                continue
+        if blacklist_filter: 
+            if player_id in blacklist_filter:
+                continue
+
         try:
             if row[_CSV_DATETIME].find('.') > 0:
                 d = datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S.%f+03')
@@ -115,10 +123,6 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
             continue
 
         activity_id = row[_CSV_ID]
-        player_id = row[_CSV_PLAYER]
-        if player_filter: 
-            if player_id not in player_filter:
-                continue
 
         if player_id not in players:
             players[player_id] = ({}, [], [])
@@ -268,7 +272,7 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
     return players
 
 def read_players_sessions(csv_file, player_filter=None, print_sessions=False, delimiter=','):
-    players = read_players_data(csv_file, player_filter, delimiter)
+    players = read_players_data(csv_file, player_filter, None, delimiter)
     print('reconstruct sessions...')
     
     def avg_sum_session(session):
