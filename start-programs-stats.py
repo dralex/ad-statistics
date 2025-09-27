@@ -86,8 +86,10 @@ if __name__ == '__main__':
                                 Programs_stats[k] += 1
                         Start_programs[uniq_artefact] = [unit, set([]), 0, isom_stats]
                         player_programs.append((d, the_unit, isom_stats, uniq_program))
-                    elif str(player_programs[-1][3]) != str(uniq_program):
-                        player_programs.append((d, the_unit, Start_programs[uniq_artefact][3], uniq_program))
+                    else:
+                        isom_stats = Start_programs[uniq_artefact][3]
+                        if len(player_programs) == 0 or str(player_programs[-1][3]) != str(uniq_program): 
+                            player_programs.append((d, the_unit, isom_stats, uniq_program))
                     if player not in Start_programs[uniq_artefact][1]:
                         Start_programs[uniq_artefact][1].add(player)
                     Start_programs[uniq_artefact][2] += 1
