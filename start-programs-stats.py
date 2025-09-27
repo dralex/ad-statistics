@@ -32,7 +32,7 @@ DEFAULT_PLAYERS_DATA = 'test.csv'
 
 NEW_VERSIONS = ('1.6', '1.7')
 
-PROGRAMS_LIMIT     =   20            # most used programs limit
+PROGRAMS_LIMIT     =   30            # most used programs limit
 
 if __name__ == '__main__':
 
@@ -106,11 +106,13 @@ if __name__ == '__main__':
     i = 1
     print()
     print('Top {} start programs (by usage):'.format(PROGRAMS_LIMIT))
+    print('                                                   pls I N E')
     for art, data in sorted(Start_programs.items(), key=lambda x: len(x[1][1]), reverse=True):
         unit, pl, isom = data
-        print('{:10} {} {:6} {} {:3}'.format(unit, art, len(pl),
-                                             'I' if isom['isomorphic to default'] else ' ',
-                                             isom['new nodes']))
+        print('{:10} {} {:6} {} {} {}'.format(unit, art, len(pl),
+                                           'E' if isom['extended default'] else ('I' if isom['isomorphic to default'] else ' '),
+                                           '+' if isom['new nodes'] else ' ',
+                                           '+' if isom['new edges'] else ' '))
         i += 1
         if i == PROGRAMS_LIMIT:
             break
