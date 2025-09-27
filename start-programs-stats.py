@@ -51,13 +51,12 @@ if __name__ == '__main__':
     Start_programs = {}
     Programs_words = {}
     Programs_stats = {}
-    First_programs = {}
-    Second_programs = {}
+    Players_programs_distribution = {}
 
     for player, values in Players.items():        
         _, _, sessions = values
         data.load_player_programs(player, Programs, Unique_programs, Unique_programs_with_names)
-        player_programs = {}
+        player_programs = []
         for s in sessions:
             for artefact, unit_data in s['art'].items():
                 if artefact in Programs:
@@ -78,29 +77,29 @@ if __name__ == '__main__':
                     if str(uniq_program) == str(the_unit):
                         # skip programs equal to default
                         continue
-                    player_programs[uniq_artefact] = uniq_program                    
                     if uniq_artefact not in Start_programs:
-                        isom_stats = data.check_isomorphic_programs(the_unit, uniq_program, Programs_words)
+                        isom_stats = data.check_isomorphic_programs(the_unit, uniq_program, None)
                         for k, v in isom_stats.items():
                             if k not in Programs_stats:
                                 Programs_stats[k] = 0
                             if v:
                                 Programs_stats[k] += 1
                         Start_programs[uniq_artefact] = [unit, set([]), 0, isom_stats]
-                        if player not in First_programs:
-                            First_programs[player] = [d, isom_stats]
-                        else:
-                            if d < First_programs[player][0]:
-                                Second_programs[player] = [First_programs[player][0], isom_stats]
-                                First_programs[player] = [d, isom_stats]
-                            elif player not in Second_programs or d < Second_programs[player][0] and d > First_programs[player][0]:
-                                Second_programs[player] = [d, isom_stats]
+                        player_programs.append((d, the_unit, isom_stats, uniq_program))
+                    else:
+                        player_programs.append((d, the_unit, Start_programs[uniq_artefact][3], uniq_program))
                     if player not in Start_programs[uniq_artefact][1]:
                         Start_programs[uniq_artefact][1].add(player)
                     Start_programs[uniq_artefact][2] += 1
 
         if len(player_programs) > 0:
+            player_programs = sorted(player_programs, key=lambda x: x[0])
             Start_players[player] = player_programs
+            n = len(player_programs)
+            if n not in Players_programs_distribution:
+                Players_programs_distribution[n] = 1
+            else:
+                Players_programs_distribution[n] += 1
 
     n2 = 0
     Used_programs_stats = {}
@@ -116,8 +115,8 @@ if __name__ == '__main__':
 
     n3 = 0
     First_programs_stats = {}
-    for v in First_programs.values():
-        _, isom_stats = v
+    for v in Start_players.values():
+        _, _, isom_stats, _ = v[0]
         n3 += 1
         for k, v in isom_stats.items():
             if k not in First_programs_stats:
@@ -127,15 +126,23 @@ if __name__ == '__main__':
 
     n4 = 0
     Second_programs_stats = {}
-    for v in Second_programs.values():
-        _, isom_stats = v
+    for programs in Start_players.values():
+        p1 = None
+        p2 = None
+        for p in programs:
+            if p1 is None:
+                p1 = p[-1]
+            elif p2 is None and str(p1) != str(p[-1]):
+                p2 = p[-1]
+                break
+        if p1 is None or p2 is None: continue
         n4 += 1
+        isom_stats = data.check_isomorphic_programs(p1, p2, None)
         for k, v in isom_stats.items():
             if k not in Second_programs_stats:
                 Second_programs_stats[k] = 0
             if v:
                 Second_programs_stats[k] += 1
-
                 
     print()
     print('total players: {}'.format(len(Players)))
@@ -144,7 +151,12 @@ if __name__ == '__main__':
     print('player programs: {}'.format(n))
 
     print()
-    print('Scripts statistics ({}):'.format(n))
+    print('Players with programs distribution:')
+    for k,v in sorted(Players_programs_distribution.items(), key=lambda x: x[1], reverse=True):
+        print("{:3} {:3}".format(k, v))
+
+    print()
+    print('Full scripts statistics ({}):'.format(n))
     for k,v in sorted(Programs_stats.items(), key=lambda x: (x[1] / n, x[0]), reverse=True):
         print("{:45} {:6} {:5.1f}%".format(k, v, 100.0 * v / n))
     print()
@@ -156,7 +168,7 @@ if __name__ == '__main__':
     for k,v in sorted(First_programs_stats.items(), key=lambda x: (x[1] / n3, x[0]), reverse=True):
         print("{:45} {:6} {:5.1f}%".format(k, v, 100.0 * v / n3))
     print()
-    print('Second program statistics ({}):'.format(n4))
+    print('First-to-Second program statistics ({}):'.format(n4))
     for k,v in sorted(Second_programs_stats.items(), key=lambda x: (x[1] / n4, x[0]), reverse=True):
         print("{:45} {:6} {:5.1f}%".format(k, v, 100.0 * v / n4))
 
