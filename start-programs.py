@@ -38,17 +38,12 @@ MAX_LEVEL =            1             # maximum level
 MIN_PROGRAMM_UNITS =   1             # at least one program
 MAX_PROGRAMM_UNITS =   100            # no more than 50 programmed units
 
-if __name__ == '__main__':
+def usage():
+    print('usage: {} <database1.csv> [database2.csv ...]'.format(sys.argv[0]))
+    exit(1)
 
-    if len(sys.argv) < 2:
-        Players_data = DEFAULT_PLAYERS_DATA
-    else:
-        Players_data = sys.argv[1]
-
-    Players = data.read_players_sessions(Players_data, None, False)
-    Start_players = set([])
-
-    for player, values in Players.items():        
+def filter_players(players, start_players):
+    for player, values in players.items():        
         _, _, sessions = values
         if not (MIN_PLAYING_SESSIONS <= len(sessions) <= MAX_PLAYING_SESSIONS):
             continue
@@ -73,7 +68,24 @@ if __name__ == '__main__':
             continue
         if len(s['art']) == 0:
             continue
-        Start_players.add(player)
+        start_players.add(player)    
 
+if __name__ == '__main__':
+
+    players_data = []
+    for i, arg in enumerate(sys.argv):
+        if i == 0: continue
+        players_data.append(arg)
+
+    if len(players_data) == 0:
+        usage()
+
+    Start_players = set([])
+    for pfile in players_data:
+        pl = data.read_players_sessions(pfile, None, False)
+        filter_players(pl, Start_players)
+
+    print()
+    print('Start players:')
     for p in sorted(Start_players):
         print(p)

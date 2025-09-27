@@ -41,12 +41,10 @@ HTML_CELL_100_CLASS = 'tabcell100'
 BLACKLIST_PLAYERS_FILE = 'blacklist.txt'
 
 def usage():
-    print('usage: {} <database.csv> [output.html]'.format(sys.argv[0]))
+    print('usage: {} <database1.csv> [database2.csv ...] [-o output.html]'.format(sys.argv[0]))
     exit(1)
 
-def calc_statistics(players):
-
-    sheets = {}
+def calc_statistics(players, sheets):
 
     _blacklist_filter = None
     if BLACKLIST_PLAYERS_FILE is not None:
@@ -134,8 +132,8 @@ def calc_statistics(players):
             max_week = max(y_sheet.keys())
         else:
             max_week = MAX_WEEK
-        print(y_sheet.keys())
-        print(max_week)
+        #print(y_sheet.keys())
+        #print(max_week)
         for w in range(max_week):
             if w + 1 not in y_sheet:
                 y_sheet[w + 1] = {
@@ -192,8 +190,6 @@ def calc_statistics(players):
                     w_data['all gsessions'][gs].add(pl)
             for gs in tuple(w_data['all gsessions']):
                 w_data['all gsessions'][gs] = len(w_data['all gsessions'][gs])
-
-    return sheets
 
 def print_statistics(sheets):
 
@@ -375,13 +371,35 @@ def save_statistics_to_html(sheets, filename):
 
 if __name__ == '__main__':
 
-    if len(sys.argv) < 2 or len(sys.argv) > 3:
+    if len(sys.argv) < 2:
+        usage()
+        
+    player_files = []
+    key_found = False
+    output_html = None
+    for i, arg in enumerate(sys.argv):
+        if i == 0: continue
+        if output_html:
+            usage()
+        if arg == '-o':
+            if key_found:
+                usage()
+            key_found = True
+            continue
+        if not key_found:
+            player_files.append(arg)
+        else:
+            output_html = arg
+    if key_found and not output_html:
         usage()
 
-    players = data.read_players_data(sys.argv[1])
-    sheets = calc_statistics(players)
-    if len(sys.argv) == 2:
+    sheets = {}
+    for p in player_files:
+        players = data.read_players_data(p)
+        calc_statistics(players, sheets)
+
+    if not output_html:
         print_statistics(sheets)
     else:
-        save_statistics_to_html(sheets, sys.argv[2])
+        save_statistics_to_html(sheets, output_html)
 
