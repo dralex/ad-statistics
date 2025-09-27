@@ -32,7 +32,7 @@ DEFAULT_PLAYERS_DATA = 'test.csv'
 
 NEW_VERSIONS = ('1.6', '1.7')
 
-PROGRAMS_LIMIT     =   30            # most used programs limit
+PROGRAMS_LIMIT     =   50            # most used programs limit
 
 if __name__ == '__main__':
 
