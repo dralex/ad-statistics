@@ -64,7 +64,7 @@ if __name__ == '__main__':
         data.load_player_programs(player, Programs, Unique_programs, Unique_programs_with_names)
         for s in sessions:
             for artefact, unit in s['art'].items():
-                unit_type, unit_dmg, unit_enemies, unit_date = unit
+                unit_type, unit_dmg, unit_enemies, unit_date, _ = unit
                 
                 if artefact in Programs:
                     phash = Programs[artefact]
