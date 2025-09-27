@@ -87,7 +87,8 @@ def unpack_player(player):
 def read_players_data(csv_file, player_filter = None, delimiter=','):
     players = {}
     print('read from file {}'.format(csv_file))
-    reader = csv.reader(open(csv_file), delimiter=delimiter)
+    the_file = open(csv_file)
+    reader = csv.reader(the_file, delimiter=delimiter)
     i = 0
     for row in reader:
         i += 1
@@ -255,6 +256,7 @@ def read_players_data(csv_file, player_filter = None, delimiter=','):
             del players[p]
         for p, v in to_add.items():
             players[p] = (v, [], [])
+    the_file.close()
 
     # build date table
     for pl, pl_values in players.items():
