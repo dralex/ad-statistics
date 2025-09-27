@@ -84,7 +84,6 @@ if __name__ == '__main__':
                                 Programs_stats[k] = 0
                             if v:
                                 Programs_stats[k] += 1
-                        print(isom_stats)
                         Start_programs[uniq_artefact] = [unit, set([]), 0, isom_stats]
                     if player not in Start_programs[uniq_artefact][1]:
                         Start_programs[uniq_artefact][1].add(player)
