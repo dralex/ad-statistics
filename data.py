@@ -387,7 +387,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                         if unit not in cur_session['u']:
                             cur_session['u'].append(unit)
                         if art_cs is not None:
-                            cur_session['art'][art_cs[0]] = (unit, art_cs[2], art_cs[3], d)
+                            cur_session['art'][art_cs[0]] = (unit, art_cs[2], art_cs[3], d, version)
                             #else:
                             #    print('program {} is already in session, orig: {}'.format(art_cs[0], cur_session['art'][art_cs[1]]))
                             cur_session['ws'][wave][cur_try][1] += 1
