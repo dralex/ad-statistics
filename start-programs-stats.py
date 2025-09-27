@@ -100,9 +100,8 @@ if __name__ == '__main__':
 
     print()
     print('Scripts statistics:')
-    for k in sorted(Programs_stats):
-        v = Programs_stats[k]
-        print("{:40} {:3} {:5.1f}%".format(k, v, 100.0 * v / n))
+    for k,v in sorted(Programs_stats.items(), key=lambda x: (x[1] / n, x[0]), reverse=True):
+        print("{:45} {:6} {:5.1f}%".format(k, v, 100.0 * v / n))
     
     i = 1
     print()
