@@ -656,64 +656,6 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
             else:
                 words[name] += 1
 
-    diod_flag = False
-    repair_flag = False
-    overdrive_flag = False
-    movefrom_flag = False
-    for nid in diff_nodes2 + new_nodes:
-        n = program.find_element_by_id(nid)
-        if n.get_type() != CyberiadaML.elementSimpleState and n.get_type() != CyberiadaML.elementCompositeState:
-            continue
-        for a in n.get_actions():
-            if a.has_behavior():
-                behav = a.get_behavior()
-                if not diod_flag:
-                    for d in DEBUG_ACTIONS:
-                        if behav.find(d) >= 0:
-                            diod_flag = True
-                            break
-                if not repair_flag:
-                    for d in REPAIR_ACTIONS:
-                        if behav.find(d) >= 0:
-                            repair_flag = True
-                            break
-                if not overdrive_flag:
-                    for d in OVERDRIVE_ACTIONS:
-                        if behav.find(d) >= 0:
-                            overdrive_flag = True
-                            break
-                if not movefrom_flag:
-                    for d in MOVEFROM_ACTIONS:
-                        if behav.find(d) >= 0:
-                            movefrom_flag = True
-                            break
-    if not diod_flag or not repair_flag or not overdrive_flag or not movefrom_flag:
-        for e in program.find_elements_by_type(CyberiadaML.elementTransition):
-            if e.has_action():
-                a = e.get_action()
-                if a.has_behavior():
-                    behav = a.get_behavior()
-                    if not diod_flag:
-                        for d in DEBUG_ACTIONS:
-                            if behav.find(d) >= 0:
-                                diod_flag = True
-                                break
-                    if not repair_flag:
-                        for d in REPAIR_ACTIONS:
-                            if behav.find(d) >= 0:
-                                repair_flag = True
-                                break
-                    if not overdrive_flag:
-                        for d in OVERDRIVE_ACTIONS:
-                            if behav.find(d) >= 0:
-                                overdrive_flag = True
-                                break
-                    if not movefrom_flag:
-                        for d in MOVEFROM_ACTIONS:
-                            if behav.find(d) >= 0:
-                                movefrom_flag = True
-                                break
-
     if diff:
         diff_arrays = {}
         diff_arrays['res'] = res
@@ -737,6 +679,67 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
         default_names = 0
         empty_names = 0
         nontrivial_names = 0
+        empty_new_nodes = 0
+        
+        diod_flag = False
+        repair_flag = False
+        overdrive_flag = False
+        movefrom_flag = False
+        for nid in diff_nodes2 + new_nodes:
+            n = program.find_element_by_id(nid)
+            if n.get_type() != CyberiadaML.elementSimpleState and n.get_type() != CyberiadaML.elementCompositeState:
+                continue
+            for a in n.get_actions():
+                if a.has_behavior():
+                    behav = a.get_behavior()
+                    if not diod_flag:
+                        for d in DEBUG_ACTIONS:
+                            if behav.find(d) >= 0:
+                                diod_flag = True
+                                break
+                    if not repair_flag:
+                        for d in REPAIR_ACTIONS:
+                            if behav.find(d) >= 0:
+                                repair_flag = True
+                                break
+                    if not overdrive_flag:
+                        for d in OVERDRIVE_ACTIONS:
+                            if behav.find(d) >= 0:
+                                overdrive_flag = True
+                                break
+                    if not movefrom_flag:
+                        for d in MOVEFROM_ACTIONS:
+                            if behav.find(d) >= 0:
+                                movefrom_flag = True
+                                break
+                            
+        if not diod_flag or not repair_flag or not overdrive_flag or not movefrom_flag:
+            for e in program.find_elements_by_type(CyberiadaML.elementTransition):
+                if e.has_action():
+                    a = e.get_action()
+                    if a.has_behavior():
+                        behav = a.get_behavior()
+                        if not diod_flag:
+                            for d in DEBUG_ACTIONS:
+                                if behav.find(d) >= 0:
+                                    diod_flag = True
+                                    break
+                        if not repair_flag:
+                            for d in REPAIR_ACTIONS:
+                                if behav.find(d) >= 0:
+                                    repair_flag = True
+                                    break
+                        if not overdrive_flag:
+                            for d in OVERDRIVE_ACTIONS:
+                                if behav.find(d) >= 0:
+                                    overdrive_flag = True
+                                    break
+                        if not movefrom_flag:
+                            for d in MOVEFROM_ACTIONS:
+                                if behav.find(d) >= 0:
+                                    movefrom_flag = True
+                                    break
+
         for i, f in enumerate(diff_nodes_flags):
             if f & CyberiadaML.smiNodeDiffFlagTitle:
                 diff_names += 1
@@ -761,12 +764,16 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                 empty_names += 1
             elif name not in BASIC_STATE_NAMES:
                 nontrivial_names += 1
+            if not e.has_actions():
+                empty_new_nodes += 1
 
         return {'isomorphic to default': res == CyberiadaML.smiIsomorphic,
                 'extended default': ((len(new_nodes) > 0 or len(new_edges) > 0) and
                                      len(missing_nodes) == 0 and len(missing_edges) == 0),
                 'new nodes': len(new_nodes) > 0,
                 'single new node': len(new_nodes) == 1,
+                'empty new nodes': empty_new_nodes > 0,
+                'single empty new node': empty_new_nodes == 1,
                 'new nodes with default state name': default_names > 0,
                 'single new node with default state name': len(new_nodes) == 1 and default_names > 0,
                 'new nodes with empty state name': empty_names > 0,
