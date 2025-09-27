@@ -791,14 +791,21 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                         for a in e.get_actions():
                             if a.has_behavior() and a.get_behavior().find(name) >= 0:
                                 new_node_flags[m] = True
-    
+
+        edge_to_new_node_event_flags = {}
         for _id in new_edges:
             e = program.find_element_by_id(_id)
             source_id = e.get_source_element_id()
             target_id = e.get_target_element_id()
             if source_id in new_nodes or target_id in new_nodes:
                 new_edged_nodes_link += 1
-
+            if target_id in new_nodes and e.has_action():
+                trigger = e.get_action().get_trigger()
+                for m, names in AD_MODULES.items():
+                    for name in names:
+                        if trigger.find(name) >= 0:
+                            edge_to_new_node_event_flags[m] = True
+                
         results =  {'isomorphic to default': res == CyberiadaML.smiIsomorphic,
                     'extended default': ((len(new_nodes) > 0 or len(new_edges) > 0) and
                                          len(missing_nodes) == 0 and len(missing_edges) == 0),
@@ -832,7 +839,9 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
 
         for m in new_node_flags:
             results['new nodes with {} module'.format(m)] = True
-        
+        for m in edge_to_new_node_event_flags:
+            results['new nodes and edges linked with {} event'.format(m)] = True
+
         return results
 
 def inspect_program(unit_type, default_units, program):
