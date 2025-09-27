@@ -41,6 +41,8 @@ TRADITIONS = ['Constructor', 'Beekeeper', 'Programmer']
 DEFAULT_STATE_NAME = 'Состояние'
 BASIC_STATE_NAMES = ('Скан', 'Атака', 'Сближение','Бой')
 DEBUG_ACTIONS = ('Диод', 'LED')
+REPAIR_ACTIONS = ('ЧинитьСебя', 'Self')
+OVERDRIVE_ACTIONS = ('СпособностьНаМаксимум', 'Overdrive')
 
 # CSV file format:
 # id,created_at,player,app_version,context,metrics_id,metrics_key,metrics_value,artefact,checksum
@@ -654,28 +656,52 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                 words[name] += 1
 
     diod_flag = False
+    repair_flag = False
+    overdrive_flag = False
     for nid in diff_nodes2 + new_nodes:
-        if diod_flag: break
         n = program.find_element_by_id(nid)
         if n.get_type() != CyberiadaML.elementSimpleState and n.get_type() != CyberiadaML.elementCompositeState:
             continue
         for a in n.get_actions():
-            if not diod_flag and a.has_behavior():
+            if a.has_behavior():
                 behav = a.get_behavior()
-                for d in DEBUG_ACTIONS:
-                    if behav.find(d) >= 0:
-                        diod_flag = True
-                        break
-    if not diod_flag:
-        for e in program.find_elements_by_type(CyberiadaML.elementTransition):
-            if not diod_flag and e.has_action():
-                a = e.get_action()
-                if a.has_behavior():
-                    behav = a.get_behavior()
+                if not diod_flag:
                     for d in DEBUG_ACTIONS:
                         if behav.find(d) >= 0:
                             diod_flag = True
                             break
+                if not repair_flag:
+                    for d in REPAIR_ACTIONS:
+                        if behav.find(d) >= 0:
+                            repair_flag = True
+                            break
+                if not overdrive_flag:
+                    for d in OVERDRIVE_ACTIONS:
+                        if behav.find(d) >= 0:
+                            overdrive_flag = True
+                            break
+    if not diod_flag or not repair_flag or not overdrive_flag:
+        for e in program.find_elements_by_type(CyberiadaML.elementTransition):
+            if e.has_action():
+                a = e.get_action()
+                if a.has_behavior():
+                    behav = a.get_behavior()
+                    if not diod_flag:
+                        for d in DEBUG_ACTIONS:
+                            if behav.find(d) >= 0:
+                                diod_flag = True
+                                break
+                    if not repair_flag:
+                        for d in REPAIR_ACTIONS:
+                            if behav.find(d) >= 0:
+                                repair_flag = True
+                                break
+                    if not overdrive_flag:
+                        for d in OVERDRIVE_ACTIONS:
+                            if behav.find(d) >= 0:
+                                overdrive_flag = True
+                                break
+
     if diff:
         diff_arrays = {}
         diff_arrays['res'] = res
@@ -725,7 +751,7 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                 nontrivial_names += 1
 
         return {'isomorphic to default': res == CyberiadaML.smiIsomorphic,
-                'extended default': ((len(new_nodes) > 0 or len(new_edges) > 0 or diff_actions > 0) and
+                'extended default': ((len(new_nodes) > 0 or len(new_edges) > 0) and
                                      len(missing_nodes) == 0 and len(missing_edges) == 0),
                 'new nodes': len(new_nodes) > 0,
                 'single new node': len(new_nodes) == 1,
@@ -738,6 +764,8 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                 'diff names': diff_names > 0,
                 'non-trivial names': nontrivial_names > 0,
                 'debug actions': diod_flag,
+                'repair actions': repair_flag,
+                'overdrive actions': overdrive_flag,
                 'diff actions': diff_actions > 0,
                 'single diff action': diff_actions == 1,
                 'diff edges': len(diff_edges2) > 0,
