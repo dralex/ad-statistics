@@ -43,6 +43,7 @@ BASIC_STATE_NAMES = ('Скан', 'Атака', 'Сближение','Бой')
 DEBUG_ACTIONS = ('Диод', 'LED')
 REPAIR_ACTIONS = ('ЧинитьСебя', 'Self')
 OVERDRIVE_ACTIONS = ('СпособностьНаМаксимум', 'Overdrive')
+MOVEFROM_ACTIONS = ('ДвигатьсяОтЦели', 'MoveFromTarget')
 
 # CSV file format:
 # id,created_at,player,app_version,context,metrics_id,metrics_key,metrics_value,artefact,checksum
@@ -658,6 +659,7 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
     diod_flag = False
     repair_flag = False
     overdrive_flag = False
+    movefrom_flag = False
     for nid in diff_nodes2 + new_nodes:
         n = program.find_element_by_id(nid)
         if n.get_type() != CyberiadaML.elementSimpleState and n.get_type() != CyberiadaML.elementCompositeState:
@@ -680,7 +682,12 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                         if behav.find(d) >= 0:
                             overdrive_flag = True
                             break
-    if not diod_flag or not repair_flag or not overdrive_flag:
+                if not movefrom_flag:
+                    for d in MOVEFROM_ACTIONS:
+                        if behav.find(d) >= 0:
+                            movefrom_flag = True
+                            break
+    if not diod_flag or not repair_flag or not overdrive_flag or not movefrom_flag:
         for e in program.find_elements_by_type(CyberiadaML.elementTransition):
             if e.has_action():
                 a = e.get_action()
@@ -700,6 +707,11 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                         for d in OVERDRIVE_ACTIONS:
                             if behav.find(d) >= 0:
                                 overdrive_flag = True
+                                break
+                    if not movefrom_flag:
+                        for d in MOVEFROM_ACTIONS:
+                            if behav.find(d) >= 0:
+                                movefrom_flag = True
                                 break
 
     if diff:
@@ -766,6 +778,7 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                 'debug actions': diod_flag,
                 'repair actions': repair_flag,
                 'overdrive actions': overdrive_flag,
+                'movefrom actions': movefrom_flag,
                 'diff actions': diff_actions > 0,
                 'single diff action': diff_actions == 1,
                 'diff edges': len(diff_edges2) > 0,
