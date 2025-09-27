@@ -756,6 +756,7 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                     if f2 & CyberiadaML.adiffOrder: diff_actions_order += 1
                     if f2 & CyberiadaML.adiffNumber: diff_actions_num += 1
 
+        rest_action_flag = False
         for n in new_nodes:
             e = program.find_element_by_id(n)
             name = e.get_name()
@@ -767,6 +768,11 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                 nontrivial_names += 1
             if not e.has_actions():
                 empty_new_nodes += 1
+            elif not diod_flag and not overdrive_flag and not movefrom_flag and not repair_flag:
+                rest_action_flag = True
+#                for a in n.get_actions():
+#                    if a.has_behavior():
+#                        behav = a.get_behavior()
 
         for _id in new_edges:
             e = program.find_element_by_id(_id)
@@ -781,6 +787,7 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                 'new nodes': len(new_nodes) > 0,
                 'single new node': len(new_nodes) == 1,
                 'empty new nodes': empty_new_nodes > 0,
+                'new nodes with rest action': rest_action_flag,
                 'single empty new node': empty_new_nodes == 1,
                 'new nodes with default state name': default_names > 0,
                 'single new node with default state name': len(new_nodes) == 1 and default_names > 0,
