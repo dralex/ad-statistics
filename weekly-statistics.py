@@ -38,7 +38,7 @@ HTML_CELL_25_CLASS = 'tabcell25'
 HTML_CELL_50_CLASS = 'tabcell50'
 HTML_CELL_75_CLASS = 'tabcell75'
 HTML_CELL_100_CLASS = 'tabcell100'
-BLACKLIST_PLAYERS_FILE = None # 'blacklist.txt'
+BLACKLIST_PLAYERS_FILE = 'blacklist.txt'
 
 def usage():
     print('usage: {} <database.csv> [output.html]'.format(sys.argv[0]))
