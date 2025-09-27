@@ -51,6 +51,7 @@ if __name__ == '__main__':
     Start_programs = {}
     Programs_words = {}
     Programs_stats = {}
+    Used_programs_stats = {}
 
     for player, values in Players.items():        
         _, _, sessions = values
@@ -92,6 +93,17 @@ if __name__ == '__main__':
         if len(player_programs) > 0:
             Start_players[player] = player_programs
 
+    n2 = 0
+    for v in Start_programs.values():
+        _, _, units, isom_stats = v
+        if units < 2: continue
+        n2 += 1
+        for k, v in isom_stats.items():
+            if k not in Used_programs_stats:
+                Used_programs_stats[k] = 0
+            if v:
+                Used_programs_stats[k] += 1
+    
     print()
     print('total players: {}'.format(len(Players)))
     print('players: {}'.format(len(Start_players)))
@@ -99,9 +111,13 @@ if __name__ == '__main__':
     print('player programs: {}'.format(n))
 
     print()
-    print('Scripts statistics:')
+    print('Scripts statistics ({}):'.format(n))
     for k,v in sorted(Programs_stats.items(), key=lambda x: (x[1] / n, x[0]), reverse=True):
         print("{:45} {:6} {:5.1f}%".format(k, v, 100.0 * v / n))
+    print()
+    print('Used scripts statistics ({}):'.format(n2))
+    for k,v in sorted(Used_programs_stats.items(), key=lambda x: (x[1] / n2, x[0]), reverse=True):
+        print("{:45} {:6} {:5.1f}%".format(k, v, 100.0 * v / n2))
     
     i = 1
     print()
