@@ -44,6 +44,23 @@ DEBUG_ACTIONS = ('Диод', 'LED')
 REPAIR_ACTIONS = ('ЧинитьСебя', 'Self')
 OVERDRIVE_ACTIONS = ('СпособностьНаМаксимум', 'Overdrive')
 MOVEFROM_ACTIONS = ('ДвигатьсяОтЦели', 'MoveFromTarget')
+AD_MODULES = {
+    'navi': ('МодульДвижения', 'Navigation'),
+    'timer': ('Таймер', 'Timer'),
+    'counter': ('Счетчик', 'Counter'),
+    'scaner': ('Сенсор', 'Scaner'),
+    'analyz': ('АнализаторЦели', 'TargetAnalyser'),
+    'self': ('Самодиагностика', 'SelfDiagnostics'),
+    'weapon': ('ОружиеЦелевое', 'Weapon'),
+    'mass_w': ('ОружиеМассовое', 'MassWeapon'),
+    'base': ('СвязьСБазой', 'BaseCom'),
+    'diod': ('Диод', 'LED'),
+    'repair': ('СпособностьПочинка', 'Repair'),
+    'overdr': ('СпособностьНаМаксимум', 'Overdrive'),
+    'smoke': ('СтруяДыма', 'Smoke'),
+    'charge': ('Зарядка', 'Charger'),
+    'deton': ('Самоуничтожение', 'Detonation')
+}
 
 # CSV file format:
 # id,created_at,player,app_version,context,metrics_id,metrics_key,metrics_value,artefact,checksum
@@ -756,7 +773,7 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                     if f2 & CyberiadaML.adiffOrder: diff_actions_order += 1
                     if f2 & CyberiadaML.adiffNumber: diff_actions_num += 1
 
-        rest_action_flag = False
+        new_node_flags = {}
         for n in new_nodes:
             e = program.find_element_by_id(n)
             name = e.get_name()
@@ -768,12 +785,13 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                 nontrivial_names += 1
             if not e.has_actions():
                 empty_new_nodes += 1
-            elif not diod_flag and not overdrive_flag and not movefrom_flag and not repair_flag:
-                rest_action_flag = True
-#                for a in n.get_actions():
-#                    if a.has_behavior():
-#                        behav = a.get_behavior()
-
+            else:
+                for m, names in AD_MODULES.items():
+                    for name in names:
+                        for a in e.get_actions():
+                            if a.has_behavior() and a.get_behavior().find(name) >= 0:
+                                new_node_flags[m] = True
+    
         for _id in new_edges:
             e = program.find_element_by_id(_id)
             source_id = e.get_source_element_id()
@@ -781,37 +799,41 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
             if source_id in new_nodes or target_id in new_nodes:
                 new_edged_nodes_link += 1
 
-        return {'isomorphic to default': res == CyberiadaML.smiIsomorphic,
-                'extended default': ((len(new_nodes) > 0 or len(new_edges) > 0) and
-                                     len(missing_nodes) == 0 and len(missing_edges) == 0),
-                'new nodes': len(new_nodes) > 0,
-                'single new node': len(new_nodes) == 1,
-                'empty new nodes': empty_new_nodes > 0,
-                'new nodes with rest action': rest_action_flag,
-                'single empty new node': empty_new_nodes == 1,
-                'new nodes with default state name': default_names > 0,
-                'single new node with default state name': len(new_nodes) == 1 and default_names > 0,
-                'new nodes with empty state name': empty_names > 0,
-                'missing nodes': len(missing_nodes) > 0,
-                'detached nodes': (len(new_nodes) > 0 and len(missing_nodes) == 0 and
-                                   len(missing_edges) == 0 and len(new_edges) == 0),
-                'new nodes and edges linked': new_edged_nodes_link > 0,
-                'diff names': diff_names > 0,
-                'non-trivial names': nontrivial_names > 0,
-                'debug actions': diod_flag,
-                'repair actions': repair_flag,
-                'overdrive actions': overdrive_flag,
-                'movefrom actions': movefrom_flag,
-                'diff actions': diff_actions > 0,
-                'single diff action': diff_actions == 1,
-                'diff edges': len(diff_edges2) > 0,
-                'single diff edge': len(diff_edges2) == 1,
-                'new edges': len(new_edges) > 0,
-                'single new edge': len(new_edges) == 1,
-                'missing edges': len(missing_edges) > 0,
-                'diff actions args': diff_actions_args > 0,
-                'diff actions order': diff_actions_order > 0,
-                'diff actions num': diff_actions_num > 0}
+        results =  {'isomorphic to default': res == CyberiadaML.smiIsomorphic,
+                    'extended default': ((len(new_nodes) > 0 or len(new_edges) > 0) and
+                                         len(missing_nodes) == 0 and len(missing_edges) == 0),
+                    'new nodes': len(new_nodes) > 0,
+                    'single new node': len(new_nodes) == 1,
+                    'empty new nodes': empty_new_nodes > 0,
+                    'single empty new node': empty_new_nodes == 1,
+                    'new nodes with default state name': default_names > 0,
+                    'single new node with default state name': len(new_nodes) == 1 and default_names > 0,
+                    'new nodes with empty state name': empty_names > 0,
+                    'missing nodes': len(missing_nodes) > 0,
+                    'detached nodes': (len(new_nodes) > 0 and len(missing_nodes) == 0 and
+                                       len(missing_edges) == 0 and len(new_edges) == 0),
+                    'new nodes and edges linked': new_edged_nodes_link > 0,
+                    'diff names': diff_names > 0,
+                    'non-trivial names': nontrivial_names > 0,
+                    'debug actions': diod_flag,
+                    'repair actions': repair_flag,
+                    'overdrive actions': overdrive_flag,
+                    'movefrom actions': movefrom_flag,
+                    'diff actions': diff_actions > 0,
+                    'single diff action': diff_actions == 1,
+                    'diff edges': len(diff_edges2) > 0,
+                    'single diff edge': len(diff_edges2) == 1,
+                    'new edges': len(new_edges) > 0,
+                    'single new edge': len(new_edges) == 1,
+                    'missing edges': len(missing_edges) > 0,
+                    'diff actions args': diff_actions_args > 0,
+                    'diff actions order': diff_actions_order > 0,
+                    'diff actions num': diff_actions_num > 0}
+
+        for m in new_node_flags:
+            results['new nodes with {} module'.format(m)] = True
+        
+        return results
 
 def inspect_program(unit_type, default_units, program):
     isom_results = (CyberiadaML.smiIdentical,
