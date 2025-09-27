@@ -52,6 +52,7 @@ if __name__ == '__main__':
     Programs_words = {}
     Programs_stats = {}
     First_programs = {}
+    Second_programs = {}
 
     for player, values in Players.items():        
         _, _, sessions = values
@@ -90,7 +91,10 @@ if __name__ == '__main__':
                             First_programs[player] = [d, isom_stats]
                         else:
                             if d < First_programs[player][0]:
-                                First_programs[player] = [d, isom_stats]                                
+                                Second_programs[player] = [First_programs[player][0], isom_stats]
+                                First_programs[player] = [d, isom_stats]
+                            elif player not in Second_programs or d < Second_programs[player][0] and d > First_programs[player][0]:
+                                Second_programs[player] = [d, isom_stats]
                     if player not in Start_programs[uniq_artefact][1]:
                         Start_programs[uniq_artefact][1].add(player)
                     Start_programs[uniq_artefact][2] += 1
@@ -121,6 +125,17 @@ if __name__ == '__main__':
             if v:
                 First_programs_stats[k] += 1
 
+    n4 = 0
+    Second_programs_stats = {}
+    for v in Second_programs.values():
+        _, isom_stats = v
+        n4 += 1
+        for k, v in isom_stats.items():
+            if k not in Second_programs_stats:
+                Second_programs_stats[k] = 0
+            if v:
+                Second_programs_stats[k] += 1
+
                 
     print()
     print('total players: {}'.format(len(Players)))
@@ -140,7 +155,11 @@ if __name__ == '__main__':
     print('First program statistics ({}):'.format(n3))
     for k,v in sorted(First_programs_stats.items(), key=lambda x: (x[1] / n3, x[0]), reverse=True):
         print("{:45} {:6} {:5.1f}%".format(k, v, 100.0 * v / n3))
-    
+    print()
+    print('Second program statistics ({}):'.format(n4))
+    for k,v in sorted(Second_programs_stats.items(), key=lambda x: (x[1] / n4, x[0]), reverse=True):
+        print("{:45} {:6} {:5.1f}%".format(k, v, 100.0 * v / n4))
+
     i = 1
     print()
     print('Top {} start programs (by usage):'.format(PROGRAMS_LIMIT))

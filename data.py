@@ -680,6 +680,7 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
         empty_names = 0
         nontrivial_names = 0
         empty_new_nodes = 0
+        new_edged_nodes_link = 0
         
         diod_flag = False
         repair_flag = False
@@ -767,6 +768,13 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
             if not e.has_actions():
                 empty_new_nodes += 1
 
+        for _id in new_edges:
+            e = program.find_element_by_id(_id)
+            source_id = e.get_source_element_id()
+            target_id = e.get_target_element_id()
+            if source_id in new_nodes or target_id in new_nodes:
+                new_edged_nodes_link += 1
+
         return {'isomorphic to default': res == CyberiadaML.smiIsomorphic,
                 'extended default': ((len(new_nodes) > 0 or len(new_edges) > 0) and
                                      len(missing_nodes) == 0 and len(missing_edges) == 0),
@@ -780,6 +788,7 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                 'missing nodes': len(missing_nodes) > 0,
                 'detached nodes': (len(new_nodes) > 0 and len(missing_nodes) == 0 and
                                    len(missing_edges) == 0 and len(new_edges) == 0),
+                'new nodes and edges linked': new_edged_nodes_link > 0,
                 'diff names': diff_names > 0,
                 'non-trivial names': nontrivial_names > 0,
                 'debug actions': diod_flag,
