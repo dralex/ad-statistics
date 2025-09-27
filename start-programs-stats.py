@@ -73,7 +73,7 @@ if __name__ == '__main__':
                         the_unit = Units16[unit]
                     else:
                         the_unit = Units[unit]
-                    
+    
                     if str(uniq_program) == str(the_unit):
                         # skip programs equal to default
                         continue
@@ -86,7 +86,7 @@ if __name__ == '__main__':
                                 Programs_stats[k] += 1
                         Start_programs[uniq_artefact] = [unit, set([]), 0, isom_stats]
                         player_programs.append((d, the_unit, isom_stats, uniq_program))
-                    else:
+                    elif str(player_programs[-1][3]) != str(uniq_program):
                         player_programs.append((d, the_unit, Start_programs[uniq_artefact][3], uniq_program))
                     if player not in Start_programs[uniq_artefact][1]:
                         Start_programs[uniq_artefact][1].add(player)
@@ -95,7 +95,7 @@ if __name__ == '__main__':
         if len(player_programs) > 0:
             player_programs = sorted(player_programs, key=lambda x: x[0])
             Start_players[player] = player_programs
-            n = len(player_programs)
+            n = len(player_programs) % 10
             if n not in Players_programs_distribution:
                 Players_programs_distribution[n] = 1
             else:
@@ -153,7 +153,7 @@ if __name__ == '__main__':
     print()
     print('Players with programs distribution:')
     for k,v in sorted(Players_programs_distribution.items(), key=lambda x: (x[1], x[0]), reverse=True):
-        print("{:3} {:3}".format(k, v))
+        print("<{:3} {:3}".format((k + 1) * 10, v))
 
     print()
     print('Full scripts statistics ({}):'.format(n))
