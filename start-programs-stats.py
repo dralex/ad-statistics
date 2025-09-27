@@ -154,7 +154,7 @@ if __name__ == '__main__':
 
     print()
     print('Players with programs distribution:')
-    for k,v in sorted(Players_programs_distribution.items(), key=lambda x: (x[1], x[0]), reverse=True):
+    for k,v in sorted(Players_programs_distribution.items(), key=lambda x: x[0]):
         print("<{:3} {:3}".format((k + 1) * 10, v))
 
     print()
