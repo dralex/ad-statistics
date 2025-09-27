@@ -68,7 +68,7 @@ def filter_players(players, start_players):
             continue
         if len(s['art']) == 0:
             continue
-        start_players.add(player)    
+        start_players.add(''.join(player))    
 
 if __name__ == '__main__':
 
