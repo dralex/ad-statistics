@@ -24,20 +24,13 @@ import sys
 import csv
 import data
 
-BLACKLIST_PLAYERS_FILE = None # 'blacklist.txt'
+BLACKLIST_PLAYERS_FILE = 'blacklist.txt'
 
 def usage():
-    print('usage: {} <database.csv>'.format(sys.argv[0]))
+    print('usage: {} <database1.csv> [<database2.csv> ...]'.format(sys.argv[0]))
     exit(1)
 
-def calc_statistics(players):
-
-    stats = {}
-
-    _blacklist_filter = None
-    if BLACKLIST_PLAYERS_FILE is not None:
-        _blacklist_filter = data.load_players_list(BLACKLIST_PLAYERS_FILE)
-
+def calc_statistics(players, stats, _blacklist_filter):
     for player, values in players.items():
 
         if _blacklist_filter is not None and player in _blacklist_filter:
@@ -47,8 +40,6 @@ def calc_statistics(players):
         if player not in stats:
             stats[player] = 0
         stats[player] += len(activities)
-
-    return stats
 
 def print_statistics(stats, top):
 
@@ -62,10 +53,21 @@ def print_statistics(stats, top):
 
 if __name__ == '__main__':
 
-    if len(sys.argv) != 2:
-        usage()
+    players_data = []
+    for i, arg in enumerate(sys.argv):
+        if i == 0: continue
+        players_data.append(arg)
 
-    players = data.read_players_data(sys.argv[1])
-    stats = calc_statistics(players)
+    if len(players_data) == 0:
+        usage()
+    
+    _blacklist_filter = None
+    if BLACKLIST_PLAYERS_FILE is not None:
+        _blacklist_filter = data.load_players_list(BLACKLIST_PLAYERS_FILE)
+
+    stats = {}
+    for p in players_data:
+        players = data.read_players_data(p)
+        calc_statistics(players, stats, _blacklist_filter)
     print_statistics(stats, 100)
 
