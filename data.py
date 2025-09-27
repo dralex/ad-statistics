@@ -728,7 +728,9 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                 'extended default': ((len(new_nodes) > 0 or len(new_edges) > 0 or diff_actions > 0) and
                                      len(missing_nodes) == 0 and len(missing_edges) == 0),
                 'new nodes': len(new_nodes) > 0,
+                'single new node': len(new_nodes) == 1,
                 'new nodes with default state name': default_names > 0,
+                'single new node with default state name': len(new_nodes) == 1 and default_names > 0,
                 'new nodes with empty state name': empty_names > 0,
                 'missing nodes': len(missing_nodes) > 0,
                 'detached nodes': (len(new_nodes) > 0 and len(missing_nodes) == 0 and
@@ -737,8 +739,11 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                 'non-trivial names': nontrivial_names > 0,
                 'debug actions': diod_flag,
                 'diff actions': diff_actions > 0,
+                'single diff action': diff_actions == 1,
                 'diff edges': len(diff_edges2) > 0,
+                'single diff edge': len(diff_edges2) == 1,
                 'new edges': len(new_edges) > 0,
+                'single new edge': len(new_edges) == 1,
                 'missing edges': len(missing_edges) > 0,
                 'diff actions args': diff_actions_args > 0,
                 'diff actions order': diff_actions_order > 0,

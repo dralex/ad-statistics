@@ -107,13 +107,18 @@ if __name__ == '__main__':
     i = 1
     print()
     print('Top {} start programs (by usage):'.format(PROGRAMS_LIMIT))
-    print('                                                   pls  units I No Ed nu o d')
+    print('                                                   pls  units I No Ed Ac nu o d')
     for art, data in sorted(Start_programs.items(), key=lambda x: (len(x[1][1]), x[1][2]), reverse=True):
         unit, pl, units, isom = data
-        print('{:10} {} {:6} {:6} {}  {}  {}  {} {} {}'.format(unit, art, len(pl), units,
+        print('{:10} {} {:6} {:6} {} {}  {} {}  {} {} {}'.format(unit, art, len(pl), units,
                                               'E' if isom['extended default'] else ('I' if isom['isomorphic to default'] else ' '),
-                                              'e' if isom['new nodes with default state name'] else ('+' if isom['new nodes'] else ' '),
+                                              ('1e' if isom['single new node with default state name'] else
+                                               (' 1' if isom['single new node'] else
+                                                ('+e' if isom['new nodes with default state name'] else
+                                                 ('++' if isom['new nodes'] else '  ')))),
                                               '+' if isom['new edges'] else ' ',
+                                              (' 1' if isom['single diff action'] else
+                                               (('++' if isom['diff actions'] else '  '))),
                                               '+' if isom['diff actions num'] else ' ',
                                               '+' if isom['diff actions order'] else ' ',
                                               '+' if isom['debug actions'] else ' '))
