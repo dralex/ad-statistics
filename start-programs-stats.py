@@ -131,6 +131,7 @@ if __name__ == '__main__':
 
     n4 = 0
     Second_programs_stats = {}
+    FS_popular_actions = {}
     for programs in Start_players.values():
         p1 = None
         p2 = None
@@ -142,7 +143,7 @@ if __name__ == '__main__':
                 break
         if p1 is None or p2 is None: continue
         n4 += 1
-        isom_stats = data.check_isomorphic_programs(p1, p2, None)
+        isom_stats = data.check_isomorphic_programs(p1, p2, None, False, FS_popular_actions)
         for k, v in isom_stats.items():
             if k not in Second_programs_stats:
                 Second_programs_stats[k] = 0
@@ -187,10 +188,18 @@ if __name__ == '__main__':
         print("{:45} {:6} {:5.1f}%".format(k, v, 100.0 * v / n4))
 
     print()
-    print('Top {} popular actions in new/diff nodes by players:', PROGRAMS_LIMIT)
+    print('Top {} popular actions in new/diff nodes by players:'.format(PROGRAMS_LIMIT))
     i = 1 
     for k,v in sorted(Players_popular_actions.items(), key=lambda x: (len(x[1][0]), x[1][1]), reverse=True):
         print("{:5} {:5} '{}'".format(len(v[0]), v[1], k.replace('\n', ';')))
+        i += 1
+        if i == PROGRAMS_LIMIT:
+            break
+    print()
+    print('Top {} popular actions in new/diff nodes (first-to-second program):'.format(PROGRAMS_LIMIT))
+    i = 1 
+    for k,v in sorted(FS_popular_actions.items(), key=lambda x: x[1], reverse=True):
+        print("{:5} '{}'".format(v, k.replace('\n', ';')))
         i += 1
         if i == PROGRAMS_LIMIT:
             break
