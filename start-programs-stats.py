@@ -155,7 +155,7 @@ if __name__ == '__main__':
             if a not in Players_popular_actions:
                 Players_popular_actions[a] = [set([pl,]), n] 
             else:
-                Players_popular_actions[a].add(pl)
+                Players_popular_actions[a][0].add(pl)
                 Players_popular_actions[a][1] += n
 
     print()
