@@ -79,7 +79,9 @@ if __name__ == '__main__':
                         # skip programs equal to default
                         continue
                     if uniq_artefact not in Start_programs:
-                        isom_stats = data.check_isomorphic_programs(the_unit, uniq_program, None, False, Popular_actions)
+                        if player not in Popular_actions:
+                            Popular_actions[player] = {}
+                        isom_stats = data.check_isomorphic_programs(the_unit, uniq_program, None, False, Popular_actions[player])
                         for k, v in isom_stats.items():
                             if k not in Programs_stats:
                                 Programs_stats[k] = 0
@@ -146,7 +148,16 @@ if __name__ == '__main__':
                 Second_programs_stats[k] = 0
             if v:
                 Second_programs_stats[k] += 1
-                
+
+    Players_popular_actions = {}
+    for pl, actions in Popular_actions.items():
+        for a, n in actions.items():
+            if a not in Players_popular_actions:
+                Players_popular_actions[a] = [set([pl,]), n] 
+            else:
+                Players_popular_actions[a].add(pl)
+                Players_popular_actions[a][1] += n
+
     print()
     print('total players: {}'.format(len(Players)))
     print('players: {}'.format(len(Start_players)))
@@ -176,10 +187,13 @@ if __name__ == '__main__':
         print("{:45} {:6} {:5.1f}%".format(k, v, 100.0 * v / n4))
 
     print()
-    print('Popular actions in new/diff nodes:')
-    for k,v in sorted(Popular_actions.items(), key=lambda x: x[1], reverse=True):
-        print("{:3} '{}'".format(v, k.replace('\n', ';')))
-
+    print('Top {} popular actions in new/diff nodes by players:', PROGRAMS_LIMIT)
+    i = 1 
+    for k,v in sorted(Players_popular_actions.items(), key=lambda x: (len(x[1][0]), x[1][1]), reverse=True):
+        print("{:5} {:5} '{}'".format(len(v[0]), v[1], k.replace('\n', ';')))
+        i += 1
+        if i == PROGRAMS_LIMIT:
+            break
 
     i = 1
     print()
