@@ -40,6 +40,8 @@ STANDARD_PATH      = 'standard_programs'
 STANDARD_PATH_NEW  = os.path.join('standard_programs', '1.6')
 STANDARD_UNITS     = ('Autoborder', 'Stapler')
 
+FIND_ACTION        = 'entry/МодульДвижения.ДвигатьсяПоКоординатам();Диод.Включить(зеленый);Таймер.ТаймерЗапуск(6)'
+
 if __name__ == '__main__':
 
     if len(sys.argv) < 2:
@@ -65,6 +67,7 @@ if __name__ == '__main__':
     Players_programs_distribution = {}
     Popular_actions = {}
     Programs_with_standards = {}
+    Players_found = set([])
 
     for player, values in Players.items():        
         _, _, sessions = values
@@ -259,3 +262,12 @@ if __name__ == '__main__':
         i += 1
         if i == PROGRAMS_LIMIT:
             break
+
+    if FIND_ACTION and FIND_ACTION in Players_popular_actions:
+        players = Players_popular_actions[FIND_ACTION][0]
+        print('Found {} players with action "{}"'.format(len(players), FIND_ACTION))
+        for p in players:
+            print()
+            print('------------------ player ', p, ' ----------------------')
+            for pr in Start_players[p]:
+                print(pr[3])
