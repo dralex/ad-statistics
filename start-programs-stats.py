@@ -83,20 +83,6 @@ if __name__ == '__main__':
                         if version.find(v) == 0:
                             new_found = True
                             break
-
-                    if STANDARD_FILTER and unit in STANDARD_UNITS:
-                        if new_found:
-                            the_unit = Standard_units16[unit]
-                        else:
-                            the_unit = Standard_units[unit]
-                        isom_stats = data.check_isomorphic_programs(the_unit, uniq_program)
-                        if isom_stats['isomorphic to default'] or isom_stats['extended default']:
-                            if player not in Programs_with_standards:
-                                Programs_with_standards[player] = 1
-                            else:
-                                Programs_with_standards[player] += 1
-                            continue
-
                     if new_found:
                         the_unit = Units16[unit]
                     else:
@@ -104,6 +90,19 @@ if __name__ == '__main__':
                     if str(uniq_program) == str(the_unit):
                         # skip programs equal to default
                         continue
+                        
+                    if STANDARD_FILTER and unit in STANDARD_UNITS:
+                        if new_found:
+                            s_unit = Standard_units16[unit]
+                        else:
+                            s_unit = Standard_units[unit]
+                        isom_stats = data.check_isomorphic_programs(s_unit, uniq_program)
+                        if isom_stats['isomorphic to default'] or isom_stats['extended default']:
+                            if player not in Programs_with_standards:
+                                Programs_with_standards[player] = 1
+                            else:
+                                Programs_with_standards[player] += 1
+                            continue
 
                     if uniq_artefact not in Start_programs:
                         if player not in Popular_actions:
