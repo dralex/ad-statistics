@@ -40,7 +40,7 @@ STANDARD_PATH      = 'standard_programs'
 STANDARD_PATH_NEW  = os.path.join('standard_programs', '1.6')
 STANDARD_UNITS     = ('Autoborder', 'Stapler')
 
-FIND_ACTION        = 'entry/МодульДвижения.ДвигатьсяПоКоординатам();Диод.Включить(зеленый);Таймер.ТаймерЗапуск(6)'
+FIND_ACTION        = None #'entry/МодульДвижения.ДвигатьсяПоКоординатам();Диод.Включить(зеленый);Таймер.ТаймерЗапуск(6)'
 
 if __name__ == '__main__':
 
