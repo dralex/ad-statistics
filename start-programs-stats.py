@@ -52,6 +52,7 @@ if __name__ == '__main__':
     Programs_words = {}
     Programs_stats = {}
     Players_programs_distribution = {}
+    Popular_actions = {}
 
     for player, values in Players.items():        
         _, _, sessions = values
@@ -78,7 +79,7 @@ if __name__ == '__main__':
                         # skip programs equal to default
                         continue
                     if uniq_artefact not in Start_programs:
-                        isom_stats = data.check_isomorphic_programs(the_unit, uniq_program, None)
+                        isom_stats = data.check_isomorphic_programs(the_unit, uniq_program, None, False, Popular_actions)
                         for k, v in isom_stats.items():
                             if k not in Programs_stats:
                                 Programs_stats[k] = 0
@@ -173,6 +174,12 @@ if __name__ == '__main__':
     print('First-to-Second program statistics ({}):'.format(n4))
     for k,v in sorted(Second_programs_stats.items(), key=lambda x: (x[1] / n4, x[0]), reverse=True):
         print("{:45} {:6} {:5.1f}%".format(k, v, 100.0 * v / n4))
+
+    print()
+    print('Popular actions in new/diff nodes:')
+    for k,v in sorted(Popular_actions.items(), key=lambda x: x[1], reverse=True):
+        print("{:3} '{}'".format(v, k.replace('\n', ';')))
+
 
     i = 1
     print()

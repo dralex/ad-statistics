@@ -635,7 +635,7 @@ def load_players_index_list(filename):
                 players[pl_id].append(index_pair)
     return players
 
-def check_isomorphic_programs(unit_program, program, words = None, diff = False):
+def check_isomorphic_programs(unit_program, program, words = None, diff = False, pop_actions = None):
     initial = ''
     diff_nodes1 = []
     diff_nodes2 = []
@@ -772,6 +772,22 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                     if f2 & CyberiadaML.adiffArguments: diff_actions_args += 1
                     if f2 & CyberiadaML.adiffOrder: diff_actions_order += 1
                     if f2 & CyberiadaML.adiffNumber: diff_actions_num += 1
+                if pop_actions is not None and node2.has_actions():
+                    for a in node2.get_actions():
+                        if a.get_type() == CyberiadaML.actionEntry:
+                            s = 'entry/'
+                        elif a.get_type() == CyberiadaML.actionExit:
+                            s = 'exit/'
+                        else:
+                            s = a.get_trigger()
+                            if a.get_guard():
+                                s += '[{}]'.format(a.get_guard())
+                            s += '/'
+                        s += a.get_behavior()
+                        if s not in pop_actions:
+                            pop_actions[s] = 1
+                        else:
+                            pop_actions[s] += 1
 
         new_node_flags = {}
         for n in new_nodes:
@@ -791,6 +807,22 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                         for a in e.get_actions():
                             if a.has_behavior() and a.get_behavior().find(name) >= 0:
                                 new_node_flags[m] = True
+                if pop_actions is not None:
+                    for a in e.get_actions():
+                        if a.get_type() == CyberiadaML.actionEntry:
+                            s = 'entry/'
+                        elif a.get_type() == CyberiadaML.actionExit:
+                            s = 'exit/'
+                        else:
+                            s = a.get_trigger()
+                            if a.get_guard():
+                                s += '[{}]'.format(a.get_guard())
+                            s += '/'
+                        s += a.get_behavior()
+                        if s not in pop_actions:
+                            pop_actions[s] = 1
+                        else:
+                            pop_actions[s] += 1
 
         edge_to_new_node_event_flags = {}
         for _id in new_edges:
@@ -805,7 +837,7 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False)
                     for name in names:
                         if trigger.find(name) >= 0:
                             edge_to_new_node_event_flags[m] = True
-                
+                            
         results =  {'isomorphic to default': res == CyberiadaML.smiIsomorphic,
                     'extended default': ((len(new_nodes) > 0 or len(new_edges) > 0) and
                                          len(missing_nodes) == 0 and len(missing_edges) == 0),
