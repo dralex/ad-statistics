@@ -193,7 +193,7 @@ if __name__ == '__main__':
     print('players with standards: {}'.format(len(Programs_with_standards)))
     n = len(Start_programs)
     print('player programs: {}'.format(n))
-    print('programs with standards: {}'.format(sum(map(sum, Programs_with_standards.values()))))
+    print('programs with standards: {}'.format(sum(Programs_with_standards.values())))
 
     print()
     print('Players with programs distribution:')
