@@ -32,8 +32,13 @@ DEFAULT_PLAYERS_DATA = 'test.csv'
 
 NEW_VERSIONS = ('1.6', '1.7')
 
-DAMAGE_FILTER      =   True          # skip programs w/o damage
-PROGRAMS_LIMIT     =   50            # most used programs limit
+DAMAGE_FILTER      = True          # skip programs w/o damage
+STANDARD_FILTER    = True          # skip programs based on the standard example
+
+PROGRAMS_LIMIT     = 50            # most used programs limit
+STANDARD_PATH      = 'standard_programs'
+STANDARD_PATH_NEW  = os.path.join('standard_programs', '1.6')
+STANDARD_UNITS     = ('Autoborder', 'Stapler')
 
 if __name__ == '__main__':
 
@@ -44,6 +49,11 @@ if __name__ == '__main__':
 
     Units = data.load_default_programs(False)
     Units16 = data.load_default_programs(True)
+    Standard_units = {}
+    Standard_units16 = {}
+    for u in STANDARD_UNITS:
+        Standard_units[u] = data.load_program_path(STANDARD_PATH, u)
+        Standard_units16[u] = data.load_program_path(STANDARD_PATH_NEW, u)
     Unique_programs = {}
     Unique_programs_with_names = {}
     Programs = {}
@@ -54,6 +64,7 @@ if __name__ == '__main__':
     Programs_stats = {}
     Players_programs_distribution = {}
     Popular_actions = {}
+    Programs_with_standards = {}
 
     for player, values in Players.items():        
         _, _, sessions = values
@@ -65,21 +76,33 @@ if __name__ == '__main__':
                     phash = Programs[artefact]
                     uniq_artefact, uniq_program, _ = Unique_programs[phash]
                     unit, dmg, _, d, version = unit_data
-                    
+                    if DAMAGE_FILTER and dmg == 0:
+                        continue
                     new_found = False
                     for v in NEW_VERSIONS:
                         if version.find(v) == 0:
                             new_found = True
                             break
+
+                    if STANDARD_FILTER and unit in STANDARD_UNITS:
+                        if new_found:
+                            the_unit = Standard_units16[unit]
+                        else:
+                            the_unit = Standard_units[unit]
+                        isom_stats = data.check_isomorphic_programs(the_unit, uniq_program)
+                        if isom_stats['isomorphic to default'] or isom_stats['extended default']:
+                            if player not in Programs_with_standards:
+                                Programs_with_standards[player] = 1
+                            else:
+                                Programs_with_standards[player] += 1
+                            continue
+
                     if new_found:
                         the_unit = Units16[unit]
                     else:
                         the_unit = Units[unit]
-    
                     if str(uniq_program) == str(the_unit):
                         # skip programs equal to default
-                        continue
-                    if DAMAGE_FILTER and dmg == 0:
                         continue
 
                     if uniq_artefact not in Start_programs:
@@ -167,8 +190,10 @@ if __name__ == '__main__':
     print()
     print('total players: {}'.format(len(Players)))
     print('players: {}'.format(len(Start_players)))
+    print('players with standards: {}'.format(len(Programs_with_standards)))
     n = len(Start_programs)
     print('player programs: {}'.format(n))
+    print('programs with standards: {}'.format(sum(map(sum, Programs_with_standards.values()))))
 
     print()
     print('Players with programs distribution:')

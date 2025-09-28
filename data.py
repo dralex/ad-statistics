@@ -562,6 +562,17 @@ def load_default_programs(version = False):
         # print(u, programs[u])
     return programs            
 
+def load_program_path(graph_dir, unit):
+    print('Loading program {}...'.format(unit))
+    d = CyberiadaML.LocalDocument()
+    d.open(os.path.join(graph_dir, unit + '.graphml'),
+           CyberiadaML.formatDetect,
+           CyberiadaML.geometryFormatNone,
+           False, False, True)
+    p = CyberiadaML.StateMachine(d.get_state_machines()[0])
+    p.set_name('SM')
+    return p
+
 def load_program(artefact_id):
     for u in os.listdir(PROGRAMS_DIR):
         dir_path = os.path.join(PROGRAMS_DIR, u)
