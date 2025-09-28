@@ -183,6 +183,7 @@ if __name__ == '__main__':
     Players_popular_actions = {}
     for pl, actions in Popular_actions.items():
         for a, n in actions.items():
+            a = a.replace('\n', ';')
             if a not in Players_popular_actions:
                 Players_popular_actions[a] = [set([pl,]), n] 
             else:
@@ -223,7 +224,7 @@ if __name__ == '__main__':
     print('Top {} popular actions in new/diff nodes by players:'.format(PROGRAMS_LIMIT))
     i = 1 
     for k,v in sorted(Players_popular_actions.items(), key=lambda x: (len(x[1][0]), x[1][1]), reverse=True):
-        print("{:5} {:5} '{}'".format(len(v[0]), v[1], k.replace('\n', ';')))
+        print("{:5} {:5} '{}'".format(len(v[0]), v[1], k))
         i += 1
         if i == PROGRAMS_LIMIT:
             break
