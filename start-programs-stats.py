@@ -32,6 +32,7 @@ DEFAULT_PLAYERS_DATA = 'test.csv'
 
 NEW_VERSIONS = ('1.6', '1.7')
 
+DAMAGE_FILTER      =   True          # skip programs w/o damage
 PROGRAMS_LIMIT     =   50            # most used programs limit
 
 if __name__ == '__main__':
@@ -78,7 +79,7 @@ if __name__ == '__main__':
                     if str(uniq_program) == str(the_unit):
                         # skip programs equal to default
                         continue
-                    if dmg == 0:
+                    if DAMAGE_FILTER and dmg == 0:
                         continue
 
                     if uniq_artefact not in Start_programs:
