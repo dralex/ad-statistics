@@ -99,9 +99,9 @@ if __name__ == '__main__':
                         isom_stats = data.check_isomorphic_programs(s_unit, uniq_program)
                         if isom_stats['isomorphic to default'] or isom_stats['extended default']:
                             if player not in Programs_with_standards:
-                                Programs_with_standards[player] = 1
+                                Programs_with_standards[player] = set([uniq_artefact])
                             else:
-                                Programs_with_standards[player] += 1
+                                Programs_with_standards[player].add(uniq_artefact)
                             continue
 
                     if uniq_artefact not in Start_programs:
@@ -192,7 +192,7 @@ if __name__ == '__main__':
     print('players with standards: {}'.format(len(Programs_with_standards)))
     n = len(Start_programs)
     print('player programs: {}'.format(n))
-    print('programs with standards: {}'.format(sum(Programs_with_standards.values())))
+    print('programs with standards: {}'.format(sum(map(len, Programs_with_standards.values()))))
 
     print()
     print('Players with programs distribution:')
