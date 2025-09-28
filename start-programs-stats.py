@@ -63,7 +63,7 @@ if __name__ == '__main__':
                 if artefact in Programs:
                     phash = Programs[artefact]
                     uniq_artefact, uniq_program, _ = Unique_programs[phash]
-                    unit, _, _, d, version = unit_data
+                    unit, dmg, _, d, version = unit_data
                     
                     new_found = False
                     for v in NEW_VERSIONS:
@@ -78,6 +78,9 @@ if __name__ == '__main__':
                     if str(uniq_program) == str(the_unit):
                         # skip programs equal to default
                         continue
+                    if dmg == 0:
+                        continue
+
                     if uniq_artefact not in Start_programs:
                         if player not in Popular_actions:
                             Popular_actions[player] = {}
