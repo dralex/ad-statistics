@@ -33,7 +33,7 @@ DEFAULT_PLAYERS_DATA = 'test.csv'
 NEW_VERSIONS = ('1.6', '1.7')
 
 DAMAGE_FILTER      = True          # skip programs w/o damage
-STANDARD_FILTER    = True          # skip programs based on the standard example
+STANDARD_FILTER    = False         # skip programs based on the standard example
 
 PROGRAMS_LIMIT     = 50            # most used programs limit
 STANDARD_PATH      = 'standard_programs'

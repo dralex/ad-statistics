@@ -684,6 +684,50 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False,
             else:
                 words[name] += 1
 
+    if pop_actions is not None:
+
+
+        for n in new_nodes:
+            e = program.find_element_by_id(n)
+            if not a.has_actions(): continue
+            for a in e.get_actions():
+                if a.get_type() == CyberiadaML.actionEntry:
+                    s = 'entry/'
+                elif a.get_type() == CyberiadaML.actionExit:
+                    s = 'exit/'
+                else:
+                    s = a.get_trigger()
+                    if a.get_guard():
+                        s += '[{}]'.format(a.get_guard())
+                        s += '/'
+                        s += a.get_behavior()
+                        if s not in pop_actions:
+                            pop_actions[s] = 1
+                        else:
+                            pop_actions[s] += 1
+
+        for i, f in enumerate(diff_nodes_flags):
+            if f & CyberiadaML.smiNodeDiffFlagActions:
+                id2 = diff_nodes2[i]
+                node2 = program.find_element_by_id(id2)
+                if node2.has_actions():
+                    for a in node2.get_actions():
+                        if a.get_type() == CyberiadaML.actionEntry:
+                            s = 'entry/'
+                        elif a.get_type() == CyberiadaML.actionExit:
+                            s = 'exit/'
+                        else:
+                            s = a.get_trigger()
+                            if a.get_guard():
+                                s += '[{}]'.format(a.get_guard())
+                            s += '/'
+                        s += a.get_behavior()
+                        if s not in pop_actions:
+                            pop_actions[s] = 1
+                        else:
+                            pop_actions[s] += 1
+            
+                
     if diff:
         diff_arrays = {}
         diff_arrays['res'] = res
@@ -783,22 +827,6 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False,
                     if f2 & CyberiadaML.adiffArguments: diff_actions_args += 1
                     if f2 & CyberiadaML.adiffOrder: diff_actions_order += 1
                     if f2 & CyberiadaML.adiffNumber: diff_actions_num += 1
-                if pop_actions is not None and node2.has_actions():
-                    for a in node2.get_actions():
-                        if a.get_type() == CyberiadaML.actionEntry:
-                            s = 'entry/'
-                        elif a.get_type() == CyberiadaML.actionExit:
-                            s = 'exit/'
-                        else:
-                            s = a.get_trigger()
-                            if a.get_guard():
-                                s += '[{}]'.format(a.get_guard())
-                            s += '/'
-                        s += a.get_behavior()
-                        if s not in pop_actions:
-                            pop_actions[s] = 1
-                        else:
-                            pop_actions[s] += 1
 
         new_node_flags = {}
         for n in new_nodes:
@@ -818,22 +846,6 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False,
                         for a in e.get_actions():
                             if a.has_behavior() and a.get_behavior().find(name) >= 0:
                                 new_node_flags[m] = True
-                if pop_actions is not None:
-                    for a in e.get_actions():
-                        if a.get_type() == CyberiadaML.actionEntry:
-                            s = 'entry/'
-                        elif a.get_type() == CyberiadaML.actionExit:
-                            s = 'exit/'
-                        else:
-                            s = a.get_trigger()
-                            if a.get_guard():
-                                s += '[{}]'.format(a.get_guard())
-                            s += '/'
-                        s += a.get_behavior()
-                        if s not in pop_actions:
-                            pop_actions[s] = 1
-                        else:
-                            pop_actions[s] += 1
 
         edge_to_new_node_event_flags = {}
         for _id in new_edges:
@@ -887,124 +899,210 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False,
 
         return results
 
-def inspect_program(unit_type, default_units, program):
-    isom_results = (CyberiadaML.smiIdentical,
-		    CyberiadaML.smiEqual,
-		    CyberiadaML.smiIsomorphic,
-		    CyberiadaML.smiDiffStates,
-		    CyberiadaML.smiDiffInitial,
-		    CyberiadaML.smiDiffEdges)
-    diff_flags = (CyberiadaML.smiNodeDiffFlagID,
-		  CyberiadaML.smiNodeDiffFlagType,
-		  CyberiadaML.smiNodeDiffFlagTitle,
-		  CyberiadaML.smiNodeDiffFlagActions,
-		  CyberiadaML.smiNodeDiffFlagSMLink,
-		  CyberiadaML.smiNodeDiffFlagChildren,
-		  CyberiadaML.smiNodeDiffFlagEdges,
-		  CyberiadaML.smiEdgeDiffFlagID,
-		  CyberiadaML.smiEdgeDiffFlagAction)
-    words = {}
+def inspect_program(unit_type, default_units, program, short = False):
     default_program = default_units[unit_type]
-    isom_stats = check_isomorphic_programs(default_program, program, words, True)
-    nodes_to_print = []
-    edges_to_print = []
-    diff_nodes_to_print = []
-    for key,value in isom_stats.items():
-        if key == 'res':
-            flags = []
-            if value & CyberiadaML.smiIdentical:
-                flags.append('identical')
-            if value & CyberiadaML.smiEqual:
-                flags.append('equal')
-            if value & CyberiadaML.smiIsomorphic:
-                flags.append('isomorphic')
-            if value & CyberiadaML.smiDiffStates:
-                flags.append('diff states')
-            if value & CyberiadaML.smiDiffInitial:
-                flags.append('diff initial')
-            if value & CyberiadaML.smiDiffEdges:
-                flags.append('diff edges')
-            print("{:20}: {}".format('Flags:', ', '.join(flags)))
-        elif key.find('flags') > 0:
-            flags = []
-            for v in value:
-                if v & CyberiadaML.smiNodeDiffFlagID:
-                    flags.append('id')
-                if v & CyberiadaML.smiNodeDiffFlagType:
-                    flags.append('type')
-                if v & CyberiadaML.smiNodeDiffFlagTitle:
-                    flags.append('title')
-                if v & CyberiadaML.smiNodeDiffFlagActions:
-                    flags.append('actions')
-                if v & CyberiadaML.smiNodeDiffFlagSMLink:
-                    flags.append('sm link')
-                if v & CyberiadaML.smiNodeDiffFlagChildren:
-                    flags.append('children')
-                if v & CyberiadaML.smiNodeDiffFlagEdges:
-                    flags.append('edges')
-                if v & CyberiadaML.smiEdgeDiffFlagID:
-                    flags.append('id')
-                if v & CyberiadaML.smiEdgeDiffFlagAction:
-                    flags.append('action')
-            print("{:20}: {}".format(key, flags))
+    inspect_program_diff(default_program, program, short)
+
+def inspect_program_diff(program1, program2, short):
+    if short:
+        words = {}
+        pop_actions = {}
+        isom_stats = check_isomorphic_programs(program1, program2, words, True, pop_actions)
+        res = isom_stats['res']
+        print()
+        if res & (CyberiadaML.smiIdentical | CyberiadaML.smiEqual):
+            print('The same')
         else:
-            if key.find('node') > 0:
-                nodes_to_print += value
-            if key.find('edge') > 0:
-                edges_to_print += value
-            print("{:20}: {}".format(key, value))
+            if res & CyberiadaML.smiIsomorphic:
+                print('Isomorphic')
+            else:
+                print('Different')
 
-    diff_node_actions = []
-    for i,flags in enumerate(isom_stats['diff_nodes_flags']):
-         if flags & CyberiadaML.smiNodeDiffFlagActions:
-             id1 = isom_stats['diff_nodes_orig'][i]
-             node1 = default_program.find_element_by_id(id1)
-             id2 = isom_stats['diff_nodes'][i]
-             node2 = program.find_element_by_id(id2)
-             f = node1.compare_actions(node2)
-             if f != 0:
-                 diff_string = ''
-                 if f & CyberiadaML.adiffArguments: diff_string += 'a'
-                 if f & CyberiadaML.adiffOrder: diff_string += 'O'
-                 if f & CyberiadaML.adiffGuards: diff_string += 'G'
-                 if f & CyberiadaML.adiffActions: diff_string += 'A'
-                 if f & CyberiadaML.adiffNumber: diff_string += 'N'
-                 if f & CyberiadaML.adiffTypes: diff_string += 'T'
-                 diff_node_actions.append((diff_string, node1, node2))
+            if len(isom_stats['diff_nodes_flags']) > 0:
+                print()
+            for i,flags in enumerate(isom_stats['diff_nodes_flags']):
+                if flags & CyberiadaML.smiNodeDiffFlagActions:
+                    id1 = isom_stats['diff_nodes_orig'][i]
+                    node1 = program1.find_element_by_id(id1)
+                    id2 = isom_stats['diff_nodes'][i]
+                    node2 = program2.find_element_by_id(id2)
+                    f = node1.compare_actions(node2)
+                    if f != 0:
+                        diff_string = ''
+                        if f & CyberiadaML.adiffArguments: diff_string += 'a'
+                        if f & CyberiadaML.adiffOrder: diff_string += 'O'
+                        if f & CyberiadaML.adiffGuards: diff_string += 'G'
+                        if f & CyberiadaML.adiffActions: diff_string += 'A'
+                        if f & CyberiadaML.adiffNumber: diff_string += 'N'
+                        if f & CyberiadaML.adiffTypes: diff_string += 'T'
+                        print('\nDifferent actions: {}\nNode1: {}\nNode2: {}'.format(diff_string,
+                                                                                     str(node1).replace('\n', ';'),
+                                                                                     str(node2).replace('\n', ';')))
 
-    diff_edge_actions = []
-    for i,flags in enumerate(isom_stats['diff_edges_flags']):
-         if flags & CyberiadaML.smiEdgeDiffFlagAction:
-             id1 = isom_stats['diff_edges_orig'][i]
-             edge1 = default_program.find_element_by_id(id1)
-             id2 = isom_stats['diff_edges'][i]
-             edge2 = program.find_element_by_id(id2)
-             f = edge1.compare_actions(edge2)
-             if f != 0:
-                 diff_string = ''
-                 if f & CyberiadaML.adiffArguments: diff_string += 'a'
-                 if f & CyberiadaML.adiffOrder: diff_string += 'O'
-                 if f & CyberiadaML.adiffGuards: diff_string += 'G'
-                 if f & CyberiadaML.adiffActions: diff_string += 'A'
-                 if f & CyberiadaML.adiffNumber: diff_string += 'N'
-                 if f & CyberiadaML.adiffTypes: diff_string += 'T'
-                 diff_edge_actions.append((diff_string, edge1, edge2))
+            if len(isom_stats['diff_edges_flags']) > 0:
+                print()
+            for i,flags in enumerate(isom_stats['diff_edges_flags']):
+                if flags & CyberiadaML.smiEdgeDiffFlagAction:
+                    id1 = isom_stats['diff_edges_orig'][i]
+                    edge1 = program1.find_element_by_id(id1)
+                    id2 = isom_stats['diff_edges'][i]
+                    edge2 = program2.find_element_by_id(id2)
+                    f = edge1.compare_actions(edge2)
+                    if f != 0:
+                        diff_string = ''
+                        if f & CyberiadaML.adiffArguments: diff_string += 'a'
+                        if f & CyberiadaML.adiffOrder: diff_string += 'O'
+                        if f & CyberiadaML.adiffGuards: diff_string += 'G'
+                        if f & CyberiadaML.adiffActions: diff_string += 'A'
+                        if f & CyberiadaML.adiffNumber: diff_string += 'N'
+                        if f & CyberiadaML.adiffTypes: diff_string += 'T'
+                        print('\nDifferent action: {}\nEdge1: {}\nEdge2: {}'.format(diff_string,
+                                                                                    str(edge1).replace('\n', ';'),
+                                                                                    str(edge2).replace('\n', ';')))
+
+            if len(isom_stats['new_nodes']) > 0:
+                print()
+            for n in isom_stats['new_nodes']:
+                node = program2.find_element_by_id(n)
+                print('Node {}: {}'.format(node.get_title(), str(node).replace('\n', ';')))
+            if len(isom_stats['new_edges']) > 0:
+                print()
+            for e in isom_stats['new_edges']:
+                edge = program2.find_element_by_id(e)
+                print('Edge: {}'.format(str(edge).replace('\n', ';')))
+                        
+            if len(words) > 0:
+                print()
+                print('New state names:')
+                for k, v in sorted(words.items(), key=lambda x: x[1], reverse=True):
+                    print(k, v)
+            if len(pop_actions) > 0:
+                print()
+                print('Popular actions:')
+                for k, v in sorted(pop_actions.items(), key=lambda x: x[1], reverse=True):
+                    print("{:5} '{}'".format(v, k.replace('\n', ';')))
+    else:
+        isom_results = (CyberiadaML.smiIdentical,
+		        CyberiadaML.smiEqual,
+		        CyberiadaML.smiIsomorphic,
+		        CyberiadaML.smiDiffStates,
+		        CyberiadaML.smiDiffInitial,
+		        CyberiadaML.smiDiffEdges)
+        diff_flags = (CyberiadaML.smiNodeDiffFlagID,
+		      CyberiadaML.smiNodeDiffFlagType,
+		      CyberiadaML.smiNodeDiffFlagTitle,
+		      CyberiadaML.smiNodeDiffFlagActions,
+		      CyberiadaML.smiNodeDiffFlagSMLink,
+		      CyberiadaML.smiNodeDiffFlagChildren,
+		      CyberiadaML.smiNodeDiffFlagEdges,
+		      CyberiadaML.smiEdgeDiffFlagID,
+		    CyberiadaML.smiEdgeDiffFlagAction)
+        words = {}
+        pop_actions = {}
+        isom_stats = check_isomorphic_programs(program1, program2, words, True, pop_actions)
+        nodes_to_print = []
+        edges_to_print = []
+        diff_nodes_to_print = []
+        for key,value in isom_stats.items():
+            if key == 'res':
+                flags = []
+                if value & CyberiadaML.smiIdentical:
+                    flags.append('identical')
+                if value & CyberiadaML.smiEqual:
+                    flags.append('equal')
+                if value & CyberiadaML.smiIsomorphic:
+                    flags.append('isomorphic')
+                if value & CyberiadaML.smiDiffStates:
+                    flags.append('diff states')
+                if value & CyberiadaML.smiDiffInitial:
+                    flags.append('diff initial')
+                if value & CyberiadaML.smiDiffEdges:
+                    flags.append('diff edges')
+                print("{:20}: {}".format('Flags:', ', '.join(flags)))
+            elif key.find('flags') > 0:
+                flags = []
+                for v in value:
+                    if v & CyberiadaML.smiNodeDiffFlagID:
+                        flags.append('id')
+                    if v & CyberiadaML.smiNodeDiffFlagType:
+                        flags.append('type')
+                    if v & CyberiadaML.smiNodeDiffFlagTitle:
+                        flags.append('title')
+                    if v & CyberiadaML.smiNodeDiffFlagActions:
+                        flags.append('actions')
+                    if v & CyberiadaML.smiNodeDiffFlagSMLink:
+                        flags.append('sm link')
+                    if v & CyberiadaML.smiNodeDiffFlagChildren:
+                        flags.append('children')
+                    if v & CyberiadaML.smiNodeDiffFlagEdges:
+                        flags.append('edges')
+                    if v & CyberiadaML.smiEdgeDiffFlagID:
+                        flags.append('id')
+                    if v & CyberiadaML.smiEdgeDiffFlagAction:
+                        flags.append('action')
+                print("{:20}: {}".format(key, flags))
+            else:
+                if key.find('new_nodes') > 0:
+                    nodes_to_print += value
+                if key.find('edge') > 0:
+                    edges_to_print += value
+                print("{:20}: {}".format(key, value))
+
+        diff_node_actions = []
+        for i,flags in enumerate(isom_stats['diff_nodes_flags']):
+            if flags & CyberiadaML.smiNodeDiffFlagActions:
+                id1 = isom_stats['diff_nodes_orig'][i]
+                node1 = program1.find_element_by_id(id1)
+                id2 = isom_stats['diff_nodes'][i]
+                node2 = program2.find_element_by_id(id2)
+                f = node1.compare_actions(node2)
+                if f != 0:
+                    diff_string = ''
+                    if f & CyberiadaML.adiffArguments: diff_string += 'a'
+                    if f & CyberiadaML.adiffOrder: diff_string += 'O'
+                    if f & CyberiadaML.adiffGuards: diff_string += 'G'
+                    if f & CyberiadaML.adiffActions: diff_string += 'A'
+                    if f & CyberiadaML.adiffNumber: diff_string += 'N'
+                    if f & CyberiadaML.adiffTypes: diff_string += 'T'
+                    diff_node_actions.append((diff_string, node1, node2))
+
+        diff_edge_actions = []
+        for i,flags in enumerate(isom_stats['diff_edges_flags']):
+            if flags & CyberiadaML.smiEdgeDiffFlagAction:
+                id1 = isom_stats['diff_edges_orig'][i]
+                edge1 = program1.find_element_by_id(id1)
+                id2 = isom_stats['diff_edges'][i]
+                edge2 = program2.find_element_by_id(id2)
+                f = edge1.compare_actions(edge2)
+                if f != 0:
+                    diff_string = ''
+                    if f & CyberiadaML.adiffArguments: diff_string += 'a'
+                    if f & CyberiadaML.adiffOrder: diff_string += 'O'
+                    if f & CyberiadaML.adiffGuards: diff_string += 'G'
+                    if f & CyberiadaML.adiffActions: diff_string += 'A'
+                    if f & CyberiadaML.adiffNumber: diff_string += 'N'
+                    if f & CyberiadaML.adiffTypes: diff_string += 'T'
+                    diff_edge_actions.append((diff_string, edge1, edge2))
                  
-    print()
-    print('Popular state names:')
-    for k, v in sorted(words.items(), key=lambda x: x[1], reverse=True):
-        print(k, v)
-    print()
-    for n in nodes_to_print:
-        node = program.find_element_by_id(n)
-        print('Node {}: {}'.format(n, node))
-    print()
-    for f, node1, node2 in diff_node_actions:
-        print('Node diff actions {}:\n{}\n{}'.format(f, node1, node2))
-    print()
-    for e in edges_to_print:
-        edge = program.find_element_by_id(e)
-        print('Edge {}: {}'.format(e, edge))
-    print()
-    for f, edge1, edge2 in diff_edge_actions:
-        print('Edge diff actions {}:\n{}\n{}'.format(f, edge1, edge2))
+        print()
+        print('Popular state names:')
+        for k, v in sorted(words.items(), key=lambda x: x[1], reverse=True):
+            print(k, v)
+        print()    
+        print('Popular actions:')
+        for k, v in sorted(pop_actions.items(), key=lambda x: x[1], reverse=True):
+            print("{:5} '{}'".format(v, k.replace('\n', ';')))
+        print()
+        for n in nodes_to_print:
+            node = program2.find_element_by_id(n)
+            print('Node {}: {}'.format(n, node))
+        print()
+        for f, node1, node2 in diff_node_actions:
+            print('Node diff actions {}:\n{}\n{}'.format(f, node1, node2))
+        print()
+        for e in edges_to_print:
+            edge = program2.find_element_by_id(e)
+            print('Edge {}: {}'.format(e, edge))
+        print()
+        for f, edge1, edge2 in diff_edge_actions:
+            print('Edge diff actions {}:\n{}\n{}'.format(f, edge1, edge2))

@@ -25,7 +25,7 @@ import data
 import CyberiadaML
 
 def usage(msg = ''):
-    print("Usage: {} <unit-type> <artefact-id> [<new>]".format(sys.argv[0]))
+    print("Usage: {} <unit-type> <artefact-id> [<new>] [<short>]".format(sys.argv[0]))
     if msg:
         print(msg)
     exit(1)            
@@ -36,11 +36,16 @@ if __name__ == '__main__':
         usage()
 
     new_units = False
-    if len(sys.argv) == 4:
-        if sys.argv[3] == 'new':
-            new_units = True
-        else:
-            usage()
+    short = False
+    if len(sys.argv) > 3:
+        for i,a in enumerate(sys.argv):
+            if i < 3: continue
+            if sys.argv[i] == 'new':
+                new_units = True
+            elif sys.argv[i] == 'short':
+                short = True
+            else:
+                usage()
 
     unit_type = sys.argv[1]
     if unit_type not in data.UNITS:
@@ -49,7 +54,7 @@ if __name__ == '__main__':
     if program is None:
         usage('Cannot load program')
     units = data.load_default_programs(new_units)
-    data.inspect_program(unit_type, units, program)
+    data.inspect_program(unit_type, units, program, short)
     print()
     print('The program:')
     print(str(program))
