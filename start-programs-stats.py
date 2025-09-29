@@ -293,9 +293,9 @@ if __name__ == '__main__':
         print('{} players from range {}'.format(PRINT_COUNT, PRINT_RANGE))
         printed = set([])
         for i in range(min(PRINT_COUNT, len(Players_found))):
-            p = random.choice(tuple(Players_found))
-            while p in printed:
-                p = random.choice(Players_found)
+            while True:
+                p = random.choice(tuple(Players_found))
+                if p not in printed: break
             print_programs(p, Start_players[p])
             printed.add(p)
 
