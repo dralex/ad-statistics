@@ -689,7 +689,7 @@ def check_isomorphic_programs(unit_program, program, words = None, diff = False,
 
         for n in new_nodes:
             e = program.find_element_by_id(n)
-            if not a.has_actions(): continue
+            if not e.has_actions(): continue
             for a in e.get_actions():
                 if a.get_type() == CyberiadaML.actionEntry:
                     s = 'entry/'
