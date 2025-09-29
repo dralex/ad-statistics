@@ -46,15 +46,17 @@ PRINT_COUNT        = 1
 PRINT_RANGE        = (15, 35)
 
 def print_programs(player, programs):
-    print('-----------------------------------------------------------------------------')
+    print('=============================================================================')
     print('Player {} programs:'.format(player))
+    print('=============================================================================')
     prev_d = None
     prev_type = None
     prev_progam = None
     for i,p in enumerate(programs):
         d, unit, _, program, unit_type = p
         print()
-        print('Program {}, interval: {}'.format(unit, '' if prev_d is None else (d - prev_d)))
+        print('-----------------------------------------------------------------------------')
+        print('Program {}, interval: {} min'.format(unit_type, 0 if prev_d is None else int((d - prev_d) / 60.0)))
         if prev_d is None or prev_type != unit_type:
             data.inspect_program_diff(unit, program, True)
         else:
