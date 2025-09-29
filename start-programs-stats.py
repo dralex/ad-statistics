@@ -42,6 +42,16 @@ STANDARD_UNITS     = ('Autoborder', 'Stapler')
 
 FIND_ACTION        = None #'entry/МодульДвижения.ДвигатьсяПоКоординатам();Диод.Включить(зеленый);Таймер.ТаймерЗапуск(6)'
 
+def print_programs(player, programs):
+    print('-----------------------------------------------------------------------------')
+    print('Player {} programs:'.forma(player))
+    prev_d = None
+    for i,p in enumerate(programs):
+        d, unit, _, program = p
+        print()
+        print('Program {}, interval: {}'.format(player, '' if prev_d is None else (d - prev_d)))
+        data.inspect_programs(unit, program, True)
+
 if __name__ == '__main__':
 
     if len(sys.argv) < 2:
@@ -268,7 +278,4 @@ if __name__ == '__main__':
         players = Players_popular_actions[FIND_ACTION][0]
         print('Found {} players with action "{}"'.format(len(players), FIND_ACTION))
         for p in players:
-            print()
-            print('------------------ player ', p, ' ----------------------')
-            for pr in Start_players[p]:
-                print(pr[3])
+            print_programs(p, Start_players[p])
