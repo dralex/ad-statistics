@@ -94,7 +94,9 @@ if __name__ == '__main__':
     for player, values in Players.items():        
         _, _, sessions = values
         data.load_player_programs(player, Programs, Unique_programs, Unique_programs_with_names)
-        player_programs = []
+        player_programs = {}
+        for u in data.UNITS:
+            player_programs[u] = []
         for s in sessions:
             for artefact, unit_data in s['art'].items():
                 if artefact in Programs:
@@ -139,16 +141,17 @@ if __name__ == '__main__':
                             if v:
                                 Programs_stats[k] += 1
                         Start_programs[uniq_artefact] = [unit, set([]), 0, isom_stats]
-                        if len(player_programs) == 0 or str(player_programs[-1][3]) != str(uniq_program):
-                            player_programs.append((d, the_unit, isom_stats, uniq_program, unit))
+                        if len(player_programs[unit]) == 0 or str(player_programs[unit][-1][3]) != str(uniq_program):
+                            player_programs[unit].append((d, the_unit, isom_stats, uniq_program, unit))
                     else:
                         isom_stats = Start_programs[uniq_artefact][3]
-                        if len(player_programs) == 0 or str(player_programs[-1][3]) != str(uniq_program): 
-                            player_programs.append((d, the_unit, isom_stats, uniq_program, unit))
+                        if len(player_programs[unit]) == 0 or str(player_programs[unit][-1][3]) != str(uniq_program): 
+                            player_programs[unit].append((d, the_unit, isom_stats, uniq_program, unit))
                     if player not in Start_programs[uniq_artefact][1]:
                         Start_programs[uniq_artefact][1].add(player)
                     Start_programs[uniq_artefact][2] += 1
 
+        player_programs = sum(player_programs.values(), [])
         if len(player_programs) > 0:
             player_programs = sorted(player_programs, key=lambda x: x[0])
             Start_players[player] = player_programs
