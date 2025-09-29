@@ -51,19 +51,18 @@ def print_programs(player, programs):
     print('=============================================================================')
     prev_d = None
     prev_type = None
-    prev_progam = None
+    prev_programs = {}
     for i,p in enumerate(programs):
         d, unit, _, program, unit_type = p
         print()
         print('-----------------------------------------------------------------------------')
         print('Program {}, interval: {} min'.format(unit_type, 0 if prev_d is None else int((d - prev_d) / 60.0)))
-        if prev_d is None or prev_type != unit_type:
+        if unit_type not in prev_programs:
             data.inspect_program_diff(unit, program, True)
         else:
-            data.inspect_program_diff(prev_program, program, True)            
+            data.inspect_program_diff(prev_programs[unit_type], program, True)            
         prev_d = d
-        prev_type = unit_type
-        prev_program = program
+        prev_programs[unit_type] = program
 
 if __name__ == '__main__':
 
