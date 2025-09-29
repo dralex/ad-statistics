@@ -42,18 +42,26 @@ STANDARD_PATH_NEW  = os.path.join('standard_programs', '1.6')
 STANDARD_UNITS     = ('Autoborder', 'Stapler')
 
 FIND_ACTION        = None #'entry/МодульДвижения.ДвигатьсяПоКоординатам();Диод.Включить(зеленый);Таймер.ТаймерЗапуск(6)'
-PRINT_COUNT        = 5
+PRINT_COUNT        = 1
 PRINT_RANGE        = (15, 35)
 
 def print_programs(player, programs):
     print('-----------------------------------------------------------------------------')
     print('Player {} programs:'.format(player))
     prev_d = None
+    prev_type = None
+    prev_progam = None
     for i,p in enumerate(programs):
-        d, unit, _, program = p
+        d, unit, _, program, unit_type = p
         print()
-        print('Program {}, interval: {}'.format(player, '' if prev_d is None else (d - prev_d)))
-        data.inspect_program_diff(unit, program, True)
+        print('Program {}, interval: {}'.format(unit, '' if prev_d is None else (d - prev_d)))
+        if prev_d is None or prev_type != unit_type:
+            data.inspect_program_diff(unit, program, True)
+        else:
+            data.inspect_program_diff(prev_program, program, True)            
+        prev_d = d
+        prev_type = unit_type
+        prev_program = program
 
 if __name__ == '__main__':
 
@@ -131,11 +139,11 @@ if __name__ == '__main__':
                                 Programs_stats[k] += 1
                         Start_programs[uniq_artefact] = [unit, set([]), 0, isom_stats]
                         if len(player_programs) == 0 or str(player_programs[-1][3]) != str(uniq_program):
-                            player_programs.append((d, the_unit, isom_stats, uniq_program))
+                            player_programs.append((d, the_unit, isom_stats, uniq_program, unit))
                     else:
                         isom_stats = Start_programs[uniq_artefact][3]
                         if len(player_programs) == 0 or str(player_programs[-1][3]) != str(uniq_program): 
-                            player_programs.append((d, the_unit, isom_stats, uniq_program))
+                            player_programs.append((d, the_unit, isom_stats, uniq_program, unit))
                     if player not in Start_programs[uniq_artefact][1]:
                         Start_programs[uniq_artefact][1].add(player)
                     Start_programs[uniq_artefact][2] += 1
@@ -166,7 +174,7 @@ if __name__ == '__main__':
     n3 = 0
     First_programs_stats = {}
     for v in Start_players.values():
-        _, _, isom_stats, _ = v[0]
+        _, _, isom_stats, _, _ = v[0]
         n3 += 1
         for k, v in isom_stats.items():
             if k not in First_programs_stats:
@@ -182,9 +190,9 @@ if __name__ == '__main__':
         p2 = None
         for p in programs:
             if p1 is None:
-                p1 = p[-1]
-            elif p2 is None and str(p1) != str(p[-1]):
-                p2 = p[-1]
+                p1 = p[-2]
+            elif p2 is None and str(p1) != str(p[-2]):
+                p2 = p[-2]
                 break
         if p1 is None or p2 is None: continue
         n4 += 1
