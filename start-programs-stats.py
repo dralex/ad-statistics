@@ -27,6 +27,7 @@ import csv
 
 import data
 import datetime
+import random
 
 DEFAULT_PLAYERS_DATA = 'test.csv'
 
@@ -41,16 +42,18 @@ STANDARD_PATH_NEW  = os.path.join('standard_programs', '1.6')
 STANDARD_UNITS     = ('Autoborder', 'Stapler')
 
 FIND_ACTION        = None #'entry/МодульДвижения.ДвигатьсяПоКоординатам();Диод.Включить(зеленый);Таймер.ТаймерЗапуск(6)'
+PRINT_COUNT        = 5
+PRINT_RANGE        = (15, 35)
 
 def print_programs(player, programs):
     print('-----------------------------------------------------------------------------')
-    print('Player {} programs:'.forma(player))
+    print('Player {} programs:'.format(player))
     prev_d = None
     for i,p in enumerate(programs):
         d, unit, _, program = p
         print()
         print('Program {}, interval: {}'.format(player, '' if prev_d is None else (d - prev_d)))
-        data.inspect_programs(unit, program, True)
+        data.inspect_program_diff(unit, program, True)
 
 if __name__ == '__main__':
 
@@ -145,6 +148,8 @@ if __name__ == '__main__':
                 Players_programs_distribution[n] = 1
             else:
                 Players_programs_distribution[n] += 1
+            if PRINT_RANGE and PRINT_RANGE[0] <= len(player_programs) <= PRINT_RANGE[1]:
+                Players_found.add(player)
 
     n2 = 0
     Used_programs_stats = {}
@@ -251,8 +256,8 @@ if __name__ == '__main__':
     print()
     print('Top {} start programs (by usage):'.format(PROGRAMS_LIMIT))
     print('                                                   pls  units I No Ed Ac a o D O R M')
-    for art, data in sorted(Start_programs.items(), key=lambda x: (len(x[1][1]), x[1][2]), reverse=True):
-        unit, pl, units, isom = data
+    for art, d in sorted(Start_programs.items(), key=lambda x: (len(x[1][1]), x[1][2]), reverse=True):
+        unit, pl, units, isom = d
         print('{:10} {} {:6} {:6} {} {}  {} {} {} {} {} {} {} {}'.format(unit, art, len(pl), units,
                                                                             ('E' if isom['extended default'] else
                                                                              ('I' if isom['isomorphic to default'] else ' ')),
@@ -276,6 +281,21 @@ if __name__ == '__main__':
 
     if FIND_ACTION and FIND_ACTION in Players_popular_actions:
         players = Players_popular_actions[FIND_ACTION][0]
+        print()
         print('Found {} players with action "{}"'.format(len(players), FIND_ACTION))
         for p in players:
             print_programs(p, Start_players[p])
+
+    random.seed(int(datetime.datetime.now().timestamp()))
+            
+    if PRINT_COUNT:
+        print()
+        print('{} players from range {}'.format(PRINT_COUNT, PRINT_RANGE))
+        printed = set([])
+        for i in range(min(PRINT_COUNT, len(Players_found))):
+            p = random.choice(tuple(Players_found))
+            while p in printed:
+                p = random.choice(Players_found)
+            print_programs(p, Start_players[p])
+            printed.add(p)
+

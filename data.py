@@ -964,7 +964,7 @@ def inspect_program_diff(program1, program2, short):
                 print()
             for n in isom_stats['new_nodes']:
                 node = program2.find_element_by_id(n)
-                print('Node {}: {}'.format(node.get_title(), str(node).replace('\n', ';')))
+                print('Node {}: {}'.format(node.get_name(), str(node).replace('\n', ';')))
             if len(isom_stats['new_edges']) > 0:
                 print()
             for e in isom_stats['new_edges']:
