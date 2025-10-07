@@ -61,6 +61,7 @@ AD_MODULES = {
     'charge': ('Зарядка', 'Charger'),
     'deton': ('Самоуничтожение', 'Detonation')
 }
+FILTER_VERSION = '1.7.0'
 
 # CSV file format:
 # id,created_at,player,app_version,context,metrics_id,metrics_key,metrics_value,artefact,checksum
@@ -130,6 +131,10 @@ def read_players_data(csv_file, player_filter = None, blacklist_filter = None, d
             if player_id in blacklist_filter:
                 continue
 
+        app_version = row[_CSV_APP_VERSION]
+        if FILTER_VERSION is not None and app_version == FILTER_VERSION:
+            continue
+
         try:
             if row[_CSV_DATETIME].find('.') > 0:
                 d = datetime.datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S.%f+03')
@@ -141,7 +146,7 @@ def read_players_data(csv_file, player_filter = None, blacklist_filter = None, d
         except ValueError:
             print("Cannot read players' database from CSV: bad data {} at row {}".format(row[_CSV_DATETIME], i))
             continue
-
+        
         activity_id = row[_CSV_ID]
 
         if player_id not in players:
@@ -152,7 +157,6 @@ def read_players_data(csv_file, player_filter = None, blacklist_filter = None, d
 
         a = players[player_id][0][activity_id]
 
-        app_version = row[_CSV_APP_VERSION]
         a['v'] = app_version
         
         metrics_id = int(row[_CSV_METRICS_ID])
