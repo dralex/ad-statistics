@@ -31,20 +31,21 @@ def usage():
     print('usage: {} <database1.csv> [database2.csv ...]'.format(sys.argv[0]))
     exit(1)
 
-def filter_players(players, stats):
-    for player, values in players.items():        
-        activities, _, _ = values
-
-        if player not in Start_players:
+def filter_players(players_file, stats):
+    reader = csv.reader(open(players_file), delimiter=',')
+    i = 0
+    for row in reader:
+        i += 1
+        if len(row) != 3: continue
+        aid, player, ci = row
+        if aid == 'id': continue
+        ci = int(ci)
+        if player not in stats:
             stats[player] = {}
-        
-        for aid, a in activities.items():
-            ci = a['c']
-            if ci != 0:
-                if ci not in stats[player]:
-                    stats[player][ci] = [aid]
-                else:
-                    stats[player][ci].append(aid)
+        if ci not in stats[player]:
+            stats[player][ci] = [aid]
+        else:
+            stats[player][ci].append(aid)
 
 if __name__ == '__main__':
 
@@ -58,8 +59,7 @@ if __name__ == '__main__':
 
     Start_players = {}
     for pfile in players_data:
-        pl = data.read_players_data(pfile) 
-        filter_players(pl, Start_players)
+        filter_players(pfile, Start_players)
 
     for player,indexes in Start_players.items():
         for i,acts in indexes.items():
