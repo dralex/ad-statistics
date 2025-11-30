@@ -61,7 +61,7 @@ AD_MODULES = {
     'charge': ('Зарядка', 'Charger'),
     'deton': ('Самоуничтожение', 'Detonation')
 }
-FILTER_VERSION = '1.7.0'
+FILTER_VERSION = None #'1.7.0'
 
 # CSV file format:
 # id,created_at,player,app_version,context,metrics_id,metrics_key,metrics_value,artefact,checksum
