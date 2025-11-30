@@ -79,6 +79,9 @@ _CONTEXT_SAVE_PROGRAM = 'Save_program'
 _CONTEXT_POLYGON = 'Polygon_Start'
 _CONTEXT_POLYGON_AB = 'Polygon_Autoborder'
 _CONTEXT_POLYGON_SM = 'Polygon_Smoker'
+_CONTEXT_PLATFORM_ANDROID = 'androidPlatform'
+_CONTEXT_PLATFORM_WINDOWS = 'windowsPlatform'
+_CONTEXT_PLATFORM_LINUX = 'linuxPlatform'
 
 _CSV_ID = 0
 _CSV_DATETIME = 1
@@ -174,7 +177,7 @@ def read_players_data(csv_file, player_filter = None, blacklist_filter = None, d
         if 'm' not in a:
             a['m'] = {}
         a['m'][metrics_key] = metrics_value
-            
+        
         if 't' not in a:
             context = row[_CSV_CONTEXT]
             if (context.find(_CONTEXT_LEVEL) == 0 or context.find(_CONTEXT_POLYGON) == 0 or
@@ -223,6 +226,12 @@ def read_players_data(csv_file, player_filter = None, blacklist_filter = None, d
                 a['t'] = 'fe'
             elif context == _CONTEXT_SAVE_PROGRAM:
                 a['t'] = 's'
+            elif context == _CONTEXT_PLATFORM_ANDROID:
+                a['t'] = 'pl_a'
+            elif context == _CONTEXT_PLATFORM_WINDOWS:
+                a['t'] = 'pl_w'
+            elif context == _CONTEXT_PLATFORM_LINUX:
+                a['t'] = 'pl_l'
             else:
                 print("Cannot read players' database from CSV: unknown context {} at row {}".format(context, i))
                 exit(1)                
@@ -369,7 +378,8 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
             tradition = a['p'] if act_type == 't' else None
 
             save = 0
-            if act_type in ('fp', 'sg', 'fg', 'fe', 's'):
+            platform = None
+            if act_type in ('fp', 'sg', 'fg', 'fe', 's', 'pl_a', 'pl_w', 'pl_l'):
                 
                 if pre_sd is None:
                     pre_sd = d
@@ -389,9 +399,21 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                     cur_editings.append(a['es_t'])
                 elif act_type == 's':
                     save = 1
-
+                elif act_type == 'pl_a':
+                    platform = 'android'
+                elif act_type == 'pl_w':
+                    platform = 'windows'
+                elif act_type == 'pl_l':
+                    platform = 'linux'
+            
             if cur_session is not None:
                 cur_session['v'].add(a['v'])
+
+                if platform is not None:
+                    if 'plat' not in cur_session:
+                        cur_session['plat'] = set([platform])
+                    else:
+                        cur_session['plat'].add(platform)
 
             if 'ma' in a:
                 manual = a['ma']

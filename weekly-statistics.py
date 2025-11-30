@@ -39,6 +39,9 @@ HTML_CELL_50_CLASS = 'tabcell50'
 HTML_CELL_75_CLASS = 'tabcell75'
 HTML_CELL_100_CLASS = 'tabcell100'
 BLACKLIST_PLAYERS_FILE = 'blacklist.txt'
+PLATFORMS = {'pl_a': 'Android',
+             'pl_w': 'Windows',
+             'pl_l': 'Linux'}
 
 def usage():
     print('usage: {} <database1.csv> [database2.csv ...] [-o output.html]'.format(sys.argv[0]))
@@ -79,9 +82,11 @@ def calc_statistics(players, sheets):
                     'prunits': 0,
                     'versions': {},
                     'levelwaves': {},
-                    'gsessions': {}
+                    'gsessions': {},
+                    'platforms': {}
                 }
-                
+                for pl in PLATFORMS.values():
+                    sheets[year][week]['platforms'][pl] = set([])
             version = a['v']
             _all_versions.add(version)
             if version not in sheets[year][week]['versions']:
@@ -122,6 +127,9 @@ def calc_statistics(players, sheets):
                     sheets[year][week]['gsessions'][player] = 1
                 else:
                     sheets[year][week]['gsessions'][player] += 1
+            elif a['t'] in ('pl_a', 'pl_w', 'pl_l'):
+                platform = PLATFORMS[a['t']]
+                sheets[year][week]['platforms'][platform].add(player)
 
     for year, y_sheet in sorted(sheets.items(), key=lambda x: x[0]):
         if year + 1 not in sheets:
@@ -139,8 +147,12 @@ def calc_statistics(players, sheets):
                     'prunits': 0,
                     'versions': {},
                     'levelwaves': {},
-                    'gsessions': {}
+                    'gsessions': {},
+                    'platforms': {}
                 }
+                for pl in PLATFORMS.values():
+                    y_sheet[w + 1]['platforms'][pl] = set([])
+
         for week, w_data in sorted(y_sheet.items(), key=lambda x: x[0]):
 
             if week == 1 and (year - 1) in sheets:
@@ -187,6 +199,10 @@ def calc_statistics(players, sheets):
             for gs in tuple(w_data['all gsessions']):
                 w_data['all gsessions'][gs] = len(w_data['all gsessions'][gs])
 
+            w_data['all platforms'] = {}
+            for v in PLATFORMS.values():
+                w_data['all platforms'][v] = len(w_data['platforms'][v])
+
 def print_statistics(sheets):
 
     print()
@@ -221,6 +237,9 @@ def print_statistics(sheets):
                                                                      w_data['2week players'],
                                                                      w_data['3week players']))
             print('  units: {} punits: {}'.format(w_data['units'], w_data['prunits']))
+            print('  platforms:')
+            for plat, num in sorted(w_data['all platforms'].items(), key=lambda x: x[0]):
+                print('    {}: {}'.format(plat, num))
             print('  versions:')
             for v, num in sorted(w_data['all versions'].items(), key=lambda x: x[0]):
                 print('    {}: {}'.format(v, num))                
@@ -291,10 +310,12 @@ def print_html_table(f, sheets, year):
     max_levelwaves_players = 0
     max_versions_players = 0
     max_gsession_players = 0
+    max_platforms_players = 0
 
     all_levelwaves = None
     all_versions = None
     all_gsessions = set([])
+    all_platforms = set([])
 
     for w_data in y_sheet.values():
         if w_data['all players'] > max_all_players: max_all_players = w_data['all players']
@@ -316,6 +337,10 @@ def print_html_table(f, sheets, year):
             all_gsessions.add(gs)
             if w_data['all gsessions'][gs] > max_gsession_players:
                 max_gsession_players = w_data['all gsessions'][gs]
+        for pl in w_data['all platforms'].keys():
+            all_platforms.add(pl)
+            if w_data['all platforms'][pl] > max_platforms_players:
+                max_platforms_players = w_data['all platforms'][pl]
 
     f.write('<table class="{}">\n'.format(HTML_TABLE_CLASS))
     f.write('  <tr class="{}">\n'.format(HTML_ROW_CLASS))
@@ -346,6 +371,11 @@ def print_html_table(f, sheets, year):
                                                                                    len(y_sheet.keys()) + 1))  
     for lw in all_levelwaves:
         print_html_key_row(f, y_sheet, 'all levelwaves', lw, max_levelwaves_players)
+    f.write('  <tr class="{}"><td class={} colspan="{}">ПЛАТФОРМЫ</td></tr>\n'.format(HTML_ROW_CLASS,
+                                                                                      HTML_CELL_NAME_CLASS,
+                                                                                      len(y_sheet.keys()) + 1))  
+    for v in all_platforms:
+        print_html_key_row(f, y_sheet, 'all platforms', v, max_platforms_players)
     f.write('  <tr class="{}"><td class={} colspan="{}">ВЕРСИИ</td></tr>\n'.format(HTML_ROW_CLASS,
                                                                                    HTML_CELL_NAME_CLASS,
                                                                                    len(y_sheet.keys()) + 1))  
