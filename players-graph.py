@@ -55,11 +55,13 @@ def calc_histogram(stats):
 def print_histogram(hist, year):
 
     print()
-    i = 0
+    total = 0
     for day, num in sorted(hist.items(), key=lambda x: x[0]):
         if day.find(year) != 0:
             continue
         print('{}: {}'.format(day, num))
+        total += num
+    print('Total: {}'.format(total))
 
 if __name__ == '__main__':
 
