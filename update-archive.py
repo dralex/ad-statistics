@@ -26,12 +26,6 @@ import csv
 import urllib.request
 import data
 
-if len(sys.argv) > 1:
-    PLAYERS_DATA = sys.argv[1]
-else:
-    # default database
-    PLAYERS_DATA = 'test.csv'
-
 FILTER_PLAYERS_FILE = None #'select_players.txt'
 FILTER_PLAYERS = None # ['player-id-1', 'player-id-2']
 ARTEFACT_URL = 'https://storage.yandexcloud.net/berloga-artefacts/{}/{}.xml'
@@ -82,22 +76,26 @@ if __name__ == '__main__':
         Filter = Players_filter
     else:
         Filter = None
-        
-    Players = data.read_players_data(PLAYERS_DATA, Filter)
 
-    p_size = len(Players)
-    i = 0
-    for player, d in Players.items():
-        if FILTER_PLAYERS is not None and player not in FILTER_PLAYERS:
+
+    for i, players_data in enumerate(sys.argv):
+        if i == 0:
             continue
-        if Players_filter and player not in Players_filter:
-            continue
-        i += 1
-        if i % 10 == 0:
-            print('Collected {} of {}'.format(i, p_size))
-        activities = d[0]
-        for a in activities.values():
-            if 'ac' in a:
-                artefact = a['ac']
-                if artefact:
-                    download_artefact(player, artefact)
+        
+        Players = data.read_players_data(players_data, Filter)
+        p_size = len(Players)
+        i = 0
+        for player, d in Players.items():
+            if FILTER_PLAYERS is not None and player not in FILTER_PLAYERS:
+                continue
+            if Players_filter and player not in Players_filter:
+                continue
+            i += 1
+            if i % 10 == 0:
+                print('Collected {} of {}'.format(i, p_size))
+            activities = d[0]
+            for a in activities.values():
+                if 'ac' in a:
+                    artefact = a['ac']
+                    if artefact:
+                        download_artefact(player, artefact)
