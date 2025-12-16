@@ -38,7 +38,7 @@ def calc_statistics(players, stats):
         stats['players'].add(player)
         for a in activities.values():
             if a['t'] == 'u':
-                if a['w'] > 1:
+                if 'w' in a and a['w'] > 1:
                     stats['players played'].add(player)                
                 if 'ac' in a:
                     stats['players progs'].add(player)
