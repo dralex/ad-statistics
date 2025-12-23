@@ -59,7 +59,7 @@ if __name__ == '__main__':
                                     path,
                                     '-x', '"*.jpg"',
                                     '-d', target])
-                    copied_roser += 1
+                    copied_rosters += 1
 
     print()
     print('Summary:')
