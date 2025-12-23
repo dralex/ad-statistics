@@ -60,7 +60,7 @@ if __name__ == '__main__':
                 target = os.path.join(ROSTER_TARGET_DIR, asset)
                 if not os.path.exists(target):
                     print(asset)
-                    subprocess.run([UNZIP_COMMAND, path, '-d', target])
+                    subprocess.run([UNZIP_COMMAND, '-q', path, '-d', target])
                     subproccess.run([RM_COMMAND, '-f', os.path.join(target, '*.jpg')])
                     copied_rosters += 1
 
