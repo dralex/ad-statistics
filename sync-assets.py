@@ -61,7 +61,7 @@ if __name__ == '__main__':
                 if not os.path.exists(target):
                     print(asset)
                     subprocess.run([UNZIP_COMMAND, '-q', path, '-d', target])
-                    subproccess.run([RM_COMMAND, '-f', os.path.join(target, '*.jpg')])
+                    subprocess.run([RM_COMMAND, '-f', os.path.join(target, '*.jpg')])
                     copied_rosters += 1
 
     print()
