@@ -33,6 +33,8 @@ PROGRAM_EXT = '.graphml'
 
 UNZIP_COMMAND = 'unzip'
 
+MAX_SIZE = 1024 * 1024 # 1 MiB
+
 if __name__ == '__main__':
 
     total_programs = total_rosters = 0
@@ -50,15 +52,16 @@ if __name__ == '__main__':
         else:
             pos = f.find(ROSTER_EXT)
             if pos > 0:
+                if os.path.getsize(path) > MAX_SIZE:
+                    # skip non-roster archives
+                    continue
                 total_rosters += 1
                 asset = f[0:pos]
                 target = os.path.join(ROSTER_TARGET_DIR, asset)
                 if not os.path.exists(target):
                     print(asset)
-                    subprocess.run([UNZIP_COMMAND,
-                                    path,
-                                    '-x', '"*.jpg"',
-                                    '-d', target])
+                    subprocess.run([UNZIP_COMMAND, path, '-d', target])
+                    subproccess.run([RM_COMMAND, '-f', os.path.join(target, '*.jpg')])
                     copied_rosters += 1
 
     print()
