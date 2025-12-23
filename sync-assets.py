@@ -31,6 +31,7 @@ PROGRAMS_TARGET_DIR = 'arena-programs'
 ROSTER_EXT = '.zip'
 PROGRAM_EXT = '.graphml'
 
+RM_COMMAND = 'rm'
 UNZIP_COMMAND = 'unzip'
 
 MAX_SIZE = 1024 * 1024 # 1 MiB
