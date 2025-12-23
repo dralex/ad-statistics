@@ -55,7 +55,7 @@ if __name__ == '__main__':
                 target = os.path.join(ROSTER_TARGET_DIR, asset)
                 if not os.path.exists(target):
                     print(asset)
-                    subprocess.cmd([UNZIP_COMMAND,
+                    subprocess.run([UNZIP_COMMAND,
                                     path,
                                     '-x', '"*.jpg"',
                                     '-d', target])
