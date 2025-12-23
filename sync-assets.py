@@ -22,6 +22,7 @@
 
 import os
 import shutil
+import subprocess
 
 SOURCE_DIR = 'remote-s3/talent'
 ROSTER_TARGET_DIR = 'arena-rosters'
@@ -29,6 +30,8 @@ PROGRAMS_TARGET_DIR = 'arena-programs'
 
 ROSTER_EXT = '.zip'
 PROGRAM_EXT = '.graphml'
+
+UNZIP_COMMAND = 'unzip'
 
 if __name__ == '__main__':
 
@@ -44,9 +47,21 @@ if __name__ == '__main__':
                 sutils.copyfile(path, target)
                 print(f)
                 copied_programs += 1
-        elif f.find(ROSTER_EXT) > 0:
-            total_rosters += 1
+        else:
+            pos = f.find(ROSTER_EXT)
+            if pos > 0:
+                total_rosters += 1
+                asset = f[0:pos]
+                target = os.path.join(ROSTER_TARGET_DIR, asset)
+                if not os.path.exists(target):
+                    print(asset)
+                    subprocess.cmd([UNZIP_COMMAND,
+                                    path,
+                                    '-x', '"*.jpg"',
+                                    '-d', target])
+                    copied_roser += 1
 
+    print()
     print('Summary:')
     print('Programs: {} / {}'.format(copied_programs, total_programs))
     print('Rosters: {} / {}'.format(copied_rosters, total_rosters))
