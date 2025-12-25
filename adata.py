@@ -75,6 +75,8 @@ def load_program_path(graph_dir, graph_id):
     # print('Loading program {}...'.format(graph_id))
     try:
         graph_path = os.path.join(graph_dir, graph_id + '.graphml')
+        if not os.path.exists(graph_path):
+            return None
         d = CyberiadaML.LocalDocument()
         d.open(graph_path,
                CyberiadaML.formatDetect,
