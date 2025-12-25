@@ -45,7 +45,7 @@ if __name__ == '__main__':
         path = os.path.join(SOURCE_DIR, f)
         if f.find(PROGRAM_EXT) > 0:
             total_programs += 1
-            target = os.path.join(PROGRAMS_TARGET_DIR)
+            target = os.path.join(PROGRAMS_TARGET_DIR, f)
             if not os.path.exists(target):
                 sutils.copyfile(path, target)
                 print(f)
