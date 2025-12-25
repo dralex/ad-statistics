@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <data key="gFormat">Cyberiada-GraphML-1.0</data>
+  <graph id="a7e00db4-5259-4ab5-a2bf-9c0a0ab99449" edgedefault="directed">
+    <data key="dStateMachine" />
+    <data key="dName">Дымарь</data>
+    <data key="referenceGraphID">smoker</data>
+    <node id="coreMeta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">standardVersion/ 1.0
+
+target/ smoker
+
+platform/ Arena
+
+platformVersion/ 0.8.6
+</data>
+    </node>
+    <node id="57f705d2-4cfa-4bc9-bddd-34d813665361">
+      <data key="dName">Скан</data>
+      <data key="dGeometry">
+        <point x="-948.860168" y="-66.11995" />
+      </data>
+      <data key="dData">entry/
+Сенсор.ПоискВрагаПоДистанции(min)
+Движение.ЗадатьКоординатуВверх(350)
+Движение.ДвигатьсяПоКоординатам()
+
+exit/
+Сенсор.ОстановкаПоиска()
+Движение.СбросКоординат()
+Движение.Стоп()
+</data>
+    </node>
+    <node id="initial">
+      <data key="dVertex">initial</data>
+      <data key="dName">INIT</data>
+      <data key="dGeometry">
+        <point x="-1460.308" y="-77.91768" />
+      </data>
+    </node>
+    <node id="7c1214b0-a01e-4ddd-b28e-81064e9a8317">
+      <data key="dName">Бой</data>
+      <data key="dGeometry">
+        <point x="216.665009" y="-41.7075539" />
+      </data>
+      <graph id="989a34f2-c57b-4705-9cbb-663bc5ada368" edgedefault="directed">
+        <node id="f2336ae0-ab0d-437e-b6fa-16dffd4ddb0b">
+          <data key="dName">Сближение</data>
+          <data key="dGeometry">
+            <point x="-222.8319" y="155.432465" />
+          </data>
+          <data key="dData">entry/
+Движение.ДвигатьсяКЦели()
+</data>
+        </node>
+        <node id="3b8d2d03-7973-4db9-9f85-c57bb0ca45aa">
+          <data key="dName">Атака</data>
+          <data key="dGeometry">
+            <point x="222.831726" y="-128.432465" />
+          </data>
+          <data key="dData">entry/
+ОружиеМассовое.АтаковатьЦель()
+Движение.Стоп()
+</data>
+        </node>
+      </graph>
+    </node>
+    <edge id="initial57f705d2-4cfa-4bc9-bddd-34d813665361" source="initial" target="57f705d2-4cfa-4bc9-bddd-34d813665361">
+      <data key="dLabelGeometry">
+        <point x="348.523224" y="-132.99884" />
+      </data>
+    </edge>
+    <edge id="b07ae425-ab4a-447b-bdf2-3bdeca39310c" source="57f705d2-4cfa-4bc9-bddd-34d813665361" target="f2336ae0-ab0d-437e-b6fa-16dffd4ddb0b">
+      <data key="dLabelGeometry">
+        <point x="-412.21048" y="-74.19604" />
+      </data>
+      <data key="dData">Сенсор.ЦельПолучена/
+</data>
+    </edge>
+    <edge id="2bd15d64-6982-454c-a1d4-7675c90e1e05" source="7c1214b0-a01e-4ddd-b28e-81064e9a8317" target="57f705d2-4cfa-4bc9-bddd-34d813665361">
+      <data key="dLabelGeometry">
+        <point x="-803.12616" y="-541.875" />
+      </data>
+      <data key="dData">АнализаторЦели.ЦельУничтожена/
+</data>
+    </edge>
+    <edge id="2bd15d64-6982-454c-a1d4-7675c90e1e05" source="7c1214b0-a01e-4ddd-b28e-81064e9a8317" target="57f705d2-4cfa-4bc9-bddd-34d813665361">
+      <data key="dLabelGeometry">
+        <point x="-604.4096" y="-425.392365" />
+      </data>
+      <data key="dData">АнализаторЦели.ЦельПотеряна/
+</data>
+    </edge>
+    <edge id="c30df61d-2640-49b9-b5ac-bb51302d0dd7" source="f2336ae0-ab0d-437e-b6fa-16dffd4ddb0b" target="3b8d2d03-7973-4db9-9f85-c57bb0ca45aa">
+      <data key="dLabelGeometry">
+        <point x="-209.340912" y="-36.72876" />
+      </data>
+      <data key="dData">ОружиеМассовое.ЦельВошлаВЗонуАтаки/
+</data>
+    </edge>
+    <edge id="16a500dd-16ee-4254-8242-5e179960f2ac" source="3b8d2d03-7973-4db9-9f85-c57bb0ca45aa" target="f2336ae0-ab0d-437e-b6fa-16dffd4ddb0b">
+      <data key="dLabelGeometry">
+        <point x="317.398041" y="61.79413" />
+      </data>
+      <data key="dData">ОружиеМассовое.ЦельВышлаИзЗоныАтаки/
+</data>
+    </edge>
+  </graph>
+</graphml>

@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns">
+  <data key="gFormat">Cyberiada-GraphML-1.0</data>
+  <graph id="1b4a727d-d026-4109-8360-94115e10229f" edgedefault="directed">
+    <data key="dStateMachine" />
+    <data key="dName">Генератор-База</data>
+    <data key="referenceGraphID">generator</data>
+    <node id="coreMeta">
+      <data key="dNote">formal</data>
+      <data key="dName">CGML_META</data>
+      <data key="dData">standardVersion/ 1.0
+
+target/ generator
+
+platform/ Arena
+
+platformVersion/ 0.8.6
+</data>
+    </node>
+    <node id="57f705d2-4cfa-4bc9-bddd-34d813665361">
+      <data key="dName">Скан</data>
+      <data key="dGeometry">
+        <point x="64.48025" y="202.542862" />
+      </data>
+      <data key="dData">entry/
+Сенсор.ПоискСоюзникаПоУрону(max)
+
+exit/
+Сенсор.ОстановкаПоиска()
+</data>
+    </node>
+    <node id="initial">
+      <data key="dVertex">initial</data>
+      <data key="dName">INIT</data>
+      <data key="dGeometry">
+        <point x="-305.553925" y="181.395447" />
+      </data>
+    </node>
+    <node id="b36b76fb-f8c3-45eb-a210-e263147f9b88">
+      <data key="dName">Помощь</data>
+      <data key="dGeometry">
+        <point x="883.5602" y="196.8788" />
+      </data>
+      <data key="dData">entry/
+Движение.ДвигатьсяКЦели()
+Зарядка.Активация()
+
+exit/
+Зарядка.Стоп()
+</data>
+    </node>
+    <edge id="initial57f705d2-4cfa-4bc9-bddd-34d813665361" source="initial" target="57f705d2-4cfa-4bc9-bddd-34d813665361">
+      <data key="dLabelGeometry">
+        <point x="348.524719" y="-132.997971" />
+      </data>
+    </edge>
+    <edge id="cca1b2a9-c38a-4077-b048-a416ecab3c7b" source="57f705d2-4cfa-4bc9-bddd-34d813665361" target="b36b76fb-f8c3-45eb-a210-e263147f9b88">
+      <data key="dLabelGeometry">
+        <point x="431.099365" y="184.431274" />
+      </data>
+      <data key="dData">Сенсор.ЦельПолучена/
+</data>
+    </edge>
+    <edge id="106e6713-b180-4ebb-89d7-c8c3e0d8abb2" source="b36b76fb-f8c3-45eb-a210-e263147f9b88" target="57f705d2-4cfa-4bc9-bddd-34d813665361">
+      <data key="dLabelGeometry">
+        <point x="154.3057" y="-173.457779" />
+      </data>
+      <data key="dData">АнализаторЦели.ЦельУничтожена/
+</data>
+    </edge>
+    <edge id="ca2ffeca-d51a-4574-870d-14576e220e1b" source="b36b76fb-f8c3-45eb-a210-e263147f9b88" target="57f705d2-4cfa-4bc9-bddd-34d813665361">
+      <data key="dLabelGeometry">
+        <point x="350.419342" y="-59.111454" />
+      </data>
+      <data key="dData">Зарядка.ЦельВышлаИзЗоныДействия/
+</data>
+    </edge>
+  </graph>
+</graphml>
