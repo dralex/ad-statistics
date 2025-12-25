@@ -47,7 +47,7 @@ if __name__ == '__main__':
             total_programs += 1
             target = os.path.join(PROGRAMS_TARGET_DIR, f)
             if not os.path.exists(target):
-                shutils.copyfile(path, target)
+                shutil.copyfile(path, target)
                 print(f)
                 copied_programs += 1
         else:
