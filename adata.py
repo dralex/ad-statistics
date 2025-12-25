@@ -83,7 +83,8 @@ def load_program_path(graph_dir, graph_id):
         p = CyberiadaML.StateMachine(d.get_state_machines()[0])
         p.set_name('SM')
     except CyberiadaML.CybMLException as e:
-        error('Cannot open program {}: {}'.format(graph_path, str(e)))
+        print('Cannot open program {}: {}'.format(graph_path, str(e)))
+        return None
     return p
 
 def load_default_programs():
@@ -98,6 +99,8 @@ def load_default_programs():
 
 def load_program(graph_dir, graph_id, unit, default_hashes):
     program = load_program_path(graph_dir, graph_id)
+    if program is None:
+        return None, None
     pstr = str(program)
     phash = hash(pstr)
     if phash in default_hashes:
@@ -124,17 +127,22 @@ def read_roster_files(asset, player_id, default_hashes = {}, uniq_programs = {})
                 graph = d['GraphID']
                 program_string, program = load_program(asset_dir, graph, dtype, default_hashes)
                 u = { 'type': dtype }
-                if program_string == 'def':
+                if program_string is None:
+                    u['default'] = False
+                    u['broken'] = True
+                elif program_string == 'def':
                     u['default'] = True
+                    u['broken'] = False
                 else:
                     u['default'] = False
+                    u['broken'] = False
                     u['pstr'] = program_string
                     if program_string in uniq_programs:
                         uniq_programs[program_string][3] += 1
                         uniq_programs[program_string][4].add(player_id)
                     else:
                         uniq_programs[program_string] = [dtype, graph, program, 1, set([player_id])]
-                pl_uniq_programs.append(program_string)
+                    pl_uniq_programs.append(program_string)
                 units.append(u)
             if 'assets' not in the_roster:
                 the_roster['assets'] = set([asset])

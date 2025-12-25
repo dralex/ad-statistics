@@ -39,6 +39,7 @@ if __name__ == '__main__':
     stat_players_with_programs = 0
     stat_drones = 0
     stat_programmed_drones = 0
+    stat_broken_programs = 0
     stat_units = {}
     stat_prog_units = {}
     for u in adata.UNITS:
@@ -58,8 +59,11 @@ if __name__ == '__main__':
                 stat_drones += 1
                 stat_units[u['type']] += 1
                 if not u['default']:
-                    stat_programmed_drones += 1
-                    stat_prog_units[u['type']] += 1
+                    if u['broken']:
+                        stat_broken_programs += 1
+                    else:
+                        stat_programmed_drones += 1
+                        stat_prog_units[u['type']] += 1
         if has_programs:
             stat_players_with_programs += 1
 
@@ -71,6 +75,8 @@ if __name__ == '__main__':
     print('Total drones: {}'.format(stat_drones))
     print('Drones with programs: {} ({:.2f}%)'.format(stat_programmed_drones,
                                                       100.0 * stat_programmed_drones / stat_drones))
+    print('Broken programs: {} ({:.2f}%)'.format(stat_broken_programs,
+                                                 100.0 * stat_broken_programs / stat_drones))
     print('Drone types:')
     for u, count in sorted(stat_units.items(), key=lambda k: k[1], reverse=True):
         print('{:11}: {:5} ({:4.1f}%), programmed: {:5} ({:4.1f}%)'.format(u, count, 100.0 * count / stat_drones,
