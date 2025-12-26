@@ -84,6 +84,9 @@ def load_program_path(graph_dir, graph_id):
                False, False, True, True, True)
         p = CyberiadaML.StateMachine(d.get_state_machines()[0])
         p.set_name('SM')
+        if p.get_children_count() <= 1:
+            # empty SM
+            return None
     except CyberiadaML.CybMLException as e:
         print('Cannot open program {}: {}'.format(graph_path, str(e)))
         return None
