@@ -83,7 +83,7 @@ if __name__ == '__main__':
         if len(has_programs) > 0:
             stat_players_with_programs += 1
         if len(has_programs) == 1:
-            one_program_players.add(list(has_program)[0])
+            one_program_players.add(list(has_programs)[0])
 
     print()
     print('Players: {}'.format(stat_players_n))
