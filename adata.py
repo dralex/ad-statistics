@@ -81,7 +81,7 @@ def load_program_path(graph_dir, graph_id):
         d.open(graph_path,
                CyberiadaML.formatDetect,
                CyberiadaML.geometryFormatNone,
-               False, False, True, True)
+               False, False, True, True, True)
         p = CyberiadaML.StateMachine(d.get_state_machines()[0])
         p.set_name('SM')
     except CyberiadaML.CybMLException as e:
