@@ -39,6 +39,8 @@ if __name__ == '__main__':
     stat_players_with_programs = 0
     stat_drones = 0
     stat_programmed_drones = 0
+    stat_isom_program = 0
+    stat_extend_program = 0
     stat_broken_programs = 0
     stat_units = {}
     stat_prog_units = {}
@@ -48,6 +50,14 @@ if __name__ == '__main__':
 
     players = adata.read_rosters(sys.argv[1], default_hashes, uniq_programs)
 
+    print()
+    print('Calculting isomorphism...')
+    for up in uniq_programs.values():
+        utype = up[0]
+        program = up[2]
+        isom = adata.check_isomorphic_programs(default_programs[utype], program)
+        up.append(isom)
+    
     for p, r in players.items():
         stat_players_n += 1
         has_programs = True
@@ -64,6 +74,11 @@ if __name__ == '__main__':
                     else:
                         stat_programmed_drones += 1
                         stat_prog_units[u['type']] += 1
+                        isom = uniq_programs[u['pstr']][-1]
+                        if isom['isomorphic to default']:
+                            stat_isom_program += 1
+                        if isom['extended default']:
+                            stat_extend_program += 1
         if has_programs:
             stat_players_with_programs += 1
 
@@ -75,6 +90,10 @@ if __name__ == '__main__':
     print('Total drones: {}'.format(stat_drones))
     print('Drones with programs: {} ({:.2f}%)'.format(stat_programmed_drones,
                                                       100.0 * stat_programmed_drones / stat_drones))
+    print('Drones with isom. programs: {} ({:.2f}%)'.format(stat_isom_program,
+                                                            100.0 * stat_isom_program / stat_drones))
+    print('Drones with def.ext. programs: {} ({:.2f}%)'.format(stat_extend_program,
+                                                               100.0 * stat_extend_program / stat_drones))
     print('Broken programs: {} ({:.2f}%)'.format(stat_broken_programs,
                                                  100.0 * stat_broken_programs / stat_drones))
     print('Drone types:')
@@ -87,8 +106,7 @@ if __name__ == '__main__':
     print('Top {} start programs (by usage):'.format(TOP_PROGRAMS))
     print('                                                       pls          units I No Ed Ac a o D O R M')
     for pstr, pvalues in sorted(uniq_programs.items(), key=lambda k: (len(k[1][4]), k[1][3]), reverse=True):
-        utype, graph_id, program, count, players = pvalues
-        isom = adata.check_isomorphic_programs(default_programs[utype], program)
+        utype, graph_id, program, count, players, isom = pvalues
         print('{:15} {} {:5} {:5} ({:5.1f}%) {} {}  {} {} {} {} {} {} {} {}'.format(utype,
                                                                                     graph_id, 
                                                                                     len(players),
