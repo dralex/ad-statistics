@@ -47,6 +47,7 @@ if __name__ == '__main__':
     for u in adata.UNITS:
         stat_units[u] = stat_prog_units[u] = 0
     stat_rosters = 0
+    one_program_players = set([])
 
     players = adata.read_rosters(sys.argv[1], default_hashes, uniq_programs)
 
@@ -60,11 +61,11 @@ if __name__ == '__main__':
     
     for p, r in players.items():
         stat_players_n += 1
-        has_programs = True
+        has_programs = set([])
         for roster in r.values():
             stat_rosters += 1
-            if not has_programs and len(roster['programs']) > 0:
-                has_programs = True
+            for p in roster['programs']:
+                has_programs.add(p)
             for u in roster['units']:
                 stat_drones += 1
                 stat_units[u['type']] += 1
@@ -79,8 +80,10 @@ if __name__ == '__main__':
                             stat_isom_program += 1
                         if isom['extended default']:
                             stat_extend_program += 1
-        if has_programs:
+        if len(has_programs) > 0:
             stat_players_with_programs += 1
+        if len(has_programs) == 1:
+            one_program_players.add(list(has_program)[0])
 
     print()
     print('Players: {}'.format(stat_players_n))
@@ -132,3 +135,11 @@ if __name__ == '__main__':
         if i == TOP_PROGRAMS: break
     print()
     print('Rosters: {}'.format(stat_rosters))
+
+    print()
+    i = 0
+    print('Top one program players:')
+    for p in one_program_players:
+        print(p)
+        i += 1
+        if i == TOP_PROGRAMS: break
