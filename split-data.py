@@ -39,10 +39,17 @@ if __name__ == '__main__':
     playersfile = sys.argv[2]
 
     PLAYERS = data.load_players_index_list(playersfile)
+    Players_found = set([])
 
     with open(datafile) as f:
         for line in f.read().splitlines():
             parts = line.split(',')
             player = parts[data._CSV_PLAYER]
             if player in PLAYERS:
+                Players_found.add(player)
                 print(line)
+
+    # players not found
+    for p in PLAYERS:
+        if p not in Players_found:
+            print(p, file=sys.stderr)
