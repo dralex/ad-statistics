@@ -225,4 +225,28 @@ if __name__ == '__main__':
             
         Data.append(player_data)
 
+    for player in Filter:
+        if player not in Players:
+            player_data = (
+                player,
+                0,
+                0,
+                0,
+                0,
+                0,
+                '',
+                '',
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            )
+        Data.append(player_data)
+        
     save_csv(output_file, Data)
