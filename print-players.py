@@ -182,8 +182,15 @@ if __name__ == '__main__':
         if first_program_level == 5:
             first_program_level = first_program_wave = 0
 
+        if ':' in player:
+            player, session_id = player.split(':')
+            session_id = int(session_id)
+        else:
+            session_id = 0
+            
         player_data = (
             player,
+            session_id,
             len(sessions),
             Waves_n,
             Max_Level,
@@ -205,6 +212,7 @@ if __name__ == '__main__':
 
         if len(Data) == 0:
             Data.append(('Player-ID',
+                         'Session',
                          'Всего сессий',
                          'Всего волн',
                          'Макс. уровень',
@@ -227,8 +235,16 @@ if __name__ == '__main__':
 
     for player in Filter:
         if player not in Players:
+
+            if ':' in player:
+                player, session_id = player.split(':')
+                session_id = int(session_id)
+            else:
+                session_id = 0
+
             player_data = (
                 player,
+                session_id,
                 0,
                 0,
                 0,
@@ -248,5 +264,5 @@ if __name__ == '__main__':
                 0
             )
         Data.append(player_data)
-        
-    save_csv(output_file, Data)
+
+    save_csv(output_file, sorted(Data, key=lambda k: (k[0], k[1])))
