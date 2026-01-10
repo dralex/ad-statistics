@@ -4,7 +4,7 @@
 # 
 #  Players' list statistics 
 # 
-#  Copyright (C) 2025 Alexey Fedoseev <aleksey@fedoseev.net>
+#  Copyright (C) 2025-26 Alexey Fedoseev <aleksey@fedoseev.net>
 # 
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,8 +23,9 @@
 import sys
 import datetime
 import csv
-
 import data
+
+NEW_VERSIONS = ('1.6', '1.7')
 
 def usage():
     print('usage: {} <database.csv> <players-indexes-filter.txt> <output.csv>'.format(sys.argv[0]))
@@ -45,6 +46,7 @@ if __name__ == '__main__':
     Unique_programs = {}
     Unique_programs_with_names = {}
     Units = data.load_default_programs()
+    Units16 = data.load_default_programs(True)
     Filter = data.load_players_index_list(sys.argv[2])
     Players = data.read_players_sessions(sys.argv[1], Filter, False)
     output_file = sys.argv[3]
@@ -76,6 +78,7 @@ if __name__ == '__main__':
         Traditions = set([])
         Unit_types = set([])
         Program_modifications = set([])
+        Programs_isomorphic = 0
         Programs_with_non_trivial_names = 0
         Programs_with_debugging = 0
 
@@ -128,25 +131,36 @@ if __name__ == '__main__':
                 if artefact in Programs:
                     phash = Programs[artefact]
                     uniq_artefact, uniq_program, _ = Unique_programs[phash]
-                    unit = unit_data[0]
-                    if str(uniq_program) == str(Units[unit]):
+                    unit, _, _, _, version = unit_data
+                    new_found = False
+                    for v in NEW_VERSIONS:
+                        if version.find(v) == 0:
+                            new_found = True
+                            break
+                    if new_found:
+                        the_unit = Units16[unit]
+                    else:
+                        the_unit = Units[unit]
+                    if str(uniq_program) == str(the_unit):
                         # skip programs equal to default
                         continue
                     if uniq_artefact not in Program_modifications:
                         Program_modifications.add(uniq_artefact)
                         Uniq_Prog += 1
                         # print('isomorphic check type {} artefact {}...'.format(unit_type, artefact))
-                        isom_stats = data.check_isomorphic_programs(Units[unit_type], uniq_program)                        
+                        isom_stats = data.check_isomorphic_programs(the_unit, uniq_program)                        
                         # print('done')
                         for key,value in isom_stats.items():
+                            if key == 'isomorphic to default':
+                                Programs_isomorphic += 1
+                            elif key == 'non-trivial names' and value:
+                                Programs_with_non_trivial_names += 1
+                            elif key == 'debug actions' and value:
+                                Programs_with_debugging += 1
 #                            if key not in Units_isomorphic_stats:
 #                                Units_isomorphic_stats[key] = 0
 #                            if value:
 #                                Units_isomorphic_stats[key] += 1
-                            if key == 'non-trivial names' and value:
-                                Programs_with_non_trivial_names += 1
-                            if key == 'debug actions' and value:
-                                Programs_with_debugging += 1
 
         if len(sessions) > 0:
             Avg_Dmg /= len(sessions)
@@ -181,6 +195,7 @@ if __name__ == '__main__':
             Avg_Dmg,
             Player_PUnits,
             Uniq_Prog,
+            Programs_isomorphic,
             Programs_with_non_trivial_names,
             Programs_with_debugging,
             Duration,
@@ -201,6 +216,7 @@ if __name__ == '__main__':
                          'Среднее повреждение от дронов',
                          'Запрограммировано дронов',
                          'Уникальных программ',
+                         'Программ, изоморфных стартовым'
                          'Программ с собств. именами',
                          'Программ с отладкой',
                          'Общая продолжительность (с)',
