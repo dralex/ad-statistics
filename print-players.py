@@ -37,6 +37,51 @@ def save_csv(fname, data):
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerows(data)
 
+def add_header(data):
+    data.insert(0, ('Player-ID',
+                    'Session',
+                    'Всего сессий',
+                    'Всего волн',
+                    'Макс. уровень',
+                    'Первый уровень прогр.',
+                    'Первая волна прогр.',
+                    'Традиции',
+                    'Типы дронов',
+                    'Всего дронов',
+                    'Среднее повреждение от дронов',
+                    'Запрограммировано дронов',
+                    'Уникальных программ',
+                    'Программ, изоморфных стартовым'
+                    'Программ с собств. именами',
+                    'Программ с отладкой',
+                    'Общая продолжительность (с)',
+                    'Время расстановки (с)',
+                    'Время редактирования прогр. (с)'))
+
+def add_zeros(data, player, session_id):
+    player_data = (
+        player,
+        session_id,
+        0,
+        0,
+        0,
+        0,
+        0,
+        '',
+        '',
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+    )
+    data.append(player_data)    
+        
 if __name__ == '__main__':
 
     if len(sys.argv) != 4:
@@ -212,57 +257,22 @@ if __name__ == '__main__':
             
         Data.append(player_data)
 
-    for player in Filter:
-        if player not in Players:
+    # add players w/o sessions
+    for pl in Filter:
+        if player_filter[pl] is not None:
+            for indexes in player_filter[pl]:
+                if indexes is None: continue
+                first_index, _ = indexes
+                new_player = pack_player(pl, first_index)
+                if new_player not in Players:
+                    add_zeros(pl, first_index)
+        elif pl not in Players:
+            add_zeros(pl, 0)
 
-            if ':' in player:
-                player, session_id = player.split(':')
-                session_id = int(session_id)
-            else:
-                session_id = 0
-
-            player_data = (
-                player,
-                session_id,
-                0,
-                0,
-                0,
-                0,
-                0,
-                '',
-                '',
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0
-            )
-            Data.append(player_data)
-
+    # sort by player id + session id
     Data = sorted(Data, key=lambda k: (k[0], k[1]))
-    Data.insert(0, ('Player-ID',
-                    'Session',
-                    'Всего сессий',
-                    'Всего волн',
-                    'Макс. уровень',
-                    'Первый уровень прогр.',
-                    'Первая волна прогр.',
-                    'Традиции',
-                    'Типы дронов',
-                    'Всего дронов',
-                    'Среднее повреждение от дронов',
-                    'Запрограммировано дронов',
-                    'Уникальных программ',
-                    'Программ, изоморфных стартовым'
-                    'Программ с собств. именами',
-                    'Программ с отладкой',
-                    'Общая продолжительность (с)',
-                    'Время расстановки (с)',
-                    'Время редактирования прогр. (с)'))
+
+    # add readable header 
+    add_header(Data)
 
     save_csv(output_file, Data)
