@@ -258,12 +258,12 @@ if __name__ == '__main__':
         Data.append(player_data)
 
     # add players w/o sessions
-    for pl in Filter:
-        if player_filter[pl] is not None:
-            for indexes in player_filter[pl]:
+    for pl,value in Filter.items():
+        if value is not None:
+            for indexes in value:
                 if indexes is None: continue
                 first_index, _ = indexes
-                new_player = pack_player(pl, first_index)
+                new_player = data.pack_player(pl, first_index)
                 if new_player not in Players:
                     add_zeros(pl, first_index)
         elif pl not in Players:
