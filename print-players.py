@@ -103,8 +103,14 @@ if __name__ == '__main__':
         activities, _, sessions = values
 
         if len(sessions) == 0:
+            if ':' in player:
+                player, first_index = player.split(':')
+                first_index = int(first_index)
+            else:
+                first_index = 0
+            add_zeros(Data, player, first_index)
             continue
-        
+
         Player_sessions = 0        
         Start_sessions = 0
         Sessions_start = datetime.datetime.now().timestamp()
