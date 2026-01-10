@@ -265,9 +265,9 @@ if __name__ == '__main__':
                 first_index, _ = indexes
                 new_player = data.pack_player(pl, first_index)
                 if new_player not in Players:
-                    add_zeros(pl, first_index)
+                    add_zeros(Data, pl, first_index)
         elif pl not in Players:
-            add_zeros(pl, 0)
+            add_zeros(Data, pl, 0)
 
     # sort by player id + session id
     Data = sorted(Data, key=lambda k: (k[0], k[1]))
