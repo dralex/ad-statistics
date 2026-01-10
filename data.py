@@ -668,7 +668,12 @@ def load_players_index_list(filename):
         for line in f.read().splitlines():
             if line.find(',') > 0:
                 pl_id, index_from, index_to = line.split(',')
-                index_pair = (int(index_from), int(index_to))
+                if index_from == 'NO':
+                    continue
+                elif index_from == 'ALL':
+                    index_pair = None
+                else:
+                    index_pair = (int(index_from), int(index_to))
             else:
                 pl_id = line
                 index_pair = None
