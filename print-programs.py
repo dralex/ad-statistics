@@ -4,7 +4,7 @@
 # 
 #  Print player's programs
 # 
-#  Copyright (C) 2025 Alexey Fedoseev <aleksey@fedoseev.net>
+#  Copyright (C) 2025-26 Alexey Fedoseev <aleksey@fedoseev.net>
 # 
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@ import csv
 
 import data
 import datetime
+
+NEW_VERSIONS = ('1.6', '1.7')
 
 def usage(msg = ''):
     print("Usage: {} <database-path> <player-id|player-id-with-comma-separated-indexes> [index-from index-to]".format(sys.argv[0]))
@@ -51,6 +53,7 @@ if __name__ == '__main__':
         indexes = None
 
     Units = data.load_default_programs()
+    Units16 = data.load_default_programs(True)
     Unique_programs = {}
     Unique_programs_with_names = {}
     Programs = {}    
@@ -64,12 +67,20 @@ if __name__ == '__main__':
         data.load_player_programs(player, Programs, Unique_programs, Unique_programs_with_names)
         for s in sessions:
             for artefact, unit in s['art'].items():
-                unit_type, unit_dmg, unit_enemies, unit_date, _ = unit
-                
+                unit_type, unit_dmg, unit_enemies, unit_date, version = unit
+                new_found = False
+                for v in NEW_VERSIONS:
+                    if version.find(v) == 0:
+                        new_found = True
+                        break
+                if new_found:
+                    the_unit = Units16[unit_type]
+                else:
+                    the_unit = Units[unit_type]
                 if artefact in Programs:
                     phash = Programs[artefact]
                     uniq_artefact, uniq_program, _ = Unique_programs[phash]
-                    if str(uniq_program) == str(Units[unit_type]):
+                    if str(uniq_program) == str(the_unit):
                         # programs equal to default
                         if unit_type not in Player_defaults:
                             Player_defaults[unit_type] = [1, unit_dmg, unit_enemies, unit_date]
@@ -79,7 +90,7 @@ if __name__ == '__main__':
                             Player_defaults[unit_type][2] += unit_enemies
                     else:
                         if uniq_artefact not in Player_programs:
-                            Player_programs[uniq_artefact] = [1, unit_dmg, unit_enemies, unit_date, unit_type, uniq_program]
+                            Player_programs[uniq_artefact] = [1, unit_dmg, unit_enemies, unit_date, unit_type, new_found, uniq_program]
                         else:
                             Player_programs[uniq_artefact][0] += 1
                             Player_programs[uniq_artefact][1] += unit_dmg
@@ -95,13 +106,17 @@ if __name__ == '__main__':
     print()
     print('Unique programs ({}):'.format(len(Player_programs)))
     for artefact, art_data in sorted(Player_programs.items(), key=(lambda x: x[1][3])):
-        unit_count, unit_dmg, unit_enemies, unit_date, unit_type, program = art_data
+        unit_count, unit_dmg, unit_enemies, unit_date, unit_type, new_found, program = art_data
         date = datetime.datetime.fromtimestamp(unit_date).strftime('%Y-%m-%d %H:%M:%S')
         print('-----------------------------------------------------------------------------------------------------')
         print('{}: {} {:5} {:5.2f} {:5}'.format(unit_type, date, unit_count, unit_dmg, unit_enemies))
         print(str(program))
         print()
-        print('Diff with the default {}:'.format(unit_type))
-        data.inspect_program(unit_type, Units, program)
+        print('Diff with the default {}{}:'.format(unit_type, ' (1.6+)' if new_found else ''))
+        if new_found:
+            data.inspect_program(unit_type, Units16, program)
+        else:
+            data.inspect_program(unit_type, Units, program)
+           
         print()
 
