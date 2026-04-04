@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     for datafile in datafiles:
         with open(datafile) as f:
-            for line in f.read().splitlines():
+            for line in f.readlines():
                 parts = line.split(',')
                 player = parts[data._CSV_PLAYER]
                 if player in PLAYERS:
