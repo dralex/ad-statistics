@@ -52,7 +52,7 @@ if __name__ == '__main__':
                 player = parts[data._CSV_PLAYER]
                 if player in PLAYERS:
                     Players_found.add(player)
-                    print(line)
+                    print(line, end='')
 
     # players not found
     for p in PLAYERS:
