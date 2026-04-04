@@ -25,29 +25,34 @@ import sys
 import data
 
 def usage(msg = ''):
-    print("Usage: {} <database-path> <player-id-list>".format(sys.argv[0]))
+    print("Usage: {} <database-path> [<more-database-paths> ...] <player-id-list>".format(sys.argv[0]))
     if msg:
         print(msg)
     exit(1)            
 
 if __name__ == '__main__':
 
-    if len(sys.argv) != 3:
+    if len(sys.argv) <= 3:
         usage()
 
-    datafile = sys.argv[1]
-    playersfile = sys.argv[2]
+    datafiles = []
+    for i, a in enumerate(sys.argv):
+        if i == 0 or i == len(sys.argv) - 1:
+            continue
+        datafiles.append(a)
+    playersfile = sys.argv[-1]
 
     PLAYERS = data.load_players_index_list(playersfile)
     Players_found = set([])
 
-    with open(datafile) as f:
-        for line in f.read().splitlines():
-            parts = line.split(',')
-            player = parts[data._CSV_PLAYER]
-            if player in PLAYERS:
-                Players_found.add(player)
-                print(line)
+    for datafile in datafiles:
+        with open(datafile) as f:
+            for line in f.read().splitlines():
+                parts = line.split(',')
+                player = parts[data._CSV_PLAYER]
+                if player in PLAYERS:
+                    Players_found.add(player)
+                    print(line)
 
     # players not found
     for p in PLAYERS:
