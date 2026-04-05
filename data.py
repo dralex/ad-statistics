@@ -38,6 +38,9 @@ LEVEL_POLYGON = 'Polygon'
 LEVELS = [LEVEL_START, '1', '2', '3', LEVEL_INFINITY, LEVEL_POLYGON]
 UNITS = ['Autoborder', 'Stapler', 'Smoker', 'Generator']
 TRADITIONS = ['Constructor', 'Beekeeper', 'Programmer']
+TRADITIONS_RU = {'Конструктора': 'Constructor',
+                 'Пасечника': 'Beekeeper',
+                 'Программиста': 'Programmer'}
 DEFAULT_STATE_NAME = 'Состояние'
 BASIC_STATE_NAMES = ('Скан', 'Атака', 'Сближение','Бой')
 DEBUG_ACTIONS = ('Диод', 'LED')
@@ -210,6 +213,10 @@ def read_players_data(csv_file, player_filter = None, blacklist_filter = None, d
                     exit(1)
             elif context.find(_CONTEXT_RESULTS) == 0:
                 a['t'] = 'f'
+                for tr, tradition in TRADITIONS_RU.items():
+                    if context.find(tr):
+                        a['p'] = tradition
+                        break
             elif context == _CONTEXT_RESULTS_POLYGON:
                 a['t'] = 'p'
             elif context == _CONTEXT_START_PL:
@@ -264,13 +271,24 @@ def read_players_data(csv_file, player_filter = None, blacklist_filter = None, d
         elif metrics_key == 'program_activation':
             if 'ac' in a:
                 a['ac'][4] += int(metrics_value)            
+        elif metrics_key == 'upgradeLevel':
+            a['upg_l'] = int(metrics_value)
+        elif metrics_key == 'health_left':
+            a['heal'] = int(metrics_value)
         elif metrics_key == 'placement_time':
             a['pls_t'] = metrics_value
         elif metrics_key == 'session_time':
             a['gs_t'] = metrics_value
         elif metrics_key == 'editing_time':
             a['es_t'] = metrics_value
-            
+        elif a['t'] == 'p' and metrics_key.find('_count') > 0:
+            if metrics_key.find('beetle') == 0:
+                a['enm_be'] = int(metrics_value)
+            else:
+                a['enm_oth'] = int(metrics_value)
+        elif metrics_key.find('base_health_left') == 0:
+            a['base'] = int(metrics_value)
+
     # split multi-players
     if player_filter:
         to_delete = set([])
@@ -315,9 +333,12 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
         avg_units = 0.0
         avg_progs = 0.0
         avg_dmg = 0.0
+        avg_bee = 0
+        avg_bugs = 0
+        avg_wons = 0
         for w, tries in session['ws'].items():
             for t, v in tries.items():
-                units, progs, dmg = v
+                units, progs, dmg, bee, bugs, wons = v
                 if units == 0:
                     continue
                 total_tries += 1
@@ -326,16 +347,24 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                 avg_units += units
                 avg_progs += float(progs) / units
                 avg_dmg += dmg / units
+                avg_bee += bee
+                avg_bugs += bugs
+                avg_wons += wons
         if total_tries > 0:
             avg_units /= float(total_tries)
             avg_progs /= float(total_tries)
             avg_dmg /= float(total_tries)
+            avg_bee /= float(total_tries)
+            avg_wons /= float(total_tries)
         session['tries'] = total_tries
         session['units'] = total_units
         session['punits'] = total_progs
         session['avg_u'] = avg_units
         session['avg_p'] = avg_progs
         session['avg_d'] = avg_dmg
+        session['avg_bee'] = avg_bee
+        session['avg_bugs'] = avg_bugs
+        session['avg_wons'] = avg_wons
         total_gs = 0.0
         total_pls = 0.0
         total_es = 0.0
@@ -375,7 +404,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                 print('bad creation index for modern AD version: {}', a)
                 exit(1)
             act_type = a['t']
-            tradition = a['p'] if act_type == 't' else None
+            tradition = a['p'] if act_type == 't' or act_type == 'f' else None
 
             save = 0
             platform = None
@@ -419,7 +448,15 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                 manual = a['ma']
             else:
                 manual = 0
-                
+
+            if act_type == 'p' and cur_session is not None:
+                tries = cur_session['ws'][cur_session['w']]
+                max_try = max(tries.keys())
+                if 'enm_be' in a:
+                    tries[max_try][3] += a['enm_be']
+                if 'enm_oth' in a:
+                    tries[max_try][3] += a['enm_oth']
+
             if act_type in ('f', 'u', 't'):
                 level = a['l']
                 if 'w' not in a: 
@@ -432,7 +469,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
 
                 if cur_session is not None and wave not in cur_session['ws']:
                     cur_try = 1
-                    cur_session['ws'][wave] = {cur_try: [0, 0, 0.0]}
+                    cur_session['ws'][wave] = {cur_try: [0, 0, 0.0, 0, 0, 0]}
                 
                 if cur_session is not None and level == cur_session['l'] and wave >= cur_session['w']:
                     if unit is not None:
@@ -453,7 +490,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                         cur_session['t'] = tradition
                     if act_type == 'f' and a['y'] > cur_try:
                         cur_try += 1
-                        cur_session['ws'][wave][cur_try] = [0, 0, 0.0]
+                        cur_session['ws'][wave][cur_try] = [0, 0, 0.0, 0, 0, int(a['base'] == 10)]
                     cur_session['w'] = wave
                     cur_session['a'].append(a)
                     if d > cur_session['fd']:
@@ -477,11 +514,16 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                         pre_smid = metrics_id
                         pre_sidx = cindex
                     cur_try = 1
-                    cur_session = {'v': set([a['v']]), 'l': level, 'w': wave, 'ws': {wave: {cur_try: [0, 0, 0.0]}},
+                    if 'base' not in a:
+                        base = 0
+                    else:
+                        base = int(a['base'] == 10)
+                    cur_session = {'v': set([a['v']]), 'l': level, 'w': wave, 'ws': {wave: {cur_try: [0, 0, 0.0, 0, 0, base]}},
                                    'sd': d if pre_sd is None else pre_sd, 'fd': d,
                                    'smid': metrics_id if pre_smid is None else pre_smid, 'fmid': metrics_id,
                                    'sidx': cindex if pre_sidx is None else pre_sidx, 'fidx': cindex,
-                                   'a': [a], 'u': [], 't': tradition, 'art': {}, 'gs': [], 'pls': [], 'es': [], 'sa': save, 'ma': manual}
+                                   'a': [a], 'u': [], 't': tradition, 'art': {}, 'gs': [], 'pls': [], 'es': [], 'sa': save,
+                                   'ma': manual, 'avg_bee': 0, 'avg_bugs': 0, 'avg_wons': 0}
                     if unit is not None:
                         cur_session['u'].append(unit)
                         cur_session['ws'][wave][cur_try][0] += 1
@@ -534,7 +576,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                         avg_unit_wave += tri[0]
                         tries += 1
                 avg_unit_wave /= tries
-                print("versions: ({}), level: {}, last wave: {}, waves(tries): {}, date from: {}, to: {}, metrics from: {}, to: {}, cindex from: {}, to: {}, activities: {}, tradition: {}, unit types: ({}), units: {}, units per wave: {:5.2f}, pr.units: {}, uniq progs: {}, manual use: {}, saves: {}, avg units: {:5.2f}, avg prog percent: {:5.2f}%, avg dmg: {:6.1f}, avg g.s.: {:5.2f}, avg pl.s.: {:5.2f}, avg ed.s.: {:5.2f}, pls: {:6.2f}, eds: {:6.2f}".format(
+                print("versions: ({}), level: {}, last wave: {}, waves(tries): {}, date from: {}, to: {}, metrics from: {}, to: {}, cindex from: {}, to: {}, activities: {}, tradition: {}, unit types: ({}), units: {}, units per wave: {:5.2f}, pr.units: {}, uniq progs: {}, manual use: {}, saves: {}, avg units: {:5.2f}, avg prog percent: {:5.2f}%, avg dmg: {:6.1f}, avg g.s.: {:5.2f}, avg pl.s.: {:5.2f}, avg ed.s.: {:5.2f}, pls: {:6.2f}, eds: {:6.2f}, avg.bee: {:5.2f}, avg.bugs: {:5.2f}, avg.wons: {:5.2f}".format(
                     ', '.join(sorted(s['v'])),
                     s['l'], s['w'], s['tries'],
                     datetime.datetime.fromtimestamp(s['sd']).strftime('%Y-%m-%d %H:%M:%S'),
@@ -549,7 +591,7 @@ def read_players_sessions(csv_file, player_filter=None, print_sessions=False, de
                     s['ma'], s['sa'],
                     s['avg_u'], s['avg_p'] * 100.0, s['avg_d'],
                     s['avg_gs'], s['avg_pls'], s['avg_es'],
-                    s['places'], s['edits']))
+                    s['places'], s['edits'], s['avg_bee'], s['avg_bugs'], s['avg_wons']))
 
     return players
 

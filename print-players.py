@@ -42,7 +42,11 @@ def add_header(data):
                     'Session',
                     'Всего сессий',
                     'Всего волн',
+                    'Всего попыток',
                     'Макс. уровень',
+                    'Доля побед',
+                    'Ср. носороги',
+                    'Ср. др. насекомые',
                     'Первый уровень прогр.',
                     'Первая волна прогр.',
                     'Традиции',
@@ -62,6 +66,10 @@ def add_zeros(data, player, session_id):
     player_data = (
         player,
         session_id,
+        0,
+        0,
+        0,
+        0,
         0,
         0,
         0,
@@ -121,6 +129,7 @@ if __name__ == '__main__':
         data.load_player_programs(player, Programs, Unique_programs, Unique_programs_with_names)
 
         Waves_n = 0
+        Tries_n = 0
         Max_Level = 0
         Avg_Dmg = 0.0
         Uniq_Prog = 0
@@ -140,9 +149,13 @@ if __name__ == '__main__':
         Places = 0.0
         Edits = 0.0
         Duration = 0.0
+        Avg_Bugs = 0.0
+        Avg_Beetles = 0.0
+        Avg_Wons = 0.0
         
         for s in sessions:
             Waves_n += s['w']
+            Tries_n += s['tries']
             
             level = s['l']
             nlevel = 0
@@ -165,6 +178,9 @@ if __name__ == '__main__':
             Avg_Dmg += s['avg_d']
             Places += s['places']
             Edits += s['edits']
+            Avg_Beetles += s['avg_bee']
+            Avg_Bugs += s['avg_bugs']
+            Avg_Wons += s['avg_wons']
 
             if s['sd'] < Sessions_start:
                 Sessions_start = s['sd']
@@ -215,8 +231,14 @@ if __name__ == '__main__':
 
         if len(sessions) > 0:
             Avg_Dmg /= len(sessions)
+            Avg_Beetles /= len(sessions)
+            Avg_Bugs /= len(sessions)
+            Avg_Wons /= len(sessions)
         else:
             Avg_Dmg = 0.0            
+            Avg_Beetles = 0.0
+            Avg_Bugs = 0.0
+            Avg_Wons = 0.0
 
         Duration = (Sessions_finish - Sessions_start) 
            
@@ -244,7 +266,11 @@ if __name__ == '__main__':
             session_id,
             len(sessions),
             Waves_n,
+            Tries_n,
             Max_Level,
+            Avg_Wons,
+            Avg_Beetles,
+            Avg_Bugs,
             first_program_level,
             first_program_wave,
             Traditions_str,
